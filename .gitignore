@@ -1,0 +1,13 @@
+*~
+*.aux
+*.fls
+*.log
+*.fdb_latexmk
+*.sw?
+*.cb
+*.cb?
+*.idx
+*.ilg
+*.ind
+*.out
+/cheri-c-programming.pdf
