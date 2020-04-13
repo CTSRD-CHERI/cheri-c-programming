@@ -1,5 +1,15 @@
-\documentclass[11pt]{article}
-\usepackage[UKenglish]{isodate}%UK date endian
+\documentclass[12pt,twoside,openright,a4paper]{article}
+\setlength{\oddsidemargin}{-0.4mm} % 25 mm left margin
+\setlength{\evensidemargin}{\oddsidemargin}
+\setlength{\textwidth}{160mm}      % 25 mm right margin
+\setlength{\topmargin}{-5.4mm}     % 20 mm top margin
+\setlength{\headheight}{5mm}
+\setlength{\headsep}{5mm}
+\setlength{\footskip}{10mm}
+\setlength{\textheight}{237mm}     % 20 mm bottom margin
+
+%\documentclass[11pt]{article}
+%\usepackage[UKenglish]{isodate}%UK date endian
 \usepackage[headings]{fullpage}
 \usepackage[colorlinks]{hyperref}
 
@@ -15,14 +25,33 @@
 \definecolor{lightgray}{gray}{0.8}
 \usepackage{xspace}
 
+\renewcommand{\UrlFont}{\ttfamily\small}
 
 \lstset{basicstyle=\footnotesize\ttfamily}
-\newcommand{\ccode}[1]{\lstinline[language={C},basicstyle=\small\ttfamily]{#1}}
-\newcommand{\cxxcode}[1]{\lstinline[language={C++}]{#1}}
-\newcommand{\cfunc}[1]{\ccode{#1()}}
-\newcommand{\uintptr}{\texttt{uintptr\_t}\xspace}
-\newcommand{\intptr}{\texttt{intptr\_t}\xspace}
-\newcommand{\vaddrt}{\texttt{vaddr\_t}\xspace}
+%\newcommand{\ccode}[1]{\lstinline[language={C}]{#1}}
+%\newcommand{\cxxcode}[1]{\lstinline[language={C++}]{#1}}
+\newcommand{\ccode}[1]{{\small\ttfamily{#1}}}
+\newcommand{\cxxcode}[1]{{\ccode{#1}}}
+\newcommand{\cconst}[1]{{\ccode{#1}}}
+\newcommand{\cfunc}[1]{{\ccode{#1()}}}
+\newcommand{\cvar}[1]{{\ccode{#1}}}
+\newcommand{\pathname}[1]{{\ccode{#1}}}
+\newcommand{\commandline}[1]{{\ccode{#1}}}
+
+\newcommand{\ptrdifft}{{\ccode{ptrdiff\_t}}\xspace}
+\newcommand{\sizet}{{\ccode{size\_t}}\xspace}
+\newcommand{\ssizet}{{\ccode{ssize\_t}}\xspace}
+\newcommand{\vaddrt}{{\ccode{vaddr\_t}}\xspace}
+\newcommand{\cuintptrt}{{\ccode{uintptr\_t}}\xspace}
+\newcommand{\cintptrt}{{\ccode{intptr\_t}}\xspace}
+\newcommand{\ccharstar}{{\ccode{char *}}\xspace}
+\newcommand{\cvoidstar}{{\ccode{void *}}\xspace}
+\newcommand{\clongt}{{\ccode{long}}\xspace}
+\newcommand{\cintt}{{\ccode{int}}\xspace}
+\newcommand{\cintttt}{{\ccode{int32\_t}}\xspace}
+\newcommand{\cintsft}{{\ccode{int64\_t}}\xspace}
+
+\newcommand{\SIGPROT}{{\ccode{SIGPROT}}\xspace}
 
 \newcommand{\note}[2]{{\color{blue}[ Note: #1 - #2]}}
 \renewcommand{\note}[2]{}
@@ -37,7 +66,16 @@
 \author{Robert N. M. Watson, Brooks Davis, and Alexander Richardson}
 
 \begin{document}
+\sloppy
+
+%% CL tech-report format provides its own cover page.  Comment for final
+%% version.
 \maketitle
+
+%% CL tech-report format requires page numbering to start at 3.  Uncomment for
+%% final version.
+%\setcounter{page}{3}
+%%
 
 \section{Introduction}
 
@@ -66,7 +104,7 @@ of safer C/C++ pointers and the code or data they point at.
 
 \subsection{CHERI capabilities}
 
-\begin{figure}[t]
+\begin{figure}[b]
 \hspace{2.5cm}
 % Tag
 \begin{subfigure}[t!]{0.1\textwidth}
@@ -264,6 +302,7 @@ which ensures that:
 run-time linker, and other aspects of the OS Application Binary Interface
 (ABI) utilize capabilities rather than integer pointers; and
   \item the C/C++-language runtime implements suitable capability preservation
+    \\
     (e.g., in \cfunc{memcpy}) and restriction (e.g., in \cfunc{malloc}).
 \end{itemize}
 CheriABI operates as a complete additional OS ABI, much in the style of a
@@ -297,7 +336,10 @@ present in compilation to conventional architectures:
   linker for global variables, the stack allocator, and the heap allocator,
   settings the bounds on the capability implementing pointer before returning
   it to the caller.
-  Monotonicity sneures that callers cannot later broaden the bounds to cover
+  Due to precision constraints on capability bounds, bounds on returned
+  pointers may include additional padding, but will not permit access to any
+  other allocations.
+  Monotonicity ensures that callers cannot later broaden the bounds to cover
   other allocations.
 
 \item[Temporal Safety] Prevents a pointer retained after a call to
@@ -342,10 +384,10 @@ changes required in the pure-capability programming environment.
 Two new header files provide access to CHERI-related programming interfaces:
 
 \begin{description}
-\item[\texttt{cheri/cheri.h}] defines constants such as those used in the
+\item[\pathname{cheri/cheri.h}] defines constants such as those used in the
   capability permission mask.
 
-\item[\texttt{cheri/cheric.h}] defines interfaces to access and
+\item[\pathname{cheri/cheric.h}] defines interfaces to access and
   modify capability properties.
 \end{description}
 
@@ -357,7 +399,7 @@ invalid capability, access memory outside the bounds of a capability, or perform
 accesses not authorized by the permissions on a capability, this typically
 leads to a hardware exception (trap).
 In the CheriABI process environment, the operating system catches the hardware
-exception and delivers a \ccode{SIGPROT} signal to the user process;
+exception and delivers a \SIGPROT signal to the user process;
 further information may be found in Section~\ref{sec:cheriabi}.
 
 \rwnote{We've opted to use the term ``hardware exception'' throughout, and
@@ -373,7 +415,7 @@ capabilities, rather than using conventional 32-bit or 64-bit integers.
 This allows the provenance validity of language-level pointers to be
 protected by the provenance properties of CHERI architectural capabilities:
 only pointers implemented using valid capabilities can be dereferenced.
-Other types that contain pointers, such as \intptr, are similarly implemented
+Other types that contain pointers, such as \cintptrt, are similarly implemented
 using architectural capabilities, so that casts through these types
 can retain capability properties.
 When a dereference is attempted on a capability without a valid tag --
@@ -392,17 +434,17 @@ situations:
 \item[Pointer types] The compiler will generate suitable code to propagate
   the provenance validity of pointers by using capability load and store
   instructions.
-  This occurs when a pointer type is used (e.g., \texttt{void *}), or when an
+  This occurs when a pointer type is used (e.g., \cvoidstar), or when an
   integer type defined as being able to hold a pointer is used (e.g.,
-  \intptr).
+  \cintptrt).
   As with attempting to store 64-bit pointers in 32-bit integers on 64-bit
   architectures, passing a pointer through an inappropriate type will lead to
   truncation of metadata (e.g., the validity tag and bounds).
   It is therefore important that a suitable type be used to hold pointers.
 
   This pattern often occurs where an opaque field exists in a data structure
-  -- e.g., a \texttt{long} argument to a callback in older C code -- that
-  needs to be changed to use a capability-oblivious type such as \intptr.
+  -- e.g., a \clongt argument to a callback in older C code -- that
+  needs to be changed to use a capability-oblivious type such as \cintptrt.
 
 \item[Capability-oblivious code] In some portions of the C/C++ runtime and
   com\-piler-generated code, it may not be possible to know whether memory is
@@ -415,11 +457,11 @@ situations:
   metadata and tags.
 
   A useful example of potentially surprising code requiring modification for
-  pure-capability CHERI C is \texttt{qsort()}.
-  Some C programs assume that \texttt{qsort()} on an array of data structures
+  pure-capability CHERI C is \cfunc{qsort}.
+  Some C programs assume that \cfunc{qsort} on an array of data structures
   containing pointers will preserve the usability of those pointers.
-  As a result, \texttt{qsort()} must be modified to perform memory copies using
-  pointer-based types, such as \intptr, when size and alignment
+  As a result, \cfunc{qsort} must be modified to perform memory copies using
+  pointer-based types, such as \cintptrt, when size and alignment
   require it.
 \end{description}
 
@@ -430,7 +472,7 @@ integers, pointers, and pointer-related values, we make the following
 recommendations:
 
 \begin{description}
-\item[\texttt{int}, \texttt{int32\_t}, \texttt{long}, \texttt{int64\_t},
+\item[\cintt, \cintttt, \clongt, \cintsft,
   \ldots{}] These pure integer types should be used to hold integer values
   that will never be cast to a pointer type without first combining them with
   another pointer value -- e.g., by using them as an array offset.
@@ -441,13 +483,13 @@ recommendations:
   \vaddrt should not be directly cast to a pointer type for
   dereference; instead, it must be combined with an existing valid capability
   to the address space to generate a dereferenceable pointer.
-  Typically, this is done using the \texttt{cheri\_setaddress(c, x)} function.
+  Typically, this is done using the \ccode{cheri\_setaddress(c, x)} function.
 
-\item[\texttt{size\_t}, \texttt{ssize\_t}] These integer types should be used
+\item[\sizet, \ssizet] These integer types should be used
   to hold the unsigned or signed lengths of regions of virtual address space.
-  \arnote{\texttt{size\_t} not necessary the same as unsigned \texttt{ptrdiff\_t}.}
+  \arnote{\size not necessary the same as unsigned \ptrdifft.}
 
-\item[\texttt{ptrdiff\_t}] This integer type describes the integer distance
+\item[\ptrdifft] This integer type describes the integer distance
   between the addresses of two pointers, and should not be used for
 any other purpose.
   It can be added to a pointer to obtain a new pointer, but the result will
@@ -456,20 +498,20 @@ any other purpose.
 
   \note{Isn't that last sentence true of any combination?}{nwf}
 
-  Less standards-compliant code sometimes uses \texttt{ptrdiff\_t} when the
-  programmer more likely meant \intptr or (less commonly)
-  \texttt{size\_t}.
-  When porting code, it is worthwhile to audit use of \texttt{ptrdiff\_t}.
+  Less standards-compliant code sometimes uses \ptrdifft when the
+  programmer more likely meant \cintptrt or (less commonly)
+  \sizet.
+  When porting code, it is worthwhile to audit use of \ptrdifft.
 
-  \note{Should we recommend that \texttt{size\_t} be used to hold lengths of
-  allocations and \texttt{ptrdiff\_t} be used to talk about spans of
+  \note{Should we recommend that \size be used to hold lengths of
+  allocations and \ptrdifft be used to talk about spans of
   address space (e.g., the offsets between two subobjects of an allocation)?  I feel
   like the recommendations here are not as concrete as I'd like.}{nwf}
 
-\item[\intptr, \uintptr] These integer types should be
+\item[\cintptrt, \cuintptrt] These integer types should be
   used to hold values that may be valid pointers if cast back to a pointer
   type.
-  When an \intptr is assigned an integer value -- e.g., due to
+  When an \cintptrt is assigned an integer value -- e.g., due to
   constant initialization to an integer in the source -- and the result is
   cast to a pointer type, the pointer will be invalid and hence
   non-dereferenceable.
@@ -482,18 +524,18 @@ any other purpose.
   that of a \vaddrt, despite the increased \emph{alignment} (and,
   ``incidentally,'' \emph{storage}) requirements, yes?}{nwf}
 
-\item[\texttt{char *}, \ldots{}] These pointer types are suitable for
+\item[\ccharstar, \ldots{}] These pointer types are suitable for
   dereference, but in general should not be cast to or from arbitrary integer
   values.
   Valid pointers are always derived from other valid pointers, and cannot be
   constructed using arbitrary integer arithmetic.
 \end{description}
 
-It is important to note that \uintptr is no longer the same size as
-\texttt{size\_t}. This difference may require making some changes to
+It is important to note that \cuintptrt is no longer the same size as
+\sizet. This difference may require making some changes to
 existing code to use the correct type depending on whether the variable
 needs to be able store a pointer type. In cases where this is not obvious
-(such as for a callback argument), we recommend the use of \uintptr.
+(such as for a callback argument), we recommend the use of \cuintptrt.
 While this does double the size of the variable and can result in slightly
 less efficient code generation, it ensures that provenance is maintained.
 
@@ -526,9 +568,9 @@ for optimization purposes? E.g., strcmp loading a word at a time?}
 \subsubsection{Single-origin provenance}
 In the CHERI architecture, capabilities are derived from a single other
 capability.
-However, in C code, expressions may construct a new \intptr value from more
-than one provenance-carrying parent \intptr{} -- for example, by casting both a
-pointer and a literal value to \intptr{}'s, and then adding them.
+However, in C code, expressions may construct a new \cintptrt value from more
+than one provenance-carrying parent \cintptrt{} -- for example, by casting both a
+pointer and a literal value to \cintptrt{}'s, and then adding them.
 In that case, the compiler must decide which input capability provides the
 capability metadata (bounds, permissions, \ldots{}) to be used in the output
 value.
@@ -543,15 +585,15 @@ have appropriate provenance:
 void *c2 = (void *)(1 + (uintptr_t)c1);
 \end{lstlisting}
 
-In C with integer pointers, this \texttt{c2} might be expected to have the
-same value as \texttt{c1}, except that the address had been incremented by one.
-However, in CHERI C, the constant \texttt{1} is promoted to a capability
-type, \uintptr, which has invalid pointer provenance; because it
+In C with integer pointers, this \cvar{c2} might be expected to have the
+same value as \cvar{c1}, except that the address had been incremented by one.
+However, in CHERI C, the constant \cconst{1} is promoted to a capability
+type, \cuintptrt, which has invalid pointer provenance; because it
 is on the left-hand side, its tag bit, bounds, and permissions will be used
-rather than those associated with \texttt{c1}, leading to \texttt{c2} being
+rather than those associated with \cvar{c1}, leading to \cvar{c2} being
 non-dereferenceable.
 The nearly identical expression swapping the order of those arguments in the
-expression will give the desired value, in which \texttt{c1}'s tag, bounds,
+expression will give the desired value, in which \cvar{c1}'s tag, bounds,
 and permissions are used:
 
 \begin{lstlisting}[language=C]
@@ -563,7 +605,7 @@ We are currently exploring alternative semantics -- such as selecting
 pointer-originated provenance in preference to integer-originated provenance,
 and causing a compilation error in the event that the result is ambiguous.
 We hope that this will reduce potential code disruption and programmer
-confusion arising from single-origin provenance for \intptr.}
+confusion arising from single-origin provenance for \cintptrt.}
 
 \subsection{Bounds}
 
@@ -588,9 +630,9 @@ The compiler will arrange that pointers to stack allocations have suitable
 bounds, and that the run-time linker will return bounded pointers to global
 variables.
 Bounds will typically be set based on an explicitly requested allocation size
-(e.g., via the size passed to \texttt{alloca()}) or, for compiler-generated
+(e.g., via the size passed to \cfunc{alloca}) or, for compiler-generated
 code or linker-allocated memory, by the C type mechanism (e.g.,
-\texttt{sizeof(foo)}), adjusted for precision requirements arising from
+\ccode{sizeof(foo)}), adjusted for precision requirements arising from
 capability compression.
 In some cases, such as with global variables allocated in multiple object
 files, the actual size of the allocation may not be resolved until run time,
@@ -606,14 +648,14 @@ addresses only within an allocation.
 However, in some uses of C, there may be an expectation that memory access can
 occur outside of the allocation bounds of the pointer via which memory access
 takes place.
-For example, if an integer pointer difference \texttt{D} is taken between
-pointers to two different allocations (\texttt{B} and \texttt{A}), and later
-added to pointer \texttt{A}, the new pointer will have an address
-within \texttt{B}, but permit access only to \texttt{A}.
+For example, if an integer pointer difference \cvar{D} is taken between
+pointers to two different allocations (\cvar{B} and \cvar{A}), and later
+added to pointer \cvar{A}, the new pointer will have an address
+within \cvar{B}, but permit access only to \cvar{A}.
 % This idiom is not frequently used, but is particularly prevalent within
 % memory allocators, linkers, and language runtimes.
 % \bdnote{I don't think the list of things is representative.  The one place I can recall off hand is a tcsh bug.}
-This idiom is mostly likely to be found with non-trivial uses of \texttt{realloc()} (e.g., cases where multiple pointers into a buffer allocated or reallocated by \texttt{realloc()} need to be updated).
+This idiom is mostly likely to be found with non-trivial uses of \cfunc{realloc} (e.g., cases where multiple pointers into a buffer allocated or reallocated by \cfunc{realloc} need to be updated).
 We note that the subtraction of two pointers from different
 allocations is undefined behaviour in ISO C, and risks mis-optimization from
 breaking compiler alias analysis assumptions.
@@ -626,11 +668,11 @@ embedded within another structure that itself has been heap allocated.
 This will prevent an overflow on that array from affecting the remainder of
 the structure, improving spatial safety.
 
-However, subobject bounds also prevent use of the \texttt{containerof}
+However, subobject bounds also prevent use of the \ccode{containerof}
 pattern, in which pointer arithmetic on a pointer to a subobject is used to
 recover a pointer to the container object -- for example, as seen in the
-widely used BSD \texttt{queue.h} linked-list macros or the generic C
-hash-table implementation, \texttt{uthash.h}.
+widely used BSD \pathname{queue.h} linked-list macros or the generic C
+hash-table implementation, \pathname{uthash.h}.
 
 In these cases, an opt-out annotation can be applied to a given type, field or variable
 that instructs the compiler to not tighten bounds when creating pointers to subobjects.
@@ -638,7 +680,14 @@ We currently define three opt-out annotations that can be used to allow
 existing code to disable use of subobject bounds:
 
 \paragraph{Completely disable subobject bounds} It is possible to annotate a typedef, record member,
-or variable declaration with \ccode{__attribute__((cheri_no_subobject_bounds))} to indicate that the compiler should not tighten bounds when taking the address or a C++ reference. In C++11/C20 mode this can also be spelled as \cxxcode{[[cheri::no\_subobject\_bounds]]}.
+or variable declaration with:
+
+\begin{lstlisting}[language={C}]
+__attribute__((cheri_no_subobject_bounds))
+\end{lstlisting}
+
+\noindent
+to indicate that the compiler should not tighten bounds when taking the address or a C++ reference. In C++11/C20 mode this can also be spelled as \cxxcode{[[cheri::no\_subobject\_bounds]]}.
 
 \begin{lstlisting}[language={C}]
 struct str {
@@ -676,7 +725,8 @@ granularity by casting to an annotated type:
 
 \begin{lstlisting}[language={C}]
 char *foo(struct str *strp) {
-    return (&((__attribute__((cheri_no_subobject_bounds))struct str *)strp)->str_array);
+    return (&((__attribute__((cheri_no_subobject_bounds))struct str *)
+        strp)->str_array);
 }
 \end{lstlisting}
 
@@ -689,12 +739,24 @@ a hardware exception if the allocation does not grant access to that many bytes.
 If flexible arrays members are declared using the C99 syntax with empty square
 brackets the compiler will automatically use the remaining allocation size.}
 To use the remaining allocation size instead of completely disabling bounds
-(and thus protecting against buffer underflows) the annotation
-\ccode{\_\_attribute\_\_((cheri\_subobject\_bounds\_use\_remaining\_size))} can be used.
-When targeting C++11/C20 \cxxcode{[[cheri::subobject\_bounds\_use\_remaining\_size]]}
+(and thus protecting against buffer underflows) the annotation:
+
+\begin{lstlisting}[language={C}]
+__attribute__((cheri_subobject_bounds_use_remaining_size))
+\end{lstlisting}
+
+\noindent
+can be used.
+When targeting C++11/C20:
+
+\begin{lstlisting}[language={C++}]
+[[cheri::subobject_bounds_use_remaining_size]]
+\end{lstlisting}
+
+\noindent
 is also supported.
 Examples of this pattern include FreeBSD's \ccode{struct dirent} which uses
-\ccode{char d_name[255]} for an array that is actually of variable size, with
+\ccode{char d\_name[255]} for an array that is actually of variable size, with
 the containing allocation (e.g., of the heap) being sized to allow additional
 space for array entries regardless of size in the type definition.
 For example:
@@ -704,12 +766,13 @@ struct message {
     int     m_type;
 
     /*
-     * Variable-length character array -- because of the additional attribute,
-     * pointers taken to this subobject will have a lower bound at the first
-     * address of the array, but retain an upper bound of the allocation
-     * containing the array, rather than 252 bytes higher.
+     * Variable-length character array -- because of the additional
+     * attribute, pointers taken to this subobject will have a lower bound
+     * at the first address of the array, but retain an upper bound of the
+     * allocation containing the array, rather than 252 bytes higher.
      */
-    char    m_data[252] __attribute__((cheri_subobject_bounds_use_remaining_size));
+    char    m_data[252]
+                 __attribute__((cheri_subobject_bounds_use_remaining_size));
 };
 \end{lstlisting}
 
@@ -728,7 +791,7 @@ flag to be enabled; we hope to enable it by default in the future.}
 Bounds may also be set by other parts of the implementation.
 For example, the kernel may set bounds on pointers to new memory mappings (see
 Section~\ref{sec:cheriabi}), and the system library may set bounds on pointers
-into returned buffers from APIs -- e.g., \texttt{fgetln()}.
+into returned buffers from APIs -- e.g., \cfunc{fgetln}.
 More detailed information on how C/C++ code can set bounds can be found in
 Section~\ref{sec:setbounds}.
 
@@ -771,14 +834,14 @@ In pure-capability CHERI C and C++, pointer comparison consists not just of
 comparing the addresses of two pointers, but also their tags:
 
 \begin{description}
-\item[Pointer equality] Pointer \texttt{a} and pointer \texttt{b} are equal
+\item[Pointer equality] Pointer \cvar{a} and pointer \cvar{b} are equal
   if their tags and addresses are equal.
 
 \item[Pointer comparison] All pointers with valid tags compare as greater than
   any pointer without a valid tag.
-  If their tag values are equal, then pointer \texttt{a} compares greater than
-  pointer \texttt{b} if \texttt{a}'s address is greater than
-  \texttt{b}'s address.
+  If their tag values are equal, then pointer \cvar{a} compares greater than
+  pointer \cvar{b} if \cvar{a}'s address is greater than
+  \cvar{b}'s address.
 \end{description}
 
 It is important to note that other capability metadata, such as bounds and
@@ -798,7 +861,7 @@ permissions, are not used in pointer comparison.
 \textbf{NOTE:
 We are continuing to explore the implications of this definition of equality.
 It may be desirable to use different definitions of pointer equality when
-implementing \texttt{==} (more lax) vs. in compiler optimization (more strict)
+implementing \ccode{==} (more lax) vs. in compiler optimization (more strict)
 to avoid confusion for programmers.}
 
 % \subsection{Pointer equality}
@@ -808,7 +871,7 @@ to avoid confusion for programmers.}
 % For most purposes, this gives the behavior expected by programmers, as it
 % tests whether the capabilities refer to the same memory location.
 % However, in some rare circumstances, this can lead to confusing results.
-% For example, if \texttt{realloc()} returns a pointer to the same location
+% For example, if \cfunc{realloc} returns a pointer to the same location
 % in memory, but with different bounds, the pointer value it returns will
 % compare as identical
 
@@ -816,50 +879,50 @@ to avoid confusion for programmers.}
 always orders before tagged. This causes the use of -1 as a sentinel value (e.g.
 in ngxinx) to break.}
 
-\note{I think we should mention the \texttt{X + offset < Y} vs.\@ \texttt{Y - X
+\note{I think we should mention the \ccode{X + offset < Y} vs.\@ \ccode{Y - X
 > offset} issue here, even if we don't get into the full mess of pointer
-comparisons, just to say that \texttt{X + offset} might result in an un-tagged
+comparisons, just to say that \ccode{X + offset} might result in an un-tagged
 pointer.}{nwf}
 
 \subsection{Bitwise operations on capability types}
 
 In most cases bitwise operations -- such as those used to store or clear flags
-in the lower bits of pointers to well-aligned allocations -- will result in the expected \uintptr value being created.
+in the lower bits of pointers to well-aligned allocations -- will result in the expected \cuintptrt value being created.
 However, there are some corner cases where the result may be a tagged (but out-of-bounds)
 capability when an integer value is expected.
 \arnote{TODO: add an example. Maybe the mutex example checking low pointer bits + some alignment checks?}
 This may also result in the loss of tags if intermediate results become unrepresentable.\footnote{%
 Previous versions of the compiler used the capability offset (address minus base) instead
-of the address for arithmetic on \uintptr.
+of the address for arithmetic on \cuintptrt.
 This often resulted in unexpected results and therefore we switched to using
-the address in \uintptr arithmetic instead.
+the address in \cuintptrt arithmetic instead.
 The old offset-based mode may be interesting for garbage collected C where
 addresses are less useful and therefore it can still be enabled by
-passing \texttt{-cheri-uintcap=offset}.
+passing \commandline{-cheri-uintcap=offset}.
 However, this may result in significantly reduced compatibility with legacy C code.
 }
 As this can result in hard-to-debug failure modes, the compiler will emit a
-warning when using bitwise-AND on capability types such as \uintptr.
-Most bitwise operations on \uintptr fall into one of three categories for which we provide
+warning when using bitwise-AND on capability types such as \cuintptrt.
+Most bitwise operations on \cuintptrt fall into one of three categories for which we provide
 higher-level abstractions.
 
 \paragraph{Aligning pointer values}
 If the C code is attempting to align a pointer or check the alignment of pointers,
 the following compiler builtins should be used instead:
 \begin{description}
-\item[\texttt{\_Bool \_\_builtin\_is\_aligned(T ptr, size\_t alignment)}]
-  This builtin returns \texttt{true} if \texttt{ptr} is aligned to at least \texttt{alignment} bytes.
-\item[\texttt{T \_\_builtin\_align\_down(T ptr, size\_t alignment)}]
-  This builtin returns \texttt{ptr} rounded down to the next multiple of \texttt{alignment}.
-\item[\texttt{T \_\_builtin\_align\_up(T ptr, size\_t alignment)}]
-  This builtin returns \texttt{ptr} rounded up to the next multiple of \texttt{alignment}.
+\item[\ccode{\_Bool \_\_builtin\_is\_aligned(T ptr, size\_t alignment)}]
+  This builtin returns \cconst{true} if \cvar{ptr} is aligned to at least \cvar{alignment} bytes.
+\item[\ccode{T \_\_builtin\_align\_down(T ptr, size\_t alignment)}]
+  This builtin returns \cvar{ptr} rounded down to the next multiple of \cvar{alignment}.
+\item[\ccode{T \_\_builtin\_align\_up(T ptr, size\_t alignment)}]
+  This builtin returns \cvar{ptr} rounded up to the next multiple of \cvar{alignment}.
 \end{description}
 
 \rwnote{It would be nice if we had, and could document here, cheri\_ versions
   of these macros.}
 
-One advantage of these builtins compared to \uintptr arithmetic is that they preserve the
-type of the argument and can therefore remove the need for intermediate casts to \uintptr.
+One advantage of these builtins compared to \cuintptrt arithmetic is that they preserve the
+type of the argument and can therefore remove the need for intermediate casts to \cuintptrt.
 
 \paragraph{Storing additional data in pointers}
 \label{sec:low-pointer-bits}
@@ -875,29 +938,31 @@ The compiler-provided header \ccode{<cheri.h>} provides explicit macros for this
 use of bitwise arithmetic on pointers:
 
 \begin{description}
-\item[\texttt{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
-  This builtin returns \texttt{ptr} with the low bits set to \texttt{bits}. In order to retain
-  compatibility with a non-CHERI architecture, \texttt{bits} should be less than the
-  known alignment of \texttt{ptr}.
-\item[\texttt{vaddr\_t cheri\_get\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
-  This builtin returns the low bits of \texttt{ptr} in the same way as \ccode{ptr & mask}.
+\item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
+  This builtin returns \cvar{ptr} with the low bits set to \cconst{bits}. In order to retain
+  compatibility with a non-CHERI architecture, \cconst{bits} should be less than the
+  known alignment of \cvar{ptr}.
+
+\item[\ccode{vaddr\_t cheri\_get\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
+  This builtin returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
   It should be used instead of the raw bitwise operation since it can never return
   an unexpectedly tagged value.
-  \texttt{mask} should be a bitwise-AND mask less than \ccode{_Alignof(ptr) - 1}.
-\item[\texttt{uintptr\_t cheri\_clear\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
-  This builtin clears the low bits of \texttt{ptr} in the same way as \ccode{ptr & ~mask}.
-  It returns a new \uintptr value that can be used for memory accesses when cast to a pointer.
-  \texttt{mask} should be a bitwise-AND mask less than \ccode{_Alignof(ptr) - 1}.
+  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr) - 1}.
+
+\item[\ccode{uintptr\_t cheri\_clear\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
+  This builtin clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \~mask}.
+  It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
+  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr) - 1}.
 \end{description}
 
 \paragraph{Computing hash values}
 
 The compiler will also warn when operators such as modulus or shifts are used on
-\uintptr. This usually indicates that the pointer is being used as the input to a hash
+\cuintptrt. This usually indicates that the pointer is being used as the input to a hash
 function or similar computations.
-In this case, the programmer should not be using \uintptr but instead cast the pointer
+In this case, the programmer should not be using \cuintptrt but instead cast the pointer
 to \vaddrt and perform the arithmetic on this type instead.
-This has the advantage that it will be slightly more efficient than \uintptr arithmetic on
+This has the advantage that it will be slightly more efficient than \cuintptrt arithmetic on
 a split-register file architecture such as CHERI-MIPS.
 
 
@@ -920,7 +985,7 @@ programming styles that fail to unambiguously differentiate these types:
   called.\footnote{If the \textit{K\&R} function is defined within the same
   file, the compiler can determine the correct calling convention and will not
   emit a warning.}
-  This warning is less strict than \texttt{-Wstrict-prototypes} and can be
+  This warning is less strict than \commandline{-Wstrict-prototypes} and can be
   used to convert \textit{K\&R} functions that may cause problems.
   This should not be an issue for C code written in the last 20 years, but
   many core operating-system components can be significantly older.
@@ -967,12 +1032,12 @@ ways:
 
   On the whole, for performance and atomicity reasons, pointers are strongly
   aligned even on non-tagged architectures -- however, when C constructs such
-  as \texttt{\_\_packed} are used, unaligned pointers can arise, and will not
+  as \ccode{\_\_packed} are used, unaligned pointers can arise, and will not
   work with CHERI.
   While the compiler and native allocators (stack, heap, \ldots{}) will
   provide sufficient alignment for capability-based pointers, custom
-  allocators may align allocations to \texttt{sizeof(intmax\_t)} rather than
-  \texttt{sizeof(intptr\_t)}.
+  allocators may align allocations to \ccode{sizeof(intmax\_t)} rather than
+  \ccode{sizeof(intptr\_t)}.
 
 \item[Size] CHERI capabilities are twice the size of an integer able to
   describe the full address space.
@@ -1025,9 +1090,9 @@ capability-related faults).
   If a region of memory containing valid pointers is written to a file, and
   then read back, the pointers in that region will no longer be valid.
   If a file is memory mapped, then pages mapped copy-on-write
-  (\texttt{MAP\_PRIVATE}) are able to hold tagged pointers, since they are in
+  (\cconst{MAP\_PRIVATE}) are able to hold tagged pointers, since they are in
   fact swap backed rather than file backed, but pages mapped directly from the
-  buffer cache (\texttt{MAP\_SHARED}) are not.
+  buffer cache (\cconst{MAP\_SHARED}) are not.
 
 \item[Passing pointers via IPC] In the CheriABI process environment, only
   untagged data, not tagged pointers, may be passed via various forms of
@@ -1038,25 +1103,25 @@ capability-related faults).
   This code must be converted to use indexes into tables or other lookup
   mechanisms rather than passing pointers via IPC.
 
-\item[\texttt{mmap()} bounds] In CheriABI, the \texttt{mmap()} system
+\item[\cfunc{mmap} bounds] In CheriABI, the \cfunc{mmap} system
    call returns a bounded capability to allocated address space.
    The requested mapping must be rounded up in length to ensure that the
    the returned capability does not overlap with unallocated (or otherwise
    allocated) regions.
-   This currently requires code changes in consumers of \texttt{mmap()}.
+   This currently requires code changes in consumers of \cfunc{mmap}.
 
-\item[\texttt{mmap()} permissions] The permissions of the capability
-   returned by \texttt{mmap()} are determined by a combination of the
+\item[\cfunc{mmap} permissions] The permissions of the capability
+   returned by \cfunc{mmap} are determined by a combination of the
    requested page protections and the capability passed as an address hint
-   (or fixed address with \texttt{MAP\_FIXED}).
-   When using the pattern of requesting a mapping with \texttt{PROT\_NONE}
+   (or fixed address with \cconst{MAP\_FIXED}).
+   When using the pattern of requesting a mapping with \cconst{PROT\_NONE}
    and then filling in sections (as is done in run-time linkers, VM host
    environments, etc), it is necessary to ensure that the initial
    capability has the right permissions.
-   The \texttt{prot} argument has been extended to accept additional
+   The \cvar{prot} argument has been extended to accept additional
    flags indicating the maximum permission the page can have so a
    linker might request a reservation for a library with the permissions
-   \texttt{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)} which
+   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)} which
    would return a capability permitting loads, stores, and instruction
    fetch while mapping the pages with no (MMU) permissions.
 \end{description}
@@ -1064,20 +1129,20 @@ capability-related faults).
 \subsubsection{Handling capability-related signals}
 
 When a capability hardware exception fires, the operating system will map it
-into the UNIX \ccode{SIGPROT} signal.
+into the UNIX \SIGPROT signal.
 By default, this signal terminates the process, but the signal can be caught
-by registering a \ccode{SIGPROT} handler.
+by registering a \SIGPROT handler.
 When the signal handler fires, \ccode{siginfo.si\_code} will be set to
 describe the cause of the fault; available values include:
 
 \begin{description}
-\item[\texttt{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
+\item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
   invalid capability has been attempted.
-\item[\texttt{PROT\_CHERI\_BOUNDS}] Capability bounds fault -- an out-of-bounds
+\item[\cconst{PROT\_CHERI\_BOUNDS}] Capability bounds fault -- an out-of-bounds
   access has been attempted.
-\item[\texttt{PROT\_CHERI\_PERM}] Capability permission fault -- the attempted
+\item[\cconst{PROT\_CHERI\_PERM}] Capability permission fault -- the attempted
   access exceeds the permissions granted by a capability.
-\item[\texttt{PROT\_CHERI\_SEALED}] Capability sealed fault -- dereferencing a
+\item[\cconst{PROT\_CHERI\_SEALED}] Capability sealed fault -- dereferencing a
   sealed capability has been attempted.
 \end{description}
 
@@ -1099,70 +1164,70 @@ allocators and wish to narrow bounds and permissions on returned pointers
 to prevent overflows between its own allocations.
 CHERI C therefore provides several new APIs to get and set capability
 properties given a pointer argument, which are defined in
-\texttt{cheri/cheric.h}.
+\pathname{cheri/cheric.h}.
 \amnote{We should make it clear that we are referring to headers in the CheriBSD tree.}
 The following APIs allow capability properties to be retrieved from pointers:
 
 \begin{description}
-\item[\texttt{vaddr\_t cheri\_getbase(void *c)}] Return the lower bound of capability
-  \texttt{c}.
+\item[\ccode{vaddr\_t cheri\_getbase(void *c)}] Return the lower bound of capability
+  \cvar{c}.
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_base\_get()}.
+%  \cfunc{\_\_builtin\_cheri\_base\_get}.
 
-\item[\texttt{size\_t cheri\_getaddress(void *c)}] Return the address of the capability \texttt{c}.
+\item[\ccode{size\_t cheri\_getaddress(void *c)}] Return the address of the capability \cvar{c}.
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_address\_get()}.
+%  \cfunc{\_\_builtin\_cheri\_address\_get}.
 
-\item[\texttt{size\_t cheri\_getlen(void *c)}] Return the length of the bounds for the capability \texttt{c}.
+\item[\ccode{size\_t cheri\_getlen(void *c)}] Return the length of the bounds for the capability \cvar{c}.
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_length\_get()}.
-  (The base plus the length gives the upper bound on \texttt{c}'s address.)
+%  \cfunc{\_\_builtin\_cheri\_length\_get}.
+  (The base plus the length gives the upper bound on \cvar{c}'s address.)
 
-\item[\texttt{size\_t cheri\_getoffset(void *c)}] Return the difference between the address and the lower bound of the capability \texttt{c}.
+\item[\ccode{size\_t cheri\_getoffset(void *c)}] Return the difference between the address and the lower bound of the capability \cvar{c}.
  %  This macro wraps the compiler built-in
- %  \texttt{\_\_builtin\_cheri\_offset\_get()}.
+ %  \cfunc{\_\_builtin\_cheri\_offset\_get}.
 
-\item[\texttt{size\_t cheri\_getperm(void *c)}] Return the permissions of capability
-  \texttt{c}.
+\item[\ccode{size\_t cheri\_getperm(void *c)}] Return the permissions of capability
+  \cvar{c}.
   (See Section~\ref{sec:available_permissions}.)
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_perms\_get()}.
+%  \cfunc{\_\_builtin\_cheri\_perms\_get}.
 
-\item[\texttt{\_Bool cheri\_gettag(void *c)}] Return whether capability \texttt{c} has its
+\item[\ccode{\_Bool cheri\_gettag(void *c)}] Return whether capability \cvar{c} has its
   validity tag set.
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_tag\_get()}.
+%  \cfunc{\_\_builtin\_cheri\_tag\_get}.
 \end{description}
 
 \noindent
 The following APIs allow capability properties to be refined on pointers:
 
 \begin{description}
-\item[\texttt{void *cheri\_andperm(void *c, size\_t x)}] Perform a bitwise-AND of capability
-  \texttt{c}'s permissions and the value \texttt{x}, returning the new
+\item[\ccode{void *cheri\_andperm(void *c, size\_t x)}] Perform a bitwise-AND of capability
+  \cvar{c}'s permissions and the value \cvar{x}, returning the new
   capability.
   (See Section~\ref{sec:available_permissions}.)
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_perms\_and()}.
+%  \cfunc{\_\_builtin\_cheri\_perms\_and}.
 
-\item[\texttt{void *cheri\_cleartag(void *c)}] Clear the tag on \texttt{c}, returning the
+\item[\ccode{void *cheri\_cleartag(void *c)}] Clear the tag on \cvar{c}, returning the
   new capability.
 
-\item[\texttt{void *cheri\_csetbounds(void *c, size\_t x)}] Narrow the bounds of capability
-  \texttt{c} so that the lower bound is the current pointer value (which may
-  have been increased relative to \texttt{c}'s original lower bound), and its
-  upper bound is suitable for a length of \texttt{x}.
+\item[\ccode{void *cheri\_csetbounds(void *c, size\_t x)}] Narrow the bounds of capability
+  \cvar{c} so that the lower bound is the current pointer value (which may
+  have been increased relative to \cvar{c}'s original lower bound), and its
+  upper bound is suitable for a length of \cvar{x}.
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_bounds\_set()}
+%  \cfunc{\_\_builtin\_cheri\_bounds\_set}
 
-\item[\texttt{void *cheri\_setaddress(void *c, vaddr\_t a)}] Returns a new capability with the same permissions and bounds as \texttt{c} with the address set to \texttt{a}.
+\item[\ccode{void *cheri\_setaddress(void *c, vaddr\_t a)}] Returns a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
 This builtin can be useful to re-derive a valid pointer from an address.
 %  This macro wraps the compiler built-in
-%  \texttt{\_\_builtin\_cheri\_address\_set()}.
+%  \cfunc{\_\_builtin\_cheri\_address\_set}.
 \end{description}
 
-% \note{Are the references to the \texttt{\_\_builtin\_} forms useful?  Do we
-% want to encourage their use or the \texttt{cheric.h} macros?}{nwf}
+% \note{Are the references to the \ccode{\_\_builtin\_} forms useful?  Do we
+% want to encourage their use or the \pathname{cheric.h} macros?}{nwf}
 
 \subsection{Available permissions}
 \label{sec:available_permissions}
@@ -1171,19 +1236,19 @@ A number of capability permissions are available per use; only those relating
 to pure-capability memory protection are enumerated here:
 
 \begin{description}
-\item[\texttt{CHERI\_PERM\_EXECUTE}] Authorize instruction fetch via this
+\item[\cconst{CHERI\_PERM\_EXECUTE}] Authorize instruction fetch via this
    capability.
 
-\item[\texttt{CHERI\_PERM\_LOAD}] Authorize data load via this capability.
+\item[\cconst{CHERI\_PERM\_LOAD}] Authorize data load via this capability.
 
-\item[\texttt{CHERI\_PERM\_STORE}] Authorize data store via this capability.
+\item[\cconst{CHERI\_PERM\_STORE}] Authorize data store via this capability.
 
-\item[\texttt{CHERI\_PERM\_LOAD\_CAP}] Authorize capability load via this
+\item[\cconst{CHERI\_PERM\_LOAD\_CAP}] Authorize capability load via this
   capability.
   If the permission is not present, the tag on the loaded value
   will be silently cleared.
 
-\item[\texttt{CHERI\_PERM\_STORE\_CAP}] Authorize capability store via this
+\item[\cconst{CHERI\_PERM\_STORE\_CAP}] Authorize capability store via this
   capability.
   If the permission is not present, and the tag on the stored capability is
   valid, then a hardware exception will be thrown.
@@ -1218,9 +1283,9 @@ Two types of modifications are typically required:
   any other live allocations, as described in
   Section~\ref{sec:bounds_alignment}.
 
-\item[Reaching allocation metadata on \texttt{free()}]
+\item[Reaching allocation metadata on \cfunc{free}]
   It is often the case that allocators utilize the value of the pointer passed
-  to their custom \texttt{free()} function to locate corresponding metadata --
+  to their custom \cfunc{free} function to locate corresponding metadata --
   for example, by always placing that metadata immediately before the
   allocation, which would be outside of the allocation's bounds.\footnote{%
   When a custom allocator places metadata at the beginning of the allocation,
@@ -1233,7 +1298,7 @@ Two types of modifications are typically required:
   }
   Therefore, some additional work may be required to derive a pointer to the
   allocation's metadata via another global capability, rather than the one
-  that has been passed to \texttt{free()}.
+  that has been passed to \cfunc{free}.
 \end{description}
 
 %\section{Potential performance impact}
