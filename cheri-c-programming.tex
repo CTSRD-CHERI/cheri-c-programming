@@ -11,7 +11,7 @@
 %\documentclass[11pt]{article}
 %\usepackage[UKenglish]{isodate}%UK date endian
 \usepackage[headings]{fullpage}
-\usepackage[colorlinks]{hyperref}
+\usepackage[hidelinks]{hyperref}
 
 \usepackage{bytefield}
 \usepackage{color}
@@ -62,6 +62,13 @@
 \newcommand{\psnote}[1]{\note{#1}{Peter S.}}
 \newcommand{\pgnnote}[1]{\note{#1}{Peter N.}}
 
+\hyphenation{Free-BSD}
+\hyphenation{Free-RTOS}
+\hyphenation{Cheri-BSD}
+\hyphenation{Cheri-Free-RTOS}
+\hyphenation{Cheri-ABI}
+\hyphenation{Web-Kit}
+
 \title{CHERI Pure-Capability C/C++ Programming Guide \\ (DRAFT)}
 \author{Robert N. M. Watson, Brooks Davis, and Alexander Richardson}
 
@@ -77,8 +84,34 @@
 %\setcounter{page}{3}
 %%
 
+%
+% Keep Abstract in sync with the Introduction.
+%
+\begin{abstract}
+We briefly introduce the pure-capability C and C++ programming languages.
+We describe the most commonly encountered differences between those languages
+on CHERI versus on conventional architectures, and where existing software may
+require minor changes.
+We explain how modest language extensions allow selected software, such
+as memory allocators, to further refine permissions and bounds on pointers.
+This guidance is based on our experience adapting the FreeBSD operating-system
+userspace, and applications such as PostgreSQL and WebKit, to run in a
+pure-capability programming environment.
+We also recommend further reading, including our pertinent technical reports
+and papers.
+\end{abstract}
+
+\newpage
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\newpage
+
 \section{Introduction}
 
+%
+% Keep Abstract in sync with the Introduction.
+%
 This document is a brief introduction to the pure-capability CHERI C/C++
 programming languages.
 It describes the most commonly encountered differences between those languages
@@ -358,7 +391,7 @@ present in compilation to conventional architectures:
 \end{description}
 
 \textbf{Referential safety} and \textbf{spatial safety} are implemented by our
-pure-capability bare-metal, CheriFreeRTOS, CheriRTEMS, and CheriBSD's CheriABI
+pure-capability bare-metal, CheriFreeRTOS, CHERI-RTEMS, and CheriBSD's CheriABI
 execution environments.
 \textbf{Temporal safety} is currently an experimental feature present only in
 CheriBSD, and is not yet on the main development branch; we have no plans to
@@ -1073,7 +1106,7 @@ However, they can also arise in the form of stripped tag bits, leading to
 invalid capabilities that cannot be dereferenced, if, for example, pointer
 values are copied into inappropriately aligned allocations.
 
-\subsection{The CheriABI process environment}
+\section{The CheriABI POSIX process environment}
 \label{sec:cheriabi}
 
 The CheriABI process environment implements a standard POSIX/UNIX API, but in
@@ -1081,7 +1114,7 @@ some areas there are changes to API semantics (e.g., in the handling of tagged
 pointer values and I/O) or new functionality (such as relates to handling
 capability-related faults).
 
-\subsubsection{POSIX API changes}
+\subsection{POSIX API changes}
 
 \begin{description}
 \item[Writing and reading pointers via files] In the CheriABI process
@@ -1126,7 +1159,7 @@ capability-related faults).
    fetch while mapping the pages with no (MMU) permissions.
 \end{description}
 
-\subsubsection{Handling capability-related signals}
+\subsection{Handling capability-related signals}
 
 When a capability hardware exception fires, the operating system will map it
 into the UNIX \SIGPROT signal.
@@ -1146,7 +1179,7 @@ describe the cause of the fault; available values include:
   sealed capability has been attempted.
 \end{description}
 
-\section{Getting and setting permissions and bounds}
+\section{APIs for restricting capability permissions and bounds}
 \label{sec:setbounds}
 
 \rwnote{I wonder if we should talk more about permissions?  Perhaps not in
@@ -1166,6 +1199,9 @@ CHERI C therefore provides several new APIs to get and set capability
 properties given a pointer argument, which are defined in
 \pathname{cheri/cheric.h}.
 \amnote{We should make it clear that we are referring to headers in the CheriBSD tree.}
+
+\subsection{Retrieving capability properties}
+
 The following APIs allow capability properties to be retrieved from pointers:
 
 \begin{description}
@@ -1199,7 +1235,8 @@ The following APIs allow capability properties to be retrieved from pointers:
 %  \cfunc{\_\_builtin\_cheri\_tag\_get}.
 \end{description}
 
-\noindent
+\subsection{Restricting capability properties}
+
 The following APIs allow capability properties to be refined on pointers:
 
 \begin{description}
