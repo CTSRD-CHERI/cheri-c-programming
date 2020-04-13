@@ -1106,79 +1106,6 @@ However, they can also arise in the form of stripped tag bits, leading to
 invalid capabilities that cannot be dereferenced, if, for example, pointer
 values are copied into inappropriately aligned allocations.
 
-\section{The CheriABI POSIX process environment}
-\label{sec:cheriabi}
-
-The CheriABI process environment implements a standard POSIX/UNIX API, but in
-some areas there are changes to API semantics (e.g., in the handling of tagged
-pointer values and I/O) or new functionality (such as relates to handling
-capability-related faults).
-
-\subsection{POSIX API changes}
-
-\begin{description}
-\item[Writing and reading pointers via files] In the CheriABI process
-  environment, only untagged data, not tagged pointers, may be written to or
-  read from files.
-  If a region of memory containing valid pointers is written to a file, and
-  then read back, the pointers in that region will no longer be valid.
-  If a file is memory mapped, then pages mapped copy-on-write
-  (\cconst{MAP\_PRIVATE}) are able to hold tagged pointers, since they are in
-  fact swap backed rather than file backed, but pages mapped directly from the
-  buffer cache (\cconst{MAP\_SHARED}) are not.
-
-\item[Passing pointers via IPC] In the CheriABI process environment, only
-  untagged data, not tagged pointers, may be passed via various forms of
-  message-passing Inter-Process Communication (IPC).
-  Some existing software takes advantage of a shared address-space layout
-  (via \cfunc{fork}) to pass pointers to elements of shared data structures
-  (e.g., entries in dispatch tables).
-  This code must be converted to use indexes into tables or other lookup
-  mechanisms rather than passing pointers via IPC.
-
-\item[\cfunc{mmap} bounds] In CheriABI, the \cfunc{mmap} system
-   call returns a bounded capability to allocated address space.
-   The requested mapping must be rounded up in length to ensure that the
-   the returned capability does not overlap with unallocated (or otherwise
-   allocated) regions.
-   This currently requires code changes in consumers of \cfunc{mmap}.
-
-\item[\cfunc{mmap} permissions] The permissions of the capability
-   returned by \cfunc{mmap} are determined by a combination of the
-   requested page protections and the capability passed as an address hint
-   (or fixed address with \cconst{MAP\_FIXED}).
-   When using the pattern of requesting a mapping with \cconst{PROT\_NONE}
-   and then filling in sections (as is done in run-time linkers, VM host
-   environments, etc), it is necessary to ensure that the initial
-   capability has the right permissions.
-   The \cvar{prot} argument has been extended to accept additional
-   flags indicating the maximum permission the page can have so a
-   linker might request a reservation for a library with the permissions
-   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)} which
-   would return a capability permitting loads, stores, and instruction
-   fetch while mapping the pages with no (MMU) permissions.
-\end{description}
-
-\subsection{Handling capability-related signals}
-
-When a capability hardware exception fires, the operating system will map it
-into the UNIX \SIGPROT signal.
-By default, this signal terminates the process, but the signal can be caught
-by registering a \SIGPROT handler.
-When the signal handler fires, \ccode{siginfo.si\_code} will be set to
-describe the cause of the fault; available values include:
-
-\begin{description}
-\item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
-  invalid capability has been attempted.
-\item[\cconst{PROT\_CHERI\_BOUNDS}] Capability bounds fault -- an out-of-bounds
-  access has been attempted.
-\item[\cconst{PROT\_CHERI\_PERM}] Capability permission fault -- the attempted
-  access exceeds the permissions granted by a capability.
-\item[\cconst{PROT\_CHERI\_SEALED}] Capability sealed fault -- dereferencing a
-  sealed capability has been attempted.
-\end{description}
-
 \section{APIs for restricting capability permissions and bounds}
 \label{sec:setbounds}
 
@@ -1336,6 +1263,79 @@ Two types of modifications are typically required:
   Therefore, some additional work may be required to derive a pointer to the
   allocation's metadata via another global capability, rather than the one
   that has been passed to \cfunc{free}.
+\end{description}
+
+\section{The CheriABI POSIX process environment}
+\label{sec:cheriabi}
+
+The CheriABI process environment implements a standard POSIX/UNIX API, but in
+some areas there are changes to API semantics (e.g., in the handling of tagged
+pointer values and I/O) or new functionality (such as relates to handling
+capability-related faults).
+
+\subsection{POSIX API changes}
+
+\begin{description}
+\item[Writing and reading pointers via files] In the CheriABI process
+  environment, only untagged data, not tagged pointers, may be written to or
+  read from files.
+  If a region of memory containing valid pointers is written to a file, and
+  then read back, the pointers in that region will no longer be valid.
+  If a file is memory mapped, then pages mapped copy-on-write
+  (\cconst{MAP\_PRIVATE}) are able to hold tagged pointers, since they are in
+  fact swap backed rather than file backed, but pages mapped directly from the
+  buffer cache (\cconst{MAP\_SHARED}) are not.
+
+\item[Passing pointers via IPC] In the CheriABI process environment, only
+  untagged data, not tagged pointers, may be passed via various forms of
+  message-passing Inter-Process Communication (IPC).
+  Some existing software takes advantage of a shared address-space layout
+  (via \cfunc{fork}) to pass pointers to elements of shared data structures
+  (e.g., entries in dispatch tables).
+  This code must be converted to use indexes into tables or other lookup
+  mechanisms rather than passing pointers via IPC.
+
+\item[\cfunc{mmap} bounds] In CheriABI, the \cfunc{mmap} system
+   call returns a bounded capability to allocated address space.
+   The requested mapping must be rounded up in length to ensure that the
+   the returned capability does not overlap with unallocated (or otherwise
+   allocated) regions.
+   This currently requires code changes in consumers of \cfunc{mmap}.
+
+\item[\cfunc{mmap} permissions] The permissions of the capability
+   returned by \cfunc{mmap} are determined by a combination of the
+   requested page protections and the capability passed as an address hint
+   (or fixed address with \cconst{MAP\_FIXED}).
+   When using the pattern of requesting a mapping with \cconst{PROT\_NONE}
+   and then filling in sections (as is done in run-time linkers, VM host
+   environments, etc), it is necessary to ensure that the initial
+   capability has the right permissions.
+   The \cvar{prot} argument has been extended to accept additional
+   flags indicating the maximum permission the page can have so a
+   linker might request a reservation for a library with the permissions
+   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)} which
+   would return a capability permitting loads, stores, and instruction
+   fetch while mapping the pages with no (MMU) permissions.
+\end{description}
+
+\subsection{Handling capability-related signals}
+
+When a capability hardware exception fires, the operating system will map it
+into the UNIX \SIGPROT signal.
+By default, this signal terminates the process, but the signal can be caught
+by registering a \SIGPROT handler.
+When the signal handler fires, \ccode{siginfo.si\_code} will be set to
+describe the cause of the fault; available values include:
+
+\begin{description}
+\item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
+  invalid capability has been attempted.
+\item[\cconst{PROT\_CHERI\_BOUNDS}] Capability bounds fault -- an out-of-bounds
+  access has been attempted.
+\item[\cconst{PROT\_CHERI\_PERM}] Capability permission fault -- the attempted
+  access exceeds the permissions granted by a capability.
+\item[\cconst{PROT\_CHERI\_SEALED}] Capability sealed fault -- dereferencing a
+  sealed capability has been attempted.
 \end{description}
 
 %\section{Potential performance impact}
