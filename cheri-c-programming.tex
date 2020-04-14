@@ -864,59 +864,33 @@ widely used software.
 
 \subsection{Pointer comparison}
 
-In pure-capability CHERI C and C++, pointer comparison consists not just of
-comparing the addresses of two pointers, but also their tags:
+In pure-capability CHERI C and C++, pointer comparison considers only the
+integer address portions of a capability.
+This means that differences in tag validity, bounds, permissions, and so on,
+will not be considered when by C operators such as $==$, $<$, and $<=$.
+On the whole, this leads to intuitive behavior in systems software, where,
+for example, \cfunc{malloc} adjust bounds on a pointer before returning it to
+a caller, and then expect an address-wise comparison to succeed when the
+pointer is later returned via a call to \cfunc{free}.
+However, this behavior could also lead to potentially confusing results; for
+example:
 
-\begin{description}
-\item[Pointer equality] Pointer \cvar{a} and pointer \cvar{b} are equal
-  if their tags and addresses are equal.
+\begin{itemize}
+\item If a tag on a pointer is lost due to non-provenance-preserving
+  \cfunc{memcpy}(e.g., a \ccode{for} loop copying a sequence of bytes), the
+  source and destination pointers will compare as equal even though the
+  destination will not be dereferenceable.
 
-\item[Pointer comparison] All pointers with valid tags compare as greater than
-  any pointer without a valid tag.
-  If their tag values are equal, then pointer \cvar{a} compares greater than
-  pointer \cvar{b} if \cvar{a}'s address is greater than
-  \cvar{b}'s address.
-\end{description}
+\item If a \cfunc{realloc} implementation returns a pointer to the same
+  address, but with different bounds, a caller check to see if the passed and
+  returned pointers are equal will return \ccode{true} even though an access
+  might be permitted via one pointer but not the other.
+\end{itemize}
 
-It is important to note that other capability metadata, such as bounds and
-permissions, are not used in pointer comparison.
-
-\rwnote{It would be nice to add a specific code example here, as we do already
-  for some other cases, such as single-provenance pointer effects.}
-
-\arnote{Unless you compile with -mllvm -cheri-exact-equals=true}
-
-\psnote{hint why not?}
-
-\psnote{So two pointers can compare equal but still not be
-  equi-dereferencable (also true in de facto C, but only when one-past
-  pointers are involved).}
-
-\textbf{NOTE:
-We are continuing to explore the implications of this definition of equality.
-It may be desirable to use different definitions of pointer equality when
-implementing \ccode{==} (more lax) vs. in compiler optimization (more strict)
-to avoid confusion for programmers.}
-
-% \subsection{Pointer equality}
-%
-% Pure-capability CHERI C and C++ implement pointer equality testing by
-% comparing the addresses held in a pair of capabilities.
-% For most purposes, this gives the behavior expected by programmers, as it
-% tests whether the capabilities refer to the same memory location.
-% However, in some rare circumstances, this can lead to confusing results.
-% For example, if \cfunc{realloc} returns a pointer to the same location
-% in memory, but with different bounds, the pointer value it returns will
-% compare as identical
-
-\arnote{We might want to mention the effect of capability ordering: untagged
-always orders before tagged. This causes the use of -1 as a sentinel value (e.g.
-in ngxinx) to break.}
-
-\note{I think we should mention the \ccode{X + offset < Y} vs.\@ \ccode{Y - X
-> offset} issue here, even if we don't get into the full mess of pointer
-comparisons, just to say that \ccode{X + offset} might result in an un-tagged
-pointer.}{nwf}
+\noindent
+Practical experience has suggested that the current semantics produce fewer
+subtle bugs, and require fewer changes, than having comparison operators take
+the tag or other metadata into account.
 
 \subsection{Bitwise operations on capability types}
 
