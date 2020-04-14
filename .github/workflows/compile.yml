@@ -12,7 +12,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Install latex
-      run: sudo apt-get install -y --no-install-recommends make texlive-plain-generic texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science texlive-fonts-recommended texlive-fonts-extra
+      run: sudo apt-get install -y --no-install-recommends make texlive-plain-generic texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science texlive-fonts-recommended texlive-fonts-extra latexmk
     - name: Build document
       run: make
     - name: Upload artifact
