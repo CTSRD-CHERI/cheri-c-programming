@@ -1,0 +1,46 @@
+name: CI
+
+on: [push]
+
+env:
+  doc_name: cheri-c-programming
+
+jobs:
+  build:
+    # TODO: Run on Docker image that has latex pre-installed?
+    runs-on: [ubuntu-18.04]
+    steps:
+    - uses: actions/checkout@v1
+    - name: Install latex
+      run: sudo apt-get install -y --no-install-recommends make texlive-plain-generic texlive-latex-base texlive-latex-recommended texlive-latex-extra texlive-science texlive-fonts-recommended texlive-fonts-extra
+    - name: Build document
+      run: make
+    - name: Upload artifact
+
+      uses: actions/upload-artifact@master
+      with:
+        name: ${{ env.doc_name }}.pdf
+        path: ${{ env.doc_name }}.pdf
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: Latest snapshot (${{ github.sha }})
+        draft: true
+        prerelease: true
+    - name: Upload Release Asset
+      id: upload-release-asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps
+        asset_path: ./${{ env.doc_name }}.pdf
+        asset_name: ${{ env.doc_name }}-snapshot-${{ github.sha }}.pdf
+        asset_content_type: application/pdf
+
