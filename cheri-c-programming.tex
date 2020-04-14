@@ -175,13 +175,14 @@ maintained in registers and memory by the architecture.
 Each element of the capability contributes to the protection model:
 
 \begin{description}
-\item[Validity tag] The tag tracks the validity of a capability; if invalid,
-  the capability cannot be used for load, store, instruction fetch, or other
-  operations.
+\item[Validity tag] The tag tracks the validity of a capability.
+  If invalid, the capability cannot be used for load, store, instruction
+  fetch, or other operations.
   It is still possible to extract fields from an invalid capability,
   including its address.
-  Subject to limitations of the bounds compression model, its address
-  (i.e., where it points) can be changed while maintaining the validity tag.
+  Subject to precision limits of the bounds compression model, a capability's
+  address (i.e., where it points) can be changed while maintaining the
+  validity tag.
 
 \item[Bounds] The lower and upper bounds are addresses restricting the
   portion of the address space within which the capability can be used for
