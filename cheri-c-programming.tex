@@ -134,6 +134,9 @@ CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
 support for \textit{architectural capabilities}.
 One important use for this new hardware data type is in the implementation
 of safer C/C++ pointers and the code or data they point at.
+Our technical report, \textit{An Introduction to CHERI}, provides a high-level
+overview of the CHERI architecture, ISA modeling, hardware implementations,
+and software stack~\cite{UCAM-CL-TR-941}.
 
 \subsection{CHERI capabilities}
 
@@ -1336,16 +1339,26 @@ describe the cause of the fault; available values include:
 
 The primary reference for the CHERI Instruction-Set Architecture (ISA) is the
 ISA specification; at the time of writing, the most recent version is CHERI
-ISAv7:
+ISAv7~\cite{UCAM-CL-TR-927}:
 
 \smallskip
 \noindent
 \url{https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-927.pdf}
 \smallskip
 
+Our technical report, \textit{An Introduction to CHERI}, provides a high-level
+overview of the CHERI architecture, ISA modeling, hardware implementations,
+and software stack~\cite{UCAM-CL-TR-941}:
+
+\smallskip
+\noindent
+\url{https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf}
+\smallskip
+
 \noindent
 We published a paper on CheriABI and the adaptation of a complete OS userspace
-and application suite to a pure-capability process environment at ASPLOS 2019:
+and application suite to a pure-capability process environment at ASPLOS
+2019~\cite{davis2019:cheriabi}:
 
 \smallskip
 \noindent
@@ -1354,7 +1367,7 @@ and application suite to a pure-capability process environment at ASPLOS 2019:
 
 \noindent
 We have also released an extended technical-report version of this paper that
-includes greater implementation detail:
+includes greater implementation detail~\cite{UCAM-CL-TR-932}:
 
 \smallskip
 \noindent
@@ -1363,7 +1376,7 @@ includes greater implementation detail:
 
 \noindent
 We published a paper on CHERI and temporal memory safety for the heap at
-Oakland 2020:
+Oakland 2020~\cite{filardo:cornucopia}:
 
 \smallskip
 \noindent
@@ -1373,7 +1386,8 @@ Oakland 2020:
 \noindent
 We published a paper on C-language pointer provenance, and the implications
 for software design, at POPL 2019; CHERI C was a case study in the practical
-enforcement of capability provenance-validity enforcement:
+enforcement of capability provenance-validity
+enforcement~\cite{cerberus-popl2019}:
 
 \smallskip
 \noindent
@@ -1394,5 +1408,8 @@ We also acknowledge the EPSRC REMS Programme Grant (EP/K008528/1), the
 ERC ELVER Advanced Grant (789108), Arm Limited,
 HP Enterprise, and Google, Inc.
 Approved for Public Release, Distribution Unlimited.
+
+\bibliographystyle{abbrv}
+\bibliography{cheri}
 
 \end{document}
