@@ -125,6 +125,9 @@ run in a pure-capability programming environment.
 Section~\ref{sec:further_reading} recommends further reading, including our
 pertinent technical reports and papers.
 
+\textbf{XXXRW: There will be a new section on added compiler warnings and
+  errors, and what to do about them.}
+
 \textbf{NOTE: We have included some notes on potential areas of future change
   as we continue to refine CHERI C/C++ and its toolchain.}
 
@@ -603,6 +606,12 @@ to be changed.
 for optimization purposes? E.g., strcmp loading a word at a time?}
 
 \subsubsection{Single-origin provenance}
+
+\textbf{XXXRW: This section will get rewritten soon, as we have made changes
+  here, such as using static analysis to identify the most appropriate
+  provenance when combining a pointer and an integer constant or cast
+  non-provenance bearing type, and in the area of warnings.}
+
 In the CHERI architecture, capabilities are derived from a single other
 capability.
 However, in C code, expressions may construct a new \cintptrt value from more
