@@ -1,9 +1,12 @@
 *~
 *.aux
+*.bbl
+*.blg
 *.fls
 *.log
 *.fdb_latexmk
 *.sw?
+*.toc
 *.cb
 *.cb?
 *.idx

@@ -25,6 +25,8 @@
 \definecolor{lightgray}{gray}{0.8}
 \usepackage{xspace}
 
+\usepackage{cleveref}
+
 \renewcommand{\UrlFont}{\ttfamily\small}
 
 \lstset{basicstyle=\footnotesize\ttfamily}
@@ -124,7 +126,7 @@ as memory allocators, to further refine permissions and bounds on pointers.
 This guidance is based on the experience of adapting the FreeBSD
 operating-system userspace, and applications such as PostgreSQL and WebKit, to
 run in a pure-capability programming environment.
-Section~\ref{sec:further_reading} recommends further reading, including our
+\Cref{sec:further_reading} recommends further reading, including our
 pertinent technical reports and papers.
 
 \textbf{XXXRW: There will be a new section on added compiler warnings and
@@ -177,7 +179,7 @@ and 64-bit capabilities on 32-bit platforms.
 Each capability consists of an integer (virtual) address of the natural size for
 the architecture (e.g., 32 or 64 bit), and also additional metadata that is
 compressed in order to fit in the remaining 32 or 64 bits of the capability
-(see Figure~\ref{figure:cheri-capability-representation}).
+(see \Cref{figure:cheri-capability-representation}).
 In addition, they are associated with a 1-bit validity ``tag'' whose value is
 maintained in registers and memory by the architecture.
 Each element of the capability contributes to the protection model:
@@ -333,7 +335,7 @@ safety.
 
 Pure-capability code executes within a capability-aware run-time environment
 -- whether ``bare metal'' with a suitable runtime, or in a richer, OS-based
-process environment such as CheriABI (see Section~\ref{sec:cheriabi}),
+process environment such as CheriABI (see \Cref{sec:cheriabi}),
 which ensures that:
 \begin{itemize}
   \item capabilities are context switched (if required);
@@ -384,16 +386,16 @@ present in compilation to conventional architectures:
   Monotonicity ensures that callers cannot later broaden the bounds to cover
   other allocations.
 
-\item[Temporal Safety] Prevents a pointer retained after a call to
-  \cfunc{free} from granting access to future \cfunc{malloc} memory allocators
-  via that pointer.
+\item[Temporal Safety] Prevents a pointer retained after release of its allocation
+  (e.g., a call to \cfunc{free}) from granting access to future memory allocators
+  (e.g., \cfunc{malloc}) via that pointer.
 
   This is accomplished by preventing new pointers being returned to a
   previously allocated region of memory while any pointers to the prior
   allocation persist in application-accessible memory.
   Memory will be held in \textit{quarantine} until any such pointers have been
   atomically revoked; then the memory may be reallocated.
-  Architectural capability tags allow pointers implementing using capabilities
+  Architectural capability tags allow pointers implemented using capabilities
   to be accurately and efficiently located and overwritten in memory.
   Spatial safety ensures that pointer cannot be used to reference other
   memory, including freed memory.
@@ -402,10 +404,17 @@ present in compilation to conventional architectures:
 \textbf{Referential safety} and \textbf{spatial safety} are implemented by our
 pure-capability bare-metal, CheriFreeRTOS, CHERI-RTEMS, and CheriBSD's CheriABI
 execution environments.
-\textbf{Temporal safety} is currently an experimental feature present only in
-CheriABI on CheriBSD, and is not yet on the main development branch.
+\textbf{Temporal safety} is the object of ongoing experiments.  A prototype which
+guards \emph{heap} allocations has been developed for CheriABI on CheriBSD, but
+is not yet integrated with the main development branch.
 We currently have no plans to develop support for temporal memory safety in
 CheriFreeRTOS and CHERI-RTEMS.
+
+%% nwf thinks this might belong in here, lest someone think that the restriction
+%% to heap temporal safety is all that we can achieve even in theory.
+%
+% A blue-sky microkernel operating system project, CheriOS, achieves full spatial
+% and temporal safety of its C runtime environment.
 
 \section{Impact on the C/C++ programming model}
 
@@ -443,7 +452,7 @@ accesses not authorized by the permissions on a capability, this typically
 leads to a hardware exception (trap).
 In the CheriABI process environment, the operating system catches the hardware
 exception and delivers a \SIGPROT signal to the user process;
-further information may be found in Section~\ref{sec:cheriabi}.
+further information may be found in \Cref{sec:cheriabi}.
 
 \rwnote{We've opted to use the term ``hardware exception'' throughout, and
   mention ``traps'' only here.  This could cause confusion with respect to C++
@@ -463,7 +472,7 @@ using architectural capabilities, so that casts through these types
 can retain capability properties.
 When a dereference is attempted on a capability without a valid tag --
 including load, store, and instruction fetch -- a hardware exception fires
-(see Section~\ref{sec:faults}).
+(see \Cref{sec:faults}).
 
 On the whole, the effects of pointer provenance validity are non-disruptive to
 C/C++ source code.
@@ -477,8 +486,8 @@ situations:
 \item[Pointer types] The compiler will generate suitable code to propagate
   the provenance validity of pointers by using capability load and store
   instructions.
-  This occurs when a pointer type is used (e.g., \cvoidstar), or when an
-  integer type defined as being able to hold a pointer is used (e.g.,
+  This occurs when using a pointer type (e.g., \cvoidstar) or an
+  integer type defined as being able to hold a pointer (e.g.,
   \cintptrt).
   As with attempting to store 64-bit pointers in 32-bit integers on 64-bit
   architectures, passing a pointer through an inappropriate type will lead to
@@ -495,7 +504,7 @@ situations:
   desirable.
   In those cases, memory accesses must be performed in a way that preserves
   pointer provenance.
-  In the C runtime itself, this include \cfunc{memcpy}, which must use
+  In the C runtime itself, this includes \cfunc{memcpy}, which must use
   capability load and store instructions to transparently propagate capability
   metadata and tags.
 
@@ -521,7 +530,7 @@ recommendations:
   another pointer value -- e.g., by using them as an array offset.
   Most integers in a C/C++-language program will be of these types.
 
-\item[\vaddrt] This integer type should be used to hold virtual
+\item[\vaddrt] This is a new integer type introduced by CHERI C and should be used to hold virtual
   addresses.
   \vaddrt should not be directly cast to a pointer type for
   dereference; instead, it must be combined with an existing valid capability
@@ -533,7 +542,7 @@ recommendations:
   \arnote{\size not necessary the same as unsigned \ptrdifft.}
 
 \item[\ptrdifft] This integer type describes the integer distance
-  between the addresses of two pointers, and should not be used for
+  between the addresses of two pointers to within the same underlying allocation, and should not be used for
 any other purpose.
   It can be added to a pointer to obtain a new pointer, but the result will
   be dereferenceable only if the address lies within the bounds of the
@@ -561,7 +570,9 @@ any other purpose.
   These types will be used in two cases: (1) Where there is uncertainty as to
   whether the value to be held will be an integer or a pointer -- e.g., for an
   opaque argument to a callback function; or (2) Where it is more convenient
-  to place a pointer value in an integer type for the purposes of arithmetic.
+  to place a pointer value in an integer type for the purposes of arithmetic
+  (which takes place on the capability's address and in units of bytes, as if
+  the pointer had been cast to \texttt{char *}).
   
   \note{The observable, integer range of a \uintptr is the same as
   that of a \vaddrt, despite the increased \emph{alignment} (and,
@@ -570,7 +581,7 @@ any other purpose.
 \item[\ccharstar, \ldots{}] These pointer types are suitable for
   dereference, but in general should not be cast to or from arbitrary integer
   values.
-  Valid pointers are always derived from other valid pointers, and cannot be
+  Valid pointers are always derived from other valid pointers (including those cast to \cintptrt or \cuintptrt), and cannot be
   constructed using arbitrary integer arithmetic.
 \end{description}
 
@@ -664,18 +675,18 @@ In the pure-capability run-time environment, those bounds are normally set to
 the range of the memory allocation into which the pointer is intended to
 point.
 Because of capability compression, increased alignment requirements may apply
-to larger allocations (see Section~\ref{sec:bounds_alignment}).
+to larger allocations (see \Cref{sec:bounds_alignment}).
 
 Bounds may be set on pointers returned by multiple system components including
 the OS kernel, the run-time linker, compiler-generated code, system libraries,
 and other utility functions.
 As with violations of provenance validity, out-of-bounds accesses -- including
 load, store, and instruction fetch -- trigger a hardware exception (see
-Section~\ref{sec:faults}).
+\Cref{sec:faults}).
 
 \subsubsection{Bounds from the compiler and linker}
 
-The compiler will arrange that pointers to stack allocations have suitable
+The compiler will arrange that language-level pointers to stack allocations have suitable
 bounds, and that the run-time linker will return bounded pointers to global
 variables.
 Bounds will typically be set based on an explicitly requested allocation size
@@ -839,12 +850,15 @@ flag to be enabled; we hope to enable it by default in the future.}
 
 Bounds may also be set by other parts of the implementation.
 For example, the kernel may set bounds on pointers to new memory mappings (see
-Section~\ref{sec:cheriabi}), and the system library may set bounds on pointers
+\Cref{sec:cheriabi}), and the system library may set bounds on pointers
 into returned buffers from APIs -- e.g., \cfunc{fgetln}.
 More detailed information on how C/C++ code can set bounds can be found in
-Section~\ref{sec:setbounds}.
+\Cref{sec:setbounds}.
 
 \subsubsection{Out-of-bounds pointers}
+\label{sec:oob}
+
+\note{I feel like this section wants a reference to CHERI Concentrate?}{nwf}
 
 The capability compression model exploits redundancy between the pointer and
 its bounds to reduce memory overhead.
@@ -854,7 +868,7 @@ As a result, the architecture prohibits manipulations which would produce such
 a capability; in general, attempts to do so will clear the tag, resulting in
 an invalid capability -- leading attempting dereferences to fail in the same
 manner as a loss of pointer provenance validity (see
-Section~\ref{sec:pointer_provenance_validity}).
+\Cref{sec:pointer_provenance_validity}).
 \psnote{Comment on whether that should immediately trap instead?}
 ISO C permits pointers to go only one byte beyond their original
 allocation, but real code often \psnote{not sure how strong to be there}
@@ -882,9 +896,9 @@ widely used software.
 In pure-capability CHERI C and C++, pointer comparison considers only the
 integer address portions of a capability.
 This means that differences in tag validity, bounds, permissions, and so on,
-will not be considered when by C operators such as $==$, $<$, and $<=$.
+will not be considered when by C operators such as \texttt{==}, \texttt{<}, and \texttt{<=}.
 On the whole, this leads to intuitive behavior in systems software, where,
-for example, \cfunc{malloc} adjust bounds on a pointer before returning it to
+for example, \cfunc{malloc} adjusts bounds on a pointer before returning it to
 a caller, and then expect an address-wise comparison to succeed when the
 pointer is later returned via a call to \cfunc{free}.
 However, this behavior could also lead to potentially confusing results; for
@@ -903,7 +917,7 @@ example:
 \end{itemize}
 
 \noindent
-Practical experience has suggested that the current semantics produce fewer
+However, practical experience has suggested that the current semantics produce fewer
 subtle bugs, and require fewer changes, than having comparison operators take
 the tag or other metadata into account.
 
@@ -914,7 +928,7 @@ in the lower bits of pointers to well-aligned allocations -- will result in the 
 However, there are some corner cases where the result may be a tagged (but out-of-bounds)
 capability when an integer value is expected.
 \arnote{TODO: add an example. Maybe the mutex example checking low pointer bits + some alignment checks?}
-This may also result in the loss of tags if intermediate results become unrepresentable.\footnote{%
+Dually, bitwise operations may also result in the loss of tags if intermediate results become unrepresentable (recall \Cref{sec:oob}).\footnote{%
 Previous versions of the compiler used the capability offset (address minus base) instead
 of the address for arithmetic on \cuintptrt.
 This often resulted in unexpected results and therefore we switched to using
@@ -952,11 +966,11 @@ type of the argument and can therefore remove the need for intermediate casts to
 In many cases the minimum alignment of pointer values is known and therefore
 programmers assume that the low bits (which will always be zero) can be
 used to store additional data.\footnote{%
-CHERI actually provides many more usable bits than a conventional architecture:
+CHERI actually provides many more usable bits than a conventional architecture.
 In the current implementation of 128-bit CHERI, any bit between the least
 significant and the 9th least significant bit may be toggled without causing
 the tag to be cleared in pointers that point to the beginning of an allocation.
-If the pointer is strongly aligned, it may be possible to store even more additional bits.}
+If the pointer is strongly aligned, further bits may be toggled without clearing the tag.}
 The compiler-provided header \ccode{<cheri.h>} provides explicit macros for this
 use of bitwise arithmetic on pointers:
 
@@ -973,10 +987,12 @@ use of bitwise arithmetic on pointers:
   \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr) - 1}.
 
 \item[\ccode{uintptr\_t cheri\_clear\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
-  This builtin clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \~mask}.
+  This builtin clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
   It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
   \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr) - 1}.
 \end{description}
+
+\note{Is that \texttt{cheri.h} the same as the \texttt{cheri/cheri.h} mentioned earlier or a new file?}{nwf}
 
 \paragraph{Computing hash values}
 
@@ -1084,14 +1100,14 @@ ways:
   additional metadata. This is not true on CHERI since toggling high bits of a
   pointer can cause it to be so far out of bounds that it is no longer representable
   due to the compression of pointer bounds. However, it is still possible to use
-  the low bits for additional metadata (see section \ref{sec:low-pointer-bits}).
+  the low bits for additional metadata (see \Cref{sec:low-pointer-bits}).
   \end{itemize}
   \rwnote{Should there be more things in this list?}
 \end{description}
 
 These portability problems will typically be found due to hardware exceptions
 thrown on attempted unaligned accesses of capability values
-(see Section~\ref{sec:faults}).
+(see \Cref{sec:faults}).
 However, they can also arise in the form of stripped tag bits, leading to
 invalid capabilities that cannot be dereferenced, if, for example, pointer
 values are copied into inappropriately aligned allocations.
@@ -1149,7 +1165,7 @@ The following APIs allow capability properties to be retrieved from pointers:
 
 \item[\ccode{size\_t cheri\_getperm(void *c)}] Return the permissions of capability
   \cvar{c}.
-  (See Section~\ref{sec:available_permissions}.)
+  (See \Cref{sec:available_permissions}.)
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_get}.
 
@@ -1167,7 +1183,7 @@ The following APIs allow capability properties to be refined on pointers:
 \item[\ccode{void *cheri\_andperm(void *c, size\_t x)}] Perform a bitwise-AND of capability
   \cvar{c}'s permissions and the value \cvar{x}, returning the new
   capability.
-  (See Section~\ref{sec:available_permissions}.)
+  (See \Cref{sec:available_permissions}.)
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_and}.
 
@@ -1242,7 +1258,7 @@ Two types of modifications are typically required:
   be represented precisely.
   This requires suitably aligning both the bottom and top bounds to exclude
   any other live allocations, as described in
-  Section~\ref{sec:bounds_alignment}.
+  \Cref{sec:bounds_alignment}.
 
 \item[Reaching allocation metadata on \cfunc{free}]
   It is often the case that allocators utilize the value of the pointer passed
@@ -1428,7 +1444,7 @@ enforcement~\cite{cerberus-popl2019}:
 \section{Acknowledgements}
 
 We gratefully acknowledge the helpful feedback from our colleagues, including
-Peter G. Neumann, Nathaniel Wesley Filardo, John Baldwin, Peter Sewell, Brett
+Peter G. Neumann, John Baldwin, Peter Sewell, Brett
 Gutstein, Alfredo Mazzinghi, Simon W. Moore, Lee Smith, and Paul Gotch.
 This work was supported by the Defense Advanced Research Projects Agency (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
 FA8750-10-C-0237 (``CTSRD'') and HR0011-18-C-0016 (``ECATS'').
