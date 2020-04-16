@@ -378,7 +378,7 @@ present in compilation to conventional architectures:
 
   This is accomplished by various memory allocators, including the run-time
   linker for global variables, the stack allocator, and the heap allocator,
-  settings the bounds on the capability implementing pointer before returning
+  setting the bounds on the capability implementing a pointer before returning
   it to the caller.
   Due to precision constraints on capability bounds, bounds on returned
   pointers may include additional padding, but will not permit access to any
@@ -401,9 +401,9 @@ present in compilation to conventional architectures:
   memory, including freed memory.
 \end{description}
 
-\textbf{Referential safety} and \textbf{spatial safety} are implemented by our
-pure-capability bare-metal, CheriFreeRTOS, CHERI-RTEMS, and CheriBSD's CheriABI
-execution environments.
+\textbf{Referential safety} and \textbf{spatial safety} are
+implemented in CheriBSD's pure-capability CheriABI execution
+environment and for bare-metal in CheriFreeRTOS and CHERI-RTEMS.
 \textbf{Temporal safety} is the object of ongoing experiments.  A prototype which
 guards \emph{heap} allocations has been developed for CheriABI on CheriBSD, but
 is not yet integrated with the main development branch.
@@ -425,7 +425,7 @@ Our experience suggests that low-level system components such as run-time
 linkers, debuggers, memory allocators, and language runtimes require a modest
 but non-trivial porting effort.
 Similarly, support classes that include, for example, custom synchronization
-features, may also require moderate adaptation as well.
+features, may also require moderate adaptation.
 Other applications may compile with few or no changes -- especially if they
 are already portable across 32-bit and 64-bit platforms and are written in a contemporary C or C++ dialect.
 In the following sections, we consider various types of programmer-visible
