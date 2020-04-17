@@ -1219,7 +1219,7 @@ The following APIs allow capability properties to be refined on pointers:
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_bounds\_set}
 
-\item[\ccode{void *cheri\_setaddress(void *c, vaddr\_t a)}] Returns a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
+\item[\ccode{void *cheri\_setaddress(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
 This builtin can be useful to re-derive a valid pointer from an address.
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_address\_set}.
