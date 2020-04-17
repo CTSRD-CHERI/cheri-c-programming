@@ -896,9 +896,9 @@ a function of the length of the bounded region:
 
 \begin{itemize}
 \item A pointer is able to travel at least 1/4 the size of the object, or
-  2KiB, whichever is greater, above its upper bound.
+  $2$ KiB, whichever is greater, above its upper bound.
 
-\item It is able to travel at least 1/8 the size of the object, or 1KiB,
+\item It is able to travel at least 1/8 the size of the object, or $1$ KiB,
   whichever is greater, below its lower bound.
 \end{itemize}
 
@@ -1250,12 +1250,12 @@ to pure-capability memory protection are enumerated here:
 \subsection{Bounds alignment due to compression}
 \label{sec:bounds_alignment}
 
-When the length of an object exceeds 4KiB, additional alignment requirements
+When the length of an object exceeds $4$ KiB, additional alignment requirements
 apply to the lower and upper bounds.
 This may require a memory allocator to increase the alignment of an
 allocation, or increase padding on an allocation, to prevent bounds from
 spanning more than one object.
-The alignment required for allocations over 4KiB is $2^{E+3}$ bytes, where
+The alignment required for allocations over $4$ KiB is $2^{E+3}$ bytes, where
 $E$ is determined from the length, $l$, by
 $E = 52 - \textrm{CountLeadingZeros}(l[64:13])$.
 
