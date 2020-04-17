@@ -1256,6 +1256,14 @@ The following APIs allow capability properties to be refined on pointers:
 
 \item[\ccode{void *cheri\_setaddress(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
 This builtin can be useful to re-derive a valid pointer from an address.
+
+\ccode{cheri\_setaddress} is able to set an address \cvar{a} that is
+outside of the current bounds of \cvar{c}.  The resulting capability
+is treated as an out-of-bounds pointer as described in \Cref{sec:oob}.
+However, if the address \cvar{a} is not representable in the current
+bounds of \cvar{c} due to capability compression,
+\ccode{cheri\_setaddress} returns an untagged capability.
+
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_address\_set}.
 \end{description}
