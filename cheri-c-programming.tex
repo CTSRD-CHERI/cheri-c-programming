@@ -1400,7 +1400,7 @@ capability-related faults).
   then read back, the pointers in that region will no longer be valid.
   If a file is memory mapped, then pages mapped copy-on-write
   (\cconst{MAP\_PRIVATE}) are able to hold tagged pointers, since they are in
-  fact swap backed rather than file backed, but pages mapped directly from the
+  fact swap-backed rather than file-backed, but pages mapped directly from the
   buffer cache (\cconst{MAP\_SHARED}) are not.
 
 \item[Passing pointers via IPC] In the CheriABI process environment, only
