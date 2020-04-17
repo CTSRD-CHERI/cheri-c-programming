@@ -902,7 +902,8 @@ However, when a pointer goes out of bounds, this redundancy is reduced, and at
 some point the bounds can no longer be represented within the capability.
 As a result, the architecture prohibits manipulations which would produce such
 a capability; in general, attempts to do so will clear the tag, resulting in
-an invalid capability -- leading attempting dereferences to fail in the same
+an invalid capability.
+Attempting to dereference such a capability will fail in the same
 manner as a loss of pointer provenance validity (see
 \Cref{sec:pointer_provenance_validity}).
 \psnote{Comment on whether that should immediately trap instead?}
