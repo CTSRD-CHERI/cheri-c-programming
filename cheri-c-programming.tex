@@ -80,6 +80,7 @@
 \newcommand{\amnote}[1]{\note{#1}{Alfredo M.}}
 \newcommand{\psnote}[1]{\note{#1}{Peter S.}}
 \newcommand{\pgnnote}[1]{\note{#1}{Peter N.}}
+\newcommand{\jrtcnote}[1]{\note{#1}{Jess C.}}
 
 \hyphenation{Free-BSD}
 \hyphenation{Free-RTOS}
@@ -1020,7 +1021,11 @@ In this case, the programmer should not be using \cuintptrt but instead cast the
 to \vaddrt and perform the arithmetic on this type instead.
 This has the advantage that it will be slightly more efficient than \cuintptrt arithmetic on
 a split-register file architecture such as CHERI-MIPS.
-
+\jrtcnote{This point is slightly dubious; a sufficiently-smart compiler should
+be able to optimise it to the equivalent \vaddrt form, provided the result
+eventually is put in a \vaddrt or other non-capability type and nothing
+consumes the capability metadata for all the intermediate calculations (e.g.,
+it's used as an index).}
 
 \subsection{Function prototypes and calling conventions}
 
