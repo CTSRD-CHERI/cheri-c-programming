@@ -29,6 +29,22 @@
 
 \renewcommand{\UrlFont}{\ttfamily\small}
 
+\newcommand{\baselineboxformatting}[1]{%
+  % Measure size of contents
+  \sbox0{#1}%
+  % Use the difference between the contents' height and the bitbox's height,
+  % clamped to [-.44\baselineskip, 0], as our minimum depth.
+  \setlength{\skip0}{\ht0 - \height}%
+  \ifdim\skip0>0pt%
+    \setlength{\skip0}{0}%
+  \else%
+    \ifdim\skip0<-.44\baselineskip%
+      \setlength{\skip0}{-.44\baselineskip}%
+    \fi%
+  \fi%
+  \centering\rule[\skip0]{0pt}{\height}#1}
+\bytefieldsetup{boxformatting=\baselineboxformatting}
+
 \lstset{basicstyle=\footnotesize\ttfamily}
 %\newcommand{\ccode}[1]{\lstinline[language={C}]{#1}}
 %\newcommand{\cxxcode}[1]{\lstinline[language={C++}]{#1}}
