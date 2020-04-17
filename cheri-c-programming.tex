@@ -1337,7 +1337,7 @@ capability-related faults).
 \item[\cfunc{mmap} bounds] In CheriABI, the \cfunc{mmap} system
    call returns a bounded capability to the allocated address space.
    The requested mapping must be rounded up in length to ensure that the
-   the returned capability does not overlap with unallocated (or otherwise
+   returned capability does not overlap with unallocated (or otherwise
    allocated) regions.
    This currently requires code changes in consumers of \cfunc{mmap}.
 
