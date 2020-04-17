@@ -1275,7 +1275,7 @@ Two types of modifications are typically required:
 \item[Changes to alignment to allow for capabilities and bounds]
   Changes relating to alignment fall into two categories:
   First, those required to allow pointers to be stored within allocations,
-  which requires that allocations be aligned to pointer width -- 128 bits.
+  which requires that allocations be aligned to the pointer width -- 128 bits.
   Second, further alignment changes will be required to ensure that bounds can
   be represented precisely.
   This requires suitably aligning both the bottom and top bounds to exclude
