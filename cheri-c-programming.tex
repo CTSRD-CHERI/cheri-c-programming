@@ -1,4 +1,6 @@
 \documentclass[12pt,twoside,openright,a4paper]{article}
+% UK date format in bibliography:
+\usepackage[british]{babel}
 \setlength{\oddsidemargin}{-0.4mm} % 25 mm left margin
 \setlength{\evensidemargin}{\oddsidemargin}
 \setlength{\textwidth}{160mm}      % 25 mm right margin
@@ -13,6 +15,12 @@
 \usepackage[headings]{fullpage}
 \usepackage[hidelinks]{hyperref}
 
+% Bibliography:
+\usepackage[utf8]{inputenc}
+\usepackage{csquotes,xpatch}% recommended
+% list up to 99 names instead of the default 3
+\usepackage[backend=biber,bibencoding=utf8,style=numeric,maxnames=99,backref=false,sortcites,datamodel=thesis]{biblatex}
+\addbibresource{cheri.bib}
 \usepackage{bytefield}
 \usepackage{color}
 \usepackage[scaled=0.8]{DejaVuSansMono}
@@ -1482,7 +1490,6 @@ ERC ELVER Advanced Grant (789108), Arm Limited,
 HP Enterprise, and Google, Inc.
 Approved for Public Release, Distribution Unlimited.
 
-\bibliographystyle{abbrv}
-\bibliography{cheri}
+\printbibliography
 
 \end{document}

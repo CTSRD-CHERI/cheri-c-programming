@@ -7,7 +7,7 @@ ${NAME}.pdf: ${NAME}.tex cheri.bib
 
 clean:
 	latexmk -C ${NAME}
-	rm -f ${NAME}.{aux,log,out,pdf}
+	rm -f ${NAME}.{aux,log,out,pdf,bbl}
 
 sort-bibliography: ${BIB}
 	biber --tool $^ --sortcase=false --strip-comments --sortdebug --isbn13 --isbn-normalise --fixinits \
