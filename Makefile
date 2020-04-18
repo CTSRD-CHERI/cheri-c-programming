@@ -11,7 +11,7 @@ clean:
 
 sort-bibliography: ${BIB}
 	biber --tool $^ --sortcase=false --strip-comments --sortdebug --isbn13 --isbn-normalise --fixinits \
-	    --output_indent=4 --output_fieldcase=lower --sortlocale=en_GB \
+	    --output_indent=4 --output_fieldcase=lower --sortlocale=en_GB --nolog \
 	    --configfile=bib-cleanup.conf --validate-config --output-file=$^.sorted
 	cmp $^.sorted $^ || (echo "Bibliography changed" && cp -f $^.sorted $^)
 	rm -f $^.sorted

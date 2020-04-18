@@ -234,7 +234,7 @@ Each element of the capability contributes to the protection model:
   pointer types.
   This feature is not described further in this document, as it is primarily
   used to implement software compartmentalization rather than object-level
-  memory protection.
+  memory protection.\arnote{Should we mention that code pointers are sealed (sentries)?}
 \end{description}
 
 When stored in memory, valid capabilities must be naturally aligned -- i.e., at
@@ -566,7 +566,7 @@ recommendations:
 
 \item[\sizet, \ssizet] These integer types should be used
   to hold the unsigned or signed lengths of regions of virtual address space.
-  \arnote{\size not necessary the same as unsigned \ptrdifft.}
+  \arnote{\sizet not necessary the same as unsigned \ptrdifft.}
 
 \item[\ptrdifft] This integer type describes the integer distance
   between the addresses of two pointers to within the same underlying allocation, and should not be used for
@@ -582,7 +582,7 @@ any other purpose.
   \sizet.
   When porting code, it is worthwhile to audit use of \ptrdifft.
 
-  \note{Should we recommend that \size be used to hold lengths of
+  \note{Should we recommend that \sizet be used to hold lengths of
   allocations and \ptrdifft be used to talk about spans of
   address space (e.g., the offsets between two subobjects of an allocation)?  I feel
   like the recommendations here are not as concrete as I'd like.}{nwf}
@@ -601,7 +601,7 @@ any other purpose.
   (which takes place on the capability's address and in units of bytes, as if
   the pointer had been cast to \texttt{char *}).
   
-  \note{The observable, integer range of a \uintptr is the same as
+  \note{The observable, integer range of a \cuintptrt is the same as
   that of a \vaddrt, despite the increased \emph{alignment} (and,
   ``incidentally,'' \emph{storage}) requirements, yes?}{nwf}
 
@@ -966,7 +966,7 @@ passing \commandline{-cheri-uintcap=offset}.
 However, this may result in significantly reduced compatibility with legacy C code.
 }
 As this can result in hard-to-debug failure modes, the compiler will emit a
-warning when using bitwise-AND on capability types such as \cuintptrt.
+warning when using bitwise-AND on capability types such as \cuintptrt. \arnote{FIXME: This is not longer true now that we infer provenance, delete most of this}
 Most bitwise operations on \cuintptrt fall into one of three categories for which we provide
 higher-level abstractions.
 
@@ -987,6 +987,9 @@ the following compiler builtins should be used instead:
 
 One advantage of these builtins compared to \cuintptrt arithmetic is that they preserve the
 type of the argument and can therefore remove the need for intermediate casts to \cuintptrt.
+Moreover, using these builtins allows for improved compiler diagnostics and can result in better code-generation compared to hand-written functions or macros.
+We have submitted these builtins as part of the upstream Clang 10.0 release, so they can also be used for code that does not depend on CHERI.
+\arnote{Should I include some of the documentation I wrote for upstream LLVM? (\url{https://clang.llvm.org/docs/LanguageExtensions.html\#alignment-builtins})}.
 
 \paragraph{Storing additional data in pointers}
 \label{sec:low-pointer-bits}
@@ -1020,6 +1023,7 @@ use of bitwise arithmetic on pointers:
 \end{description}
 
 \note{Is that \texttt{cheri.h} the same as the \texttt{cheri/cheri.h} mentioned earlier or a new file?}{nwf}
+\arnote{Different file. I should update the compiler-provided one and use that in cheri/cheric.h}
 
 \paragraph{Computing hash values}
 
@@ -1035,6 +1039,7 @@ be able to optimise it to the equivalent \vaddrt form, provided the result
 eventually is put in a \vaddrt or other non-capability type and nothing
 consumes the capability metadata for all the intermediate calculations (e.g.,
 it's used as an index).}
+\arnote{I think I was just trying to point out that it avoids wasting space for variables stored to memory (e.g. on-stack arguments, etc.)}
 
 \subsection{Function prototypes and calling conventions}
 
@@ -1189,6 +1194,7 @@ The following APIs allow capability properties to be retrieved from pointers:
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_length\_get}.
   (The base plus the length gives the upper bound on \cvar{c}'s address.)
+  \arnote{I would quite like it if we used ``cheri\_getlength'' instead and deprecated the ``len'' version.}
 
 \item[\ccode{size\_t cheri\_getoffset(void *c)}] Return the difference between the address and the lower bound of the capability \cvar{c}.
  %  This macro wraps the compiler built-in
@@ -1278,6 +1284,41 @@ expect it to be 64-bit and thus be off by one in all calculations. We should
 probably also steer people towards CRRL/CRAM regardless (and add cheri\_foo
 APIs for them).}
 
+Correctly computing the rounded size and minimum alignment for a given allocation is non-trivial and may require many instructions to compute.
+Moreover, the exact limits for precise representability may vary across different implementations of CHERI.
+Therefore, the CHERI ISA provides instructions that allow determining precisely representable allocations that
+These instructions can be generated using the following compiler builtins:
+\begin{description}
+\item[\ccode{size\_t \_\_builtin\_cheri\_round\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_csetbounds} to set the length to \ccode{len} (assuming appropriate alignment of the base).
+
+\item[\ccode{size\_t \_\_builtin\_cheri\_representable\_alignment\_mask(size\_t len)}] returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
+\end{description}
+
+The precisely representable base address can be computed using:
+\begin{lstlisting}[language={C}]
+	base = base & __builtin_cheri_representable_alignment_mask(len);
+\end{lstlisting}
+If you are allocating from a contiguous buffer, you will need to align the base upwards instead of down.
+This can be done with the following code:
+\begin{lstlisting}[language={C}]
+size_t required_alignment(size_t len) {
+  return ~__builtin_cheri_representable_alignment_mask(len) + 1;
+}
+struct Buffer {
+  void* data;
+  size_t allocated;
+}
+size_t allocate_next(struct Buffer* buf, size_t len) {
+  void* result = buf->data + buf->allocated;
+  result = __builtin_align_up(result, required_alignment(len));
+  buf->allocated += __builtin_round_representable_length(len);
+  return cheri_setbounds(result, len);
+}
+
+\end{lstlisting}
+
+
+
 \subsection{Implications for memory-allocator design}
 
 One use case is high-performance applications that contain custom memory
@@ -1293,7 +1334,7 @@ Two types of modifications are typically required:
   be represented precisely.
   This requires suitably aligning both the bottom and top bounds to exclude
   any other live allocations, as described in
-  \Cref{sec:bounds_alignment}.
+  \Cref{sec:bounds_alignment}.\arnote{May want to switch order of sections?}
 
 \item[Reaching allocation metadata on \cfunc{free}]
   It is often the case that allocators utilize the value of the pointer passed
