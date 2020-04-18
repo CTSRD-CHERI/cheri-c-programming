@@ -21,6 +21,14 @@
 % list up to 99 names instead of the default 3
 \usepackage[backend=biber,bibencoding=utf8,style=numeric,maxnames=99,backref=false,sortcites,datamodel=thesis]{biblatex}
 \addbibresource{cheri.bib}
+\AtEveryBibitem{%
+% Don't print ISBN,issn, or URL dates
+\clearfield{issn}%
+\clearfield{isbn}%
+\clearfield{urldate}%
+\clearfield{urlyear}%
+}
+
 \usepackage{bytefield}
 \usepackage{color}
 \usepackage[scaled=0.8]{DejaVuSansMono}
