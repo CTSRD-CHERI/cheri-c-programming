@@ -1010,7 +1010,10 @@ significant and the 9th least significant bit may be toggled without causing
 the tag to be cleared in pointers that point to the beginning of an allocation.
 If the pointer is strongly aligned, further bits may be toggled without clearing the tag.}
 The compiler-provided header \ccode{<cheri.h>} provides explicit macros for this
-use of bitwise arithmetic on pointers:
+use of bitwise arithmetic on pointers.
+The use of these macros is now optional,\footnote{%
+Until recently, not using these macros result in subtle bugs at run time since capability comparisons included the tag bit.}
+but we believe that they can improve readability compared to hand-written bitwise operations.
 
 \begin{description}
 \item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
