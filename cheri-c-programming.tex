@@ -671,7 +671,7 @@ In CHERI C, each expression includes an arithmetic operation between provenance-
 While not visible in the source code, the constant \cconst{1} is promoted to a capability type, \cuintptrt.
 In the current implementation, the compiler will return the expected provenance-carrying result for cases \cvar{c1} and \cvar{c2} but not \cvar{c3}.\footnote{%
 Historically, the CHERI compiler would select the left-hand-most pointer in the expression as the provenance source.
-While this model follows a single consistent rule, it can lead to surprising behaviour if an expression places the provenance-carrying value to the right-hand-side.
+While this model follows a single consistent rule, it can lead to surprising behavior if an expression places the provenance-carrying value to the right-hand-side.
 In the example above, the value of \ccode{c1} would be a valid capability, but \cvar{c2} and \cvar{c3} would hold an untagged value (albeit with the expected address).
 }
 For \cvar{c1} and \cvar{c2}, the compiler sees that one of the sides is a non-provenance-carrying integer type that was promoted to \cuintptrt and therefore selects the other operand as the provenance source.
@@ -679,7 +679,7 @@ It is not possible\footnote{%
 We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
 However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.
 } to infer the correct provenance source for the third case, so the compiler will emit a warning.
-The current behaviour for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
+The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
 %
 The recommended approach to resolve such ambiguous cases is to change the type of one operand to to a non-provenance-carrying type such as \sizet.
 Alternatively, if the variable declaration cannot be changed, it is also possible to use a cast in the expression itself.
@@ -1047,7 +1047,7 @@ to \vaddrt and perform the arithmetic on this type instead.
 This has the advantage that it will be slightly more efficient than \cuintptrt arithmetic on
 a split-register file architecture such as CHERI-MIPS.
 \jrtcnote{This point is slightly dubious; a sufficiently-smart compiler should
-be able to optimise it to the equivalent \vaddrt form, provided the result
+be able to optimize it to the equivalent \vaddrt form, provided the result
 eventually is put in a \vaddrt or other non-capability type and nothing
 consumes the capability metadata for all the intermediate calculations (e.g.,
 it's used as an index).}
