@@ -1239,7 +1239,7 @@ The following APIs allow capability properties to be refined on pointers:
 \item[\ccode{void *cheri\_cleartag(void *c)}] Clear the tag on \cvar{c}, returning the
   new capability.
 
-\item[\ccode{void *cheri\_csetbounds(void *c, size\_t x)}] Narrow the bounds of capability
+\item[\ccode{void *cheri\_setbounds(void *c, size\_t x)}] Narrow the bounds of capability
   \cvar{c} so that the lower bound is the current pointer value (which may
   have been increased relative to \cvar{c}'s original lower bound), and its
   upper bound is suitable for a length of \cvar{x}.
@@ -1301,7 +1301,7 @@ Moreover, the exact limits for precise representability may vary across differen
 Therefore, the CHERI ISA provides instructions that allow determining precisely representable allocations that
 These instructions can be generated using the following compiler builtins:
 \begin{description}
-\item[\ccode{size\_t \_\_builtin\_cheri\_round\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_csetbounds} to set the length to \ccode{len} (assuming appropriate alignment of the base).
+\item[\ccode{size\_t \_\_builtin\_cheri\_round\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_setbounds} to set the length to \ccode{len} (assuming appropriate alignment of the base).
 
 \item[\ccode{size\_t \_\_builtin\_cheri\_representable\_alignment\_mask(size\_t len)}] returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
 \end{description}
