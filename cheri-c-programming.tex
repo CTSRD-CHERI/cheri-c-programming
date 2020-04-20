@@ -640,18 +640,13 @@ does not ensure sufficient alignment in its internal storage to preserve tags.
 We therefore recommend against using BDB for this purpose.
 While unaligned pointer use is uncommon in C programs, as data-structure
 layouts are normally designed to keep them strongly aligned for performance
-and atomicity reasons reasons, code depending on unaligned pointers will need
+and atomicity reasons, code depending on unaligned pointers will need
 to be changed.
 
 \amnote{Should we mention code that assumes that it is ok to go out of bounds
 for optimization purposes? E.g., strcmp loading a word at a time?}
 
 \subsubsection{Single-origin provenance}
-
-\textbf{XXXRW: This section will get rewritten soon, as we have made changes
-  here, such as using static analysis to identify the most appropriate
-  provenance when combining a pointer and an integer constant or cast
-  non-provenance bearing type, and in the area of warnings.}
 
 In the CHERI architecture, capabilities are derived from a single other
 capability.
@@ -661,38 +656,51 @@ pointer and a literal value to \cintptrt{}'s, and then adding them.
 In that case, the compiler must decide which input capability provides the
 capability metadata (bounds, permissions, \ldots{}) to be used in the output
 value.
-
-We currently specify that, in CHERI C/C++, the compiler will select the
-left-hand-most pointer in the expression.
-However, this can lead to surprising behavior if an expression places the
-preferred pointer to the right-hand-side of another argument that will not
-have appropriate provenance:
-
+Consider for example the following code:
 \begin{lstlisting}[language=C]
-void *c2 = (void *)(1 + (uintptr_t)c1);
+void *c1 = (void *)((uintptr_t)input_ptr + 1);
+void *c2 = (void *)(1 + (uintptr_t)input_ptr);
+uintptr_t offset = 1;
+void *c3 = (void *)(offset + (uintptr_t)input_ptr);
 \end{lstlisting}
 
-In C with integer pointers, this \cvar{c2} might be expected to have the
-same value as \cvar{c1}, except that the address had been incremented by one.
-However, in CHERI C, the constant \cconst{1} is promoted to a capability
-type, \cuintptrt, which has invalid pointer provenance; because it
-is on the left-hand side, its tag bit, bounds, and permissions will be used
-rather than those associated with \cvar{c1}, leading to \cvar{c2} being
-non-dereferenceable.
-The nearly identical expression swapping the order of those arguments in the
-expression will give the desired value, in which \cvar{c1}'s tag, bounds,
-and permissions are used:
-
+In C with integer pointers, the values of \cvar{c1}, \cvar{c2}, and \cvar{c3} might be expected to have the
+same value as \cvar{input\_ptr}, except with the address incremented by one.
+In CHERI C, each expression includes an arithmetic operation between provenance-carrying types.
+While not visible in the source code, the constant \cconst{1} is promoted to a capability type, \cuintptrt.
+In the current implementation, the compiler will return the expected provenance-carrying result for cases \cvar{c1} and \cvar{c2} but not \cvar{c3}.\footnote{%
+Historically, the CHERI compiler would select the left-hand-most pointer in the expression as the provenance source.
+While this model follows a single consistent rule, it can lead to surprising behaviour if an expression places the provenance-carrying value to the right-hand-side.
+In the example above, the value of \ccode{c1} would be a valid capability, but \cvar{c2} and \cvar{c3} would hold an untagged value (albeit with the expected address).
+}
+For \cvar{c1} and \cvar{c2}, the compiler sees that one of the sides is a non-provenance-carrying integer type that was promoted to \cuintptrt and therefore selects the other operand as the provenance source.
+It is not possible\footnote{%
+We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
+However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.
+} to infer the correct provenance source for the third case, so the compiler will emit a warning.
+The current behaviour for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
+%
+The recommended approach to resolve such ambiguous cases is to change the type of one operand to to a non-provenance-carrying type such as \sizet.
+Alternatively, if the variable declaration cannot be changed, it is also possible to use a cast in the expression itself.
 \begin{lstlisting}[language=C]
-void *c2 = (void *)((uintptr_t)c1 + 1);
+size_t offset_size_t = 1;
+void *c3_good1 = (void *)(offset_size_t + (uintptr_t)input_ptr);
+uintptr_t offset_uintptr_t = 1;
+void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
 \end{lstlisting}
 
-\textbf{NOTE:
-We are currently exploring alternative semantics -- such as selecting
-pointer-originated provenance in preference to integer-originated provenance,
-and causing a compilation error in the event that the result is ambiguous.
-We hope that this will reduce potential code disruption and programmer
-confusion arising from single-origin provenance for \cintptrt.}
+We also provide a new attribute \ccode{cheri\_no\_provenance} that can be used to annotate variables or fields where the underlying type cannot be changed:
+\begin{lstlisting}[language=C]
+struct S {
+  uintptr_t maybe_tagged;
+  uintptr_t never_tagged __attribute__((cheri_no_provenance));
+}
+void test(struct S s, uintptr_t ptr) {
+  void* x1 = (void*)(s.maybe_tagged + ptr); // ambiguous, currently uses LHS
+  void* x2 = (void*)(s.never_tagged + ptr); // not ambiguous, uses RHS
+}
+\end{lstlisting}
+
 
 \subsection{Bounds}
 
