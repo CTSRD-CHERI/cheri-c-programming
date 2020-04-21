@@ -896,7 +896,19 @@ More detailed information on how C/C++ code can set bounds can be found in
 
 \note{I feel like this section wants a reference to CHERI Concentrate?}{nwf}
 
-The capability compression model exploits redundancy between the pointer and
+ISO C permits pointers to go only one byte beyond their original
+allocation, but real code sometimes constructs transient pointer
+values which are further out of bounds.  To support this, capabilities
+can hold a range of out-of-bounds addresses while retaining a valid
+tag, and CHERI-enabled hardware performs bounds checks only on pointer
+use (i.e. dereference) but not on pointer manipulation.  Dereferencing
+an out-of-bounds pointer will raise a hardware exception (see
+\Cref{sec:faults}).  However, an out-of-bounds pointer can be
+dereferenced once it has been brought back in bounds by adjusting the
+address or suppling a suitable offset in the dereference.
+
+There is, however, a limit to the range of out-of-bounds addresses a capability can hold.
+The capability compression model exploits redundancy between the pointer's address and
 its bounds to reduce memory overhead.
 However, when a pointer goes out of bounds, this redundancy is reduced, and at
 some point the bounds can no longer be represented within the capability.
@@ -907,12 +919,7 @@ Attempting to dereference such a capability will fail in the same
 manner as a loss of pointer provenance validity (see
 \Cref{sec:pointer_provenance_validity}).
 \psnote{Comment on whether that should immediately trap instead?}
-ISO C permits pointers to go only one byte beyond their original
-allocation, but real code often \psnote{not sure how strong to be there}
-constructs transient pointer values outside that. 
-CHERI permits the address of a capability to go further out, with
-%of bounds than the one byte strictly required by ISO C;
-the exact distance permitted being 
+The range of out-of-bounds addresses permitted for a capability is
 a function of the length of the bounded region:
 
 \begin{itemize}
