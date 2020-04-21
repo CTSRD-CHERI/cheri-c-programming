@@ -97,6 +97,7 @@
 \newcommand*{\cpp}[1][]{C\textsmaller[2]{\nolinebreak[4]\hspace{-.05em}\raisebox{.45ex}{\textbf{++}}}}
 % And another macro sensible PDF metadata:
 \newcommand*{\cppInHeader}[1][]{\texorpdfstring{\cpp{}}{C++}}
+\newcommand*{\purecapCOrCpp}[1]{CHERI pure-capability C/\cpp{}}
 
 \hyphenation{Free-BSD}
 \hyphenation{Free-RTOS}
@@ -150,7 +151,7 @@ and papers.
 %
 % Keep Abstract in sync with the Introduction.
 %
-This document is a brief introduction to the pure-capability CHERI C/\cpp{}
+This document is a brief introduction to the \purecapCOrCpp{}
 programming languages.
 It describes the most commonly encountered differences between those languages
 on CHERI versus on conventional architectures, and where existing software may
@@ -352,7 +353,7 @@ These architectural properties provide the foundation on which a
 capability-based OS, compiler, and runtime can implement C/\cpp{}-language memory
 safety.
 
-\subsection{Pure-capability CHERI C/\cppInHeader{}}
+\subsection{CHERI Pure-capability C/\cppInHeader{}}
 
 The architectural-capability type can be used in a variety of ways by
 software.
@@ -395,7 +396,7 @@ which are explored in the remainder of this document.
 
 \subsection{Referential, Spatial, and Temporal Safety}
 
-CHERI pure-capability C/\cpp{} introduces a number of new types of protection not
+\purecapCOrCpp{} introduces a number of new types of protection not
 present in compilation to conventional architectures:
 
 \begin{description}
@@ -496,7 +497,7 @@ further information may be found in \Cref{sec:cheriabi}.
 \subsection{Pointer provenance validity}
 \label{sec:pointer_provenance_validity}
 
-Pure-capability CHERI C and \cpp{} implement pointers using architectural
+\purecapCOrCpp{} implement pointers using architectural
 capabilities, rather than using conventional 32-bit or 64-bit integers.
 This allows the provenance validity of language-level pointers to be
 protected by the provenance properties of CHERI architectural capabilities:
@@ -543,7 +544,7 @@ situations:
   metadata and tags.
 
   A useful example of potentially surprising code requiring modification for
-  pure-capability CHERI C is \cfunc{qsort}.
+  \purecapCOrCpp{} is \cfunc{qsort}.
   Some C programs assume that \cfunc{qsort} on an array of data structures
   containing pointers will preserve the usability of those pointers.
   As a result, \cfunc{qsort} must be modified to perform memory copies using
@@ -764,7 +765,7 @@ breaking compiler alias analysis assumptions.
 
 \subsubsection{Subobject bounds}
 
-Pure-capability CHERI C and \cpp{} also support automatically restricting the
+\purecapCOrCpp{} also supports automatically restricting the
 bounds when a pointer is taken to a subobject -- for example, an array
 embedded within another structure that itself has been heap allocated.
 This will prevent an overflow on that array from affecting the remainder of
@@ -943,7 +944,7 @@ widely used software.
 
 \subsection{Pointer comparison}
 
-In pure-capability CHERI C and \cpp{}, pointer comparison considers only the
+In \purecapCOrCpp{}, pointer comparison considers only the
 integer address portions of a capability.
 This means that differences in tag validity, bounds, permissions, and so on,
 will not be considered when by C operators such as \texttt{==}, \texttt{<}, and \texttt{<=}.
