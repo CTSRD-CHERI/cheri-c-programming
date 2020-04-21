@@ -1177,61 +1177,6 @@ However, they can also arise in the form of stripped tag bits, leading to
 invalid capabilities that cannot be dereferenced, if, for example, pointer
 values are copied into inappropriately aligned allocations.
 
-\section{TODO: CHERI compiler warnings and errors}
-
-\textbf{XXXRW: This section should list new warnings/errors, with suggestions
-  about their causes and what to do about them.  Make sure to update the
-  Abstract and Introduction to mention this, and xref from potential causes
-  above -- e.g., as relates to integer/pointer types, etc.}
-
-The CHERI Clang compiler includes many diagnostic warnings to identify code that is incompatible with \purecapCOrCpp{} or may result in behavioral differences.
-In many cases, a successful compilation that does not emit any CHERI-specific warnings will result in a functional spatially-safe program.
-However, some incompatibilities (e.g.\ memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
-This section
-
-\arnote{TODO: Sensible formatting}
-\lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\small\ttfamily\bfseries,#1}}{}
-\begin{compilerwarning}
-cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
-\end{compilerwarning}
-% A bit big: \subsection*{\texttt{cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced}}
-This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g. \clongt) to a pointer.
-As mentioned in \cref{sec:pointer_provenance_validity}, the result of this cast is a \ccode{NULL}-derived capability with the address set to the integer value.
-As any \ccode{NULL}-derived capability is untagged, any attempt to dereference it will trap.
-
-Usually, this warning is caused programmers incorrectly assuming that \clongt is able to store pointers.
-The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
-\begin{clisting}[frame=single]
-int example_bad(long ptr_or_int) {
-  return strdup((const char*)ptr_or_int); // warning triggers here
-}
-int example_good(intptr_t ptr_or_int) {
-  return strdup((const char*)ptr_or_int); // no warning
-}
-\end{clisting}
-
-\noindent
-In some cases this warning can be a false-positive.
-For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
-If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
-\begin{clisting}[frame=single]
-int false_positive_example(int callback_data) {
-  invoke_cb(&callback, (void*)callback_data); // warning triggers here
-  invoke_cb(&callback, (void*)(uintptr_t)callback_data); // no warning
-}
-\end{clisting}
-
-\begin{compilerwarning}
-compiler warning foo
-\end{compilerwarning}
-TODO: explain
-
-\begin{compilerwarning}
-compiler warning bar
-\end{compilerwarning}
-TODO: explain
-
-
 \section{C APIs for restricting capability permissions and bounds}
 \label{sec:setbounds}
 
@@ -1537,6 +1482,49 @@ describe the cause of the fault; available values include:
 %and compilers, may see more significant overheads, in the range of 10\%.
 %\textbf{XXX: Turn these into more real numbers.}
 
+\section{CHERI compiler warnings and errors}
+
+\textbf{XXXRW: This section should list new warnings/errors, with suggestions
+  about their causes and what to do about them.  Make sure to update the
+  Abstract and Introduction to mention this, and xref from potential causes
+  above -- e.g., as relates to integer/pointer types, etc.}
+
+The CHERI Clang compiler includes many diagnostic warnings to identify code that is incompatible with \purecapCOrCpp{} or may result in behavioral differences.
+In many cases, a successful compilation that does not emit any CHERI-specific warnings will result in a functional spatially-safe program.
+However, some incompatibilities (e.g.\ memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
+This section describes some of the more-commonly seen compiler warnings and provides suggestions on how to change the source code to be compatible with \purecapCOrCpp{}.
+
+\arnote{TODO: Sensible formatting}
+\lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\small\ttfamily\bfseries,#1}}{}
+\begin{compilerwarning}
+cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
+\end{compilerwarning}
+% A bit big: \subsection*{\texttt{cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced}}
+This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g. \clongt) to a pointer.
+As mentioned in \cref{sec:pointer_provenance_validity}, the result of this cast is a \ccode{NULL}-derived capability with the address set to the integer value.
+As any \ccode{NULL}-derived capability is untagged, any attempt to dereference it will trap.
+
+Usually, this warning is caused programmers incorrectly assuming that \clongt is able to store pointers.
+The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
+\begin{clisting}[frame=single]
+int example_bad(long ptr_or_int) {
+  return strdup((const char*)ptr_or_int); // warning triggers here
+}
+int example_good(intptr_t ptr_or_int) {
+  return strdup((const char*)ptr_or_int); // no warning
+}
+\end{clisting}
+
+\noindent
+In some cases this warning can be a false-positive.
+For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
+If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
+\begin{clisting}[frame=single]
+int false_positive_example(int callback_data) {
+  invoke_cb(&callback, (void*)callback_data); // warning triggers here
+  invoke_cb(&callback, (void*)(uintptr_t)callback_data); // no warning
+}
+\end{clisting}
 \section{Further reading}
 \label{sec:further_reading}
 
