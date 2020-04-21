@@ -1132,7 +1132,7 @@ ways:
   While the compiler and native allocators (stack, heap, \ldots{}) will
   provide sufficient alignment for capability-based pointers, custom
   allocators may align allocations to \ccode{sizeof(intmax\_t)} rather than
-  \ccode{sizeof(intptr\_t)}.
+  \ccode{sizeof(max\_align\_t)}.
 
 \item[Size] CHERI capabilities are twice the size of an integer able to
   describe the full address space.
