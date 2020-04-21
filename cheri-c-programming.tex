@@ -69,6 +69,7 @@
 \newcommand{\commandline}[1]{{\ccode{#1}}}
 
 \newcommand{\ptrdifft}{{\ccode{ptrdiff\_t}}\xspace}
+\newcommand{\maxalignt}{{\ccode{max\_align\_t}}\xspace}
 \newcommand{\sizet}{{\ccode{size\_t}}\xspace}
 \newcommand{\ssizet}{{\ccode{ssize\_t}}\xspace}
 \newcommand{\vaddrt}{{\ccode{vaddr\_t}}\xspace}
@@ -615,6 +616,11 @@ any other purpose.
   that of a \vaddrt, despite the increased \emph{alignment} (and,
   ``incidentally,'' \emph{storage}) requirements, yes?}{nwf}
 
+\item[\maxalignt] This type is defined in C as \enquote{an object type whose alignment is the greatest fundamental alignment} \arnote{C2x \S{}7.19.2} and this includes capability types for \purecapCOrCpp{}.
+% and in \cpp{} as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
+We found that some custom allocators use \ccode{sizeof(long double)} or \ccode{sizeof(uint64\_t)} to align their return values.
+While this appears to work on most architectures, in \purecapCOrCpp{} this must be changed to \ccode{alignof(\maxalignt)} if pointers are to be stored in the allocation.
+
 \item[\ccharstar, \ldots{}] These pointer types are suitable for
   dereference, but in general should not be cast to or from arbitrary integer
   values.
@@ -1141,7 +1147,7 @@ ways:
   While the compiler and native allocators (stack, heap, \ldots{}) will
   provide sufficient alignment for capability-based pointers, custom
   allocators may align allocations to \ccode{sizeof(intmax\_t)} rather than
-  \ccode{sizeof(max\_align\_t)}.
+  \ccode{alignof(\maxalignt)}.
 
 \item[Size] CHERI capabilities are twice the size of an integer able to
   describe the full address space.
