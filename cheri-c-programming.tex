@@ -1061,7 +1061,7 @@ The compiler will also warn when operators such as modulus or shifts are used on
 function or similar computations.
 In this case, the programmer should not be using \cuintptrt but instead cast the pointer
 to \vaddrt and perform the arithmetic on this type instead.
-This has the advantage that it will be slightly more efficient than \cuintptrt arithmetic on
+This has the advantage that it can be slightly more efficient than \cuintptrt arithmetic on
 a split-register file architecture such as CHERI-MIPS.
 \jrtcnote{This point is slightly dubious; a sufficiently-smart compiler should
 be able to optimize it to the equivalent \vaddrt form, provided the result
