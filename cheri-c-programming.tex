@@ -1130,6 +1130,7 @@ on larger objects.
   depends on how much the pointers are scattered in the struct definition.}
 
 \subsubsection{Restrictions in capability locations in memory}
+\label{sec:restricted-capability-locations}
 
 CHERI C/\cpp{} constrain how and where pointers can be stored in memory in two
 ways:
@@ -1502,10 +1503,7 @@ This section describes some of the more-commonly seen compiler warnings and prov
 
 \arnote{TODO: Sensible formatting}
 \lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\small\ttfamily\bfseries,#1}}{}
-\begin{compilerwarning}
-cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
-\end{compilerwarning}
-% A bit big: \subsection*{\texttt{cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced}}
+\subsection*{\texttt{cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced}}
 This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g. \clongt) to a pointer.
 As mentioned in \cref{sec:pointer_provenance_validity}, the result of this cast is a \ccode{NULL}-derived capability with the address set to the integer value.
 As any \ccode{NULL}-derived capability is untagged, any attempt to dereference it will trap.
@@ -1531,6 +1529,37 @@ int false_positive_example(int callback_data) {
   invoke_cb(&callback, (void*)(uintptr_t)callback_data); // no warning
 }
 \end{clisting}
+
+\subsection*{\texttt{alignment of '<type>' is less than the required capability alignment}}
+%\begin{compilerwarning}
+%alignment (<N>) of '<type>' is less than the required capability alignment
+%\end{compilerwarning}
+This warning is triggered when packed structures contain pointers.
+As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
+This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g.\ for compatibility between 32- and 64-bit architectures). For example:
+\begin{clisting}[frame=single]
+struct AtLeast8ByteAlignedBad {
+  void *data;
+} __attribute__((packed, aligned(8)));
+// Compiler warns: alignment (8) of 'struct AtLeast8ByteAligned' is less than the required capability alignment (16})
+\end{clisting}
+\begin{clisting}[frame=single]
+#include <stdalign.h>
+struct AtLeast8ByteAlignedGood {
+  void *data;
+} __attribute__((packed,aligned(alignof(void*) > 8 ? alignof(void*) : 8)));
+\end{clisting}
+
+In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
+\begin{clisting}[frame=single]
+struct UnderalignPointerIgnoreWarning {
+  void* data;
+} __attribute__((packed, aligned(4), annotate("underaligned_capability")));
+\end{clisting}
+
+\subsection*{TODO: more warnings}
+
+
 \section{Further reading}
 \label{sec:further_reading}
 
