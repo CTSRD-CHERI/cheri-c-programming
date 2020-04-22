@@ -901,7 +901,7 @@ allocation, but real code sometimes constructs transient pointer
 values which are further out of bounds.  To support this, capabilities
 can hold a range of out-of-bounds addresses while retaining a valid
 tag, and CHERI-enabled hardware performs bounds checks only on pointer
-use (i.e. dereference) but not on pointer manipulation.  Dereferencing
+use (i.e.\ dereference) but not on pointer manipulation.  Dereferencing
 an out-of-bounds pointer will raise a hardware exception (see
 \Cref{sec:faults}).  However, an out-of-bounds pointer can be
 dereferenced once it has been brought back in bounds by adjusting the
