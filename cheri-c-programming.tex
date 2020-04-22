@@ -29,6 +29,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{listings}
 \lstnewenvironment{clisting}[1][]{\lstset{language={C},breaklines=true,#1}}{}
+\lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\scriptsize\ttfamily\bfseries,frame=single#1}}{}
 \usepackage{subcaption}
 \usepackage{times}
 \usepackage{url}
@@ -664,6 +665,7 @@ to be changed.
 for optimization purposes? E.g., strcmp loading a word at a time?}
 
 \subsubsection{Single-origin provenance}
+\label{sec:ambiguous-provenance}
 
 In the CHERI architecture, capabilities are derived from a single other
 capability.
@@ -1505,7 +1507,6 @@ However, some incompatibilities (e.g.\ memory allocators returning insufficientl
 This section describes some of the more-commonly seen compiler warnings and provides suggestions on how to change the source code to be compatible with \purecapCOrCpp{}.
 
 \arnote{TODO: Sensible formatting}
-\lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\scriptsize\ttfamily\bfseries,frame=single#1}}{}
 \subsection{Loss of provenance}
 %\begin{compilerwarning}
 %cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
@@ -1556,7 +1557,38 @@ void false_positive_example(int callback_data) {
 \end{compilerwarning}
 
 \subsection{Ambiguous provenance}
-TODO:
+For arithmetic and bitwise binary operations between \cuintptrt/\cintptrt, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
+However, as noted in \cref{sec:ambiguous-provenance}, there are cases that are ambiguous as far as the compiler is concerned.
+
+Consider for example a structure that holds a pointer and a small amount of flags.
+In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:
+\begin{clisting}[frame=single,numbers=left]
+typedef struct { uintptr_t data; } pointer_and_flags;
+void set_ptr(pointer_and_flags* p, void* value) {
+    p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
+}
+void set_flags(pointer_and_flags* p, unsigned flags) {
+    p->data = p->data | (flags & 7);
+}
+\end{clisting}
+\begin{compilerwarning}
+<source>:3:40: warning: binary expression on capability types '__uintcap_t' and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as the source of provenance; currently provenance is inherited from the left-hand side [-Wcheri-provenance]
+    p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
+              ~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~
+1 warning generated.
+\end{compilerwarning}
+
+\noindent
+Unlike the compiler, the programmer knows that inside \cfunc{set\_ptr} capability metadata should always be taken from the \ccode{value} argument.
+The suggested fix for this problem is to insert a cast to an integer type:
+\begin{clisting}[frame=single,numbers=left]
+void set_ptr(pointer_and_flags* p, void* value) {
+    p->data = (size_t)(p->data & (uintptr_t)7) | (uintptr_t)(value);
+}
+\end{clisting}
+
+\arnote{TODO: highlight the added cast}
+\arnote{TODO: this section should have more examples.}
 
 \subsection{Underaligned capabilities}
 %\begin{compilerwarning}
