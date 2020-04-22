@@ -1598,7 +1598,7 @@ void set_flags(pointer_and_flags* p, unsigned flags) {
 
 \noindent
 Unlike the compiler, the programmer knows that inside \cfunc{set\_ptr} capability metadata should always be taken from the \ccode{value} argument.
-The suggested fix for this problem is to insert a cast to an integer type:
+The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:
 \TikzListingHighlightStartEnd[green]{FixAmbig}
 \begin{clisting}[frame=single,numbers=left]
 void set_ptr(pointer_and_flags* p, void* value) {
