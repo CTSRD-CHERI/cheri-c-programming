@@ -30,6 +30,7 @@
 \usepackage{listings}
 \lstnewenvironment{clisting}[1][]{\lstset{language={C},breaklines=true,#1}}{}
 \lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\scriptsize\ttfamily\bfseries,frame=single#1}}{}
+
 \usepackage{subcaption}
 \usepackage{times}
 \usepackage{url}
@@ -39,6 +40,20 @@
 \usepackage{xfrac}
 
 \usepackage[nameinlink,noabbrev,capitalise]{cleveref}
+
+% drawing over lstlistings (code stolen from nwf)
+\usepackage{tikz}
+   \usetikzlibrary{decorations.pathreplacing}
+   \usetikzlibrary{fit}
+   \usetikzlibrary{tikzmark}
+   \usetikzlibrary{calc}
+   \usetikzlibrary{patterns}
+\newcommand*{\vcpgfmark}[1]{\ensuremath{\vcenter{\hbox{\pgfmark{#1}}}}}
+% GBP symbol should be safe since it's easy to enter (at least on a UK keyboard) and won't be in any valid lstlistings
+\lstset{escapechar=£} % Note: ensure this doesn't occur in any of the code
+\newcommand{\TikzListingHighlight}[3][]{\tikz[overlay,remember picture]{\draw[\ifstrempty{#1}{yellow}{#1}, line width=10pt,opacity=0.3](#2) -- (#3);}}
+\newcommand*{\TikzListingHighlightStartEnd}[2][]{\tikz[overlay,remember picture]{\draw[\ifstrempty{#1}{yellow}{#1}, line width=10pt,opacity=0.3](pic cs:Start#2) -- (pic cs:End#2);}}
+
 
 \renewcommand{\UrlFont}{\ttfamily\small}
 
@@ -1517,11 +1532,13 @@ As any \ccode{NULL}-derived capability is untagged, any attempt to dereference i
 
 Usually, this warning is caused programmers incorrectly assuming that \clongt is able to store pointers.
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
+\TikzListingHighlightStartEnd[red]{BadParamTy}
+\TikzListingHighlightStartEnd[green]{GoodParamTy}
 \begin{clisting}[frame=single,numbers=left]
-char* example_bad(long ptr_or_int) {
+char* example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
   return strdup((const char*)ptr_or_int);
 }
-char* example_good(intptr_t ptr_or_int) {
+char* example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodParamTy}£ ptr_or_int) {
   return strdup((const char*)ptr_or_int);
 }
 \end{clisting}
@@ -1537,12 +1554,13 @@ char* example_good(intptr_t ptr_or_int) {
 In some cases this warning can be a false-positive.
 For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
+\TikzListingHighlightStartEnd[green]{SilenceProv}
 \begin{clisting}[frame=single,numbers=left]
 void invoke_cb(void(*cb)(void*), void*);
 void callback(void* arg);
 void false_positive_example(int callback_data) {
   invoke_cb(&callback, (void*)callback_data); // warning
-  invoke_cb(&callback, (void*)(uintptr_t)callback_data); // no warning
+  invoke_cb(&callback, (void*)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
 }
 \end{clisting}
 \begin{compilerwarning}
@@ -1581,13 +1599,13 @@ void set_flags(pointer_and_flags* p, unsigned flags) {
 \noindent
 Unlike the compiler, the programmer knows that inside \cfunc{set\_ptr} capability metadata should always be taken from the \ccode{value} argument.
 The suggested fix for this problem is to insert a cast to an integer type:
+\TikzListingHighlightStartEnd[green]{FixAmbig}
 \begin{clisting}[frame=single,numbers=left]
 void set_ptr(pointer_and_flags* p, void* value) {
-    p->data = (size_t)(p->data & (uintptr_t)7) | (uintptr_t)(value);
+    p->data = £\vcpgfmark{StartFixAmbig}£(size_t)£\vcpgfmark{EndFixAmbig}£(p->data & (uintptr_t)7) | (uintptr_t)(value);
 }
 \end{clisting}
 
-\arnote{TODO: highlight the added cast}
 \arnote{TODO: this section should have more examples.}
 
 \subsection{Underaligned capabilities}
@@ -1597,11 +1615,11 @@ void set_ptr(pointer_and_flags* p, void* value) {
 This warning is triggered when packed structures contain pointers.
 As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
 This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g.\ for compatibility between 32- and 64-bit architectures). For example:
+\TikzListingHighlightStartEnd[red]{BadAlignPacked}
 \begin{clisting}[frame=single]
 struct AtLeast8ByteAlignedBad {
   void *data;
 } __attribute__((packed, aligned(8)));
-// Compiler warns: alignment (8) of 'struct AtLeast8ByteAligned' is less than the required capability alignment (16})
 \end{clisting}
 \begin{compilerwarning}
 <source>:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is less than the required capability alignment (16) [-Wcheri-capability-misuse]
@@ -1613,19 +1631,22 @@ struct AtLeast8ByteAlignedBad {
 %
 The simplest fix for this issue is to either increase alignment to be CHERI-compatibile, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
 %
+\TikzListingHighlightStartEnd[green]{FixAlign1}
+\TikzListingHighlightStartEnd[green]{FixAlign2}
 \begin{clisting}[frame=single]
-#include <stdalign.h>
+£\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
 struct AtLeast8ByteAlignedGood {
   void *data;
-} __attribute__((packed,aligned(alignof(void*) > 8 ? alignof(void*) : 8)));
+} __attribute__((packed,aligned(£\vcpgfmark{StartFixAlign2}£alignof(void*) > 8 ? alignof(void*) : 8£\vcpgfmark{EndFixAlign2}£)));
 \end{clisting}
 %
-In the rare case that creating a potentially underaligned pointer is actually intended, th warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
+In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
 %
+\TikzListingHighlightStartEnd[green]{SilenceAlign}
 \begin{clisting}[frame=single]
 struct UnderalignPointerIgnoreWarning {
   void* data;
-} __attribute__((packed, aligned(4), annotate("underaligned_capability")));
+} __attribute__((packed, aligned(4), £\vcpgfmark{StartSilenceAlign}£annotate("underaligned_capability")£\vcpgfmark{EndSilenceAlign}£));
 \end{clisting}
 
 \subsection{TODO: more warnings}
