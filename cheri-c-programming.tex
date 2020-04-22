@@ -1496,41 +1496,68 @@ describe the cause of the fault; available values include:
   Abstract and Introduction to mention this, and xref from potential causes
   above -- e.g., as relates to integer/pointer types, etc.}
 
+\arnote{Feed the source code into \url{https://cheri-compiler-explorer.cl.cam.ac.uk/} to get the latest warning text}
+
 The CHERI Clang compiler includes many diagnostic warnings to identify code that is incompatible with \purecapCOrCpp{} or may result in behavioral differences.
 In many cases, a successful compilation that does not emit any CHERI-specific warnings will result in a functional spatially-safe program.
 However, some incompatibilities (e.g.\ memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
 This section describes some of the more-commonly seen compiler warnings and provides suggestions on how to change the source code to be compatible with \purecapCOrCpp{}.
 
 \arnote{TODO: Sensible formatting}
-\lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\small\ttfamily\bfseries,#1}}{}
-\subsection*{\texttt{cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced}}
+\lstnewenvironment{compilerwarning}[1][]{\lstset{language={},breaklines=true,basicstyle=\scriptsize\ttfamily\bfseries,frame=single#1}}{}
+\subsection{Loss of provenance}
+%\begin{compilerwarning}
+%cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
+%\end{compilerwarning}
 This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g. \clongt) to a pointer.
 As mentioned in \cref{sec:pointer_provenance_validity}, the result of this cast is a \ccode{NULL}-derived capability with the address set to the integer value.
 As any \ccode{NULL}-derived capability is untagged, any attempt to dereference it will trap.
 
 Usually, this warning is caused programmers incorrectly assuming that \clongt is able to store pointers.
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
-\begin{clisting}[frame=single]
-int example_bad(long ptr_or_int) {
-  return strdup((const char*)ptr_or_int); // warning triggers here
+\begin{clisting}[frame=single,numbers=left]
+char* example_bad(long ptr_or_int) {
+  return strdup((const char*)ptr_or_int);
 }
-int example_good(intptr_t ptr_or_int) {
-  return strdup((const char*)ptr_or_int); // no warning
+char* example_good(intptr_t ptr_or_int) {
+  return strdup((const char*)ptr_or_int);
 }
 \end{clisting}
+\begin{compilerwarning}
+<source>:2:17: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+  return strdup((const char*)ptr_or_int);
+                ^
+<source>:2:17: note: insert cast to intptr_t to silence this warning
+1 warning generated.
+\end{compilerwarning}
 
 \noindent
 In some cases this warning can be a false-positive.
 For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
-\begin{clisting}[frame=single]
-int false_positive_example(int callback_data) {
-  invoke_cb(&callback, (void*)callback_data); // warning triggers here
+\begin{clisting}[frame=single,numbers=left]
+void invoke_cb(void(*cb)(void*), void*);
+void callback(void* arg);
+void false_positive_example(int callback_data) {
+  invoke_cb(&callback, (void*)callback_data); // warning
   invoke_cb(&callback, (void*)(uintptr_t)callback_data); // no warning
 }
 \end{clisting}
+\begin{compilerwarning}
+<source>:4:24: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+  invoke_cb(&callback, (void*)callback_data); // warning
+                       ^
+<source>:4:24: note: insert cast to intptr_t to silence this warning
+<source>:15:24: warning: cast to 'void * __capability' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
+  invoke_cb(&callback, (void*)callback_data); // warning
+                       ^
+2 warnings generated.
+\end{compilerwarning}
 
-\subsection*{\texttt{alignment of '<type>' is less than the required capability alignment}}
+\subsection{Ambiguous provenance}
+TODO:
+
+\subsection{Underaligned capabilities}
 %\begin{compilerwarning}
 %alignment (<N>) of '<type>' is less than the required capability alignment
 %\end{compilerwarning}
@@ -1543,21 +1570,32 @@ struct AtLeast8ByteAlignedBad {
 } __attribute__((packed, aligned(8)));
 // Compiler warns: alignment (8) of 'struct AtLeast8ByteAligned' is less than the required capability alignment (16})
 \end{clisting}
+\begin{compilerwarning}
+<source>:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is less than the required capability alignment (16) [-Wcheri-capability-misuse]
+struct AtLeast8ByteAlignedBad {
+       ^
+<source>:1:8: note: If you are certain that this is correct you can silence the warning by adding __attribute__((annotate("underaligned_capability")))
+1 warning generated.
+\end{compilerwarning}
+%
+The simplest fix for this issue is to either increase alignment to be CHERI-compatibile, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
+%
 \begin{clisting}[frame=single]
 #include <stdalign.h>
 struct AtLeast8ByteAlignedGood {
   void *data;
 } __attribute__((packed,aligned(alignof(void*) > 8 ? alignof(void*) : 8)));
 \end{clisting}
-
-In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
+%
+In the rare case that creating a potentially underaligned pointer is actually intended, th warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
+%
 \begin{clisting}[frame=single]
 struct UnderalignPointerIgnoreWarning {
   void* data;
 } __attribute__((packed, aligned(4), annotate("underaligned_capability")));
 \end{clisting}
 
-\subsection*{TODO: more warnings}
+\subsection{TODO: more warnings}
 
 
 \section{Further reading}
