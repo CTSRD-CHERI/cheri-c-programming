@@ -996,6 +996,10 @@ example:
 \noindent
 However, practical experience has suggested that the current semantics produce fewer
 subtle bugs, and require fewer changes, than having comparison operators take
+the tag or other metadata into account.\footnote{
+The CHERI Clang compiler supports and experimental flag \texttt{-cheri-comparison=exact} that causes capability equality comparisons to also include capability metadata and the tag bits.
+\arnote{default behaviour=\texttt{-cheri-comparison=address}}
+}
 the tag or other metadata into account.
 
 \subsection{Bitwise operations on capability types}
