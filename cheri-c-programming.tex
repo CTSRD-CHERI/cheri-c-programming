@@ -125,7 +125,7 @@
 \hyphenation{Web-Kit}
 
 \title{CHERI Pure-Capability C/\cppInHeader{} Programming Guide \\ (DRAFT)}
-\author{Robert N. M. Watson, Brooks Davis, Alexander Richardson, \\
+\author{Robert N. M. Watson, Alexander Richardson, Brooks Davis, \\
   John Baldwin, Jessica Clarke, Nathaniel Filardo, Simon W. Moore, \\
   Edward Napierala, Peter Sewell, and Peter G. Neumann}
 
@@ -151,11 +151,14 @@ on CHERI versus on conventional architectures, and where existing software may
 require minor changes.
 We explain how modest language extensions allow selected software, such
 as memory allocators, to further refine permissions and bounds on pointers.
+We document new compiler warnings and errors that may be experienced compiling
+code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
+through typically modest source-code changes.
 This guidance is based on our experience adapting the FreeBSD operating-system
 userspace, and applications such as PostgreSQL and WebKit, to run in a
 pure-capability programming environment.
-We also recommend further reading, including our pertinent technical reports
-and papers.
+We conclude by recommending further reading, including our pertinent technical
+reports and papers.
 \end{abstract}
 
 \newpage
@@ -176,17 +179,17 @@ on CHERI versus on conventional architectures, and where existing software may
 require minor changes.
 It also explains how modest language extensions allow selected software, such
 as memory allocators, to further refine permissions and bounds on pointers.
+We document new compiler warnings and errors that may be experienced compiling
+code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
+through typically modest source-code changes.
 This guidance is based on the experience of adapting the FreeBSD
 operating-system userspace, and applications such as PostgreSQL and WebKit, to
 run in a pure-capability programming environment.
-\Cref{sec:further_reading} recommends further reading, including our
-pertinent technical reports and papers.
+We conclude by recommending further reading, including our pertinent technical
+reports and papers.
 
-\textbf{XXXRW: There will be a new section on added compiler warnings and
-  errors, and what to do about them.}
-
-\textbf{NOTE: We have included some notes on potential areas of future change
-  as we continue to refine CHERI C/\cpp{} and its toolchain.}
+%\textbf{NOTE: We have included some notes on potential areas of future change
+%  as we continue to refine CHERI C/\cpp{} and its toolchain.}
 
 \section{Background}
 
@@ -194,7 +197,8 @@ CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
 support for \textit{architectural capabilities}.
 One important use for this new hardware data type is in the implementation
 of safer C/\cpp{} pointers and the code or data they point at.
-Our technical report, \textit{An Introduction to CHERI}, provides a high-level
+Our technical report, \textit{An Introduction to CHERI}, provides a more
+detailed
 overview of the CHERI architecture, ISA modeling, hardware implementations,
 and software stack~\cite{UCAM-CL-TR-941}.
 
