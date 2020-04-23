@@ -557,8 +557,9 @@ capabilities, rather than using conventional 32-bit or 64-bit integers.
 This allows the provenance validity of language-level pointers to be
 protected by the provenance properties of CHERI architectural capabilities:
 only pointers implemented using valid capabilities can be dereferenced.
-Other types that contain pointers, such as \cintptrt,
-\psnote{It would be better to exhaustively list them (is it just intptr\_t and uintptr\_t?) rather than this vague ``such as''}
+Other types that contain pointers, \cuintptrt and \cintptrt,
+%\psnote{It would be better to exhaustively list them (is it just intptr\_t and uintptr\_t?) rather than this vague ``such as''}
+%\arnote{There are also cases such as C++11 strongly typed enums that use uintcap\_t as the underlying type, but we really don't need to mention this here. And I'm also not sure if we want to keep allowing that since enums should really be integer values only}
 are similarly implemented
 using architectural capabilities, so that casts through these types
 can retain capability properties.
@@ -680,7 +681,8 @@ While this appears to work on most architectures, in \purecapCOrCpp{} this must 
 It is important to use \ccode{alignof} instead of \ccode{sizeof} since GCC defines \maxalignt as a \ccode{struct} and not a \ccode{union}.} if pointers are to be stored in the allocation.
 
 \item[\ccharstar, \ldots{}] These pointer types are suitable for
-  dereference, but in general \psnote{that ``in general'' makes me wonder about the exceptions?}  should not be cast to or from arbitrary integer
+  dereference, but in general \psnote{that ``in general'' makes me wonder about the exceptions?}
+  \arnote{The only exception I can think of is requiring \cvoidstar due to bad API design (callback parameters, etc).}  should not be cast to or from arbitrary integer
   values.
   Valid pointers are always derived from other valid pointers (including those cast to \cintptrt or \cuintptrt), and cannot be
   constructed using arbitrary integer arithmetic.
@@ -756,6 +758,7 @@ It is not possible\footnote{%
 We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
 However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.
 \psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
+\arnote{I agree. Even the current behaviour is quite ugly, but at least it has measurable compatibility benefits.}
 } to infer the correct provenance source for the third case, so the compiler will emit a warning.
 The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
 %
@@ -768,7 +771,7 @@ uintptr_t offset_uintptr_t = 1;
 void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
 \end{lstlisting}
 
-We also provide a new attribute \ccode{cheri\_no\_provenance} that can be used to annotate variables or fields where the underlying type cannot be changed:
+We also provide a new attribute \ccode{cheri\_no\_provenance} that can be used to annotate variables or fields of type \cintptrt/\cuintptrt where the underlying type cannot be changed:
 \begin{lstlisting}[language=C]
 struct S {
   uintptr_t maybe_tagged;
@@ -779,7 +782,7 @@ void test(struct S s, uintptr_t ptr) {
   void* x2 = (void*)(s.never_tagged + ptr); // not ambiguous, uses RHS
 }
 \end{lstlisting}
-\psnote{This doesn't really explain what \ccode{cheri\_no\_provenance} does?  And what it means when applied to other types?}
+\psnote{This doesn't really explain what \ccode{cheri\_no\_provenance} does?  And what it means when applied to other types?}\arnote{compiler error if it's not \cuintptrt. Will try to improve example later.}
 
 \subsection{Bounds}
 
@@ -997,6 +1000,7 @@ some point the bounds can no longer be represented within the capability.
 As a result, the architecture prohibits manipulations which would produce such
 a capability; in general%
 \psnote{slightly mysterious ``in general'' -- isn't this always true?}%
+\arnote{I think the intent of this wording was to allow for trapping behaviour?}%
 , attempts to do so will clear the tag, resulting in
 an invalid capability.
 Attempting to dereference such a capability will fail in the same
@@ -1046,6 +1050,9 @@ example:
 
 \psnote{I'm curious about the impact on compiler optimisation, where in the scope of \texttt{if (p==q)} compilers will often assume the two are interchangeable.  Comment on that?
  }
+ \arnote{The choice between exact vs non-exact equals is made extremely late in code generation, it just chooses between emitting CEq and CExEq.
+ Compiler analyses use a stricter definition of equality.
+ In clang that should include some cases of taking provenance into account for alias information.}
 
 \noindent
 However, practical experience has suggested that the current semantics produce fewer
@@ -1113,7 +1120,7 @@ The use of these macros is currently optional,\footnote{%
 Until recently, not using these macros result in subtle bugs at run time since capability comparisons included the tag bit.}
 but we believe that they can improve readability compared to hand-written bitwise operations.
 
-\psnote{should the non-usability of high bits, mentioned at the end of \S3, also be mentioned here?}
+\psnote{should the non-usability of high bits, mentioned at the end of \S3, also be mentioned here?}\arnote{Yes}
 
 \begin{description}
 \item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
@@ -1187,7 +1194,7 @@ programming styles that fail to unambiguously differentiate these types:
   Historically, this included the FreeBSD kernel's implementation of
   \cfunc{open}, \cfunc{fcntl}, and \cfunc{syscall}.
 
-  \rwnote{I wonder if we need to be more specific with an example here.}
+  \rwnote{I wonder if we need to be more specific with an example here.}\arnote{TODO: Add example such as missing open() mode arguments?}
 
 \end{description}
 
@@ -1307,7 +1314,7 @@ The following APIs allow capability properties to be retrieved from pointers:
 
 \item[\ccode{size\_t cheri\_getperm(void *c)}] Return the permissions of capability
   \cvar{c}.
-  (See \Cref{sec:available_permissions}.)
+  (See \Cref{sec:available_permissions}.)\arnote{Why did we use getperm instead of getperm\textbf{s}?}
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_get}.
 
@@ -1406,8 +1413,7 @@ APIs for them).}
 
 Correctly computing the rounded size and minimum alignment for a given allocation is non-trivial and may require many instructions to compute.
 Moreover, the exact limits for precise representability may vary across different implementations of CHERI.
-Therefore, the CHERI ISA provides instructions that allow determining precisely representable allocations that
-\psnote{???}
+Therefore, the CHERI ISA provides instructions that allow determining precisely representable allocations.
 These instructions can be generated using the following compiler builtins:
 \begin{description}
 \item[\ccode{size\_t \_\_builtin\_cheri\_round\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_setbounds} to set the length to \ccode{len} (assuming appropriate alignment of the base).
@@ -1419,7 +1425,7 @@ The precisely representable base address can be computed using:
 \begin{lstlisting}[language={C}]
 	base = base & __builtin_cheri_representable_alignment_mask(len);
 \end{lstlisting}
-If you\psnote{awkward change of style to ``you''s} are allocating from a contiguous buffer, you will need to align the base upwards instead of down.
+When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:
 \begin{lstlisting}[language={C}]
 size_t required_alignment(size_t len) {
@@ -1442,7 +1448,7 @@ size_t allocate_next(struct Buffer* buf, size_t len) {
 
 \subsection{Implications for memory-allocator design}
 
-One use case \psnote{of what?} is high-performance applications that contain custom memory
+One use case \psnote{of what?}\arnote{capability bounds?} is high-performance applications that contain custom memory
 allocators, and wish to narrow the bounds of returned pointers.
 Two kinds of modifications are typically required:
 
