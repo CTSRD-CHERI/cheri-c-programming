@@ -682,7 +682,8 @@ any other purpose.
 % and in \cpp{} as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
 We found that some custom allocators use \ccode{sizeof(long double)} or \ccode{sizeof(uint64\_t)} to align their return values.
 While this appears to work on most architectures, in \purecapCOrCpp{} this must be changed to \ccode{alignof(\maxalignt)}\footnote{
-It is important to use \ccode{alignof} instead of \ccode{sizeof} since GCC defines \maxalignt as a \ccode{struct} and not a \ccode{union}.} if pointers are to be stored in the allocation.
+It is important to use \ccode{alignof} instead of \ccode{sizeof} since GCC defines \maxalignt as a \ccode{struct} and not a \ccode{union}. Other
+implementations including FreeBSD follow this pattern.} if pointers are to be stored in the allocation.
 
 \item[\ccharstar, \ldots{}] These pointer types are suitable for
   dereference, but in general \psnote{that ``in general'' makes me wonder about the exceptions?}
