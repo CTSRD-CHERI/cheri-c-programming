@@ -698,8 +698,7 @@ It is important to note that \cuintptrt is no longer the same size as
 existing code to use the correct type depending on whether the variable
 needs to be able store a pointer type. In cases where this is not obvious
 (such as for a callback argument), we recommend the use of \cuintptrt.
-While this does double the size of the variable and can result in slightly
-less efficient code generation, it ensures that provenance is maintained.
+This ensures that provenance is maintained.
 
 \pgnnote{The above section begs questions relating to what is the
   responsibility of programmers and what can be aided or managed by
