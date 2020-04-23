@@ -641,8 +641,8 @@ recommendations:
   to hold the unsigned or signed lengths of regions of virtual address space.
   \arnote{\sizet not necessary the same as unsigned \ptrdifft.}
 
-\item[\ptrdifft] This integer type describes the integer distance
-  between the addresses of two pointers to within the same underlying allocation, and should not be used for
+\item[\ptrdifft] This integer type describes the difference of indices
+  between two pointers to elements of the same array, and should not be used for
 any other purpose.
   It can be added to a pointer to obtain a new pointer, but the result will
   be dereferenceable only if the address lies within the bounds of the
