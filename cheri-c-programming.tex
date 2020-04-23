@@ -1587,8 +1587,6 @@ As any \ccode{NULL}-derived capability is untagged, any attempt to dereference i
 
 Usually, this warning is caused by programmers incorrectly assuming that \clongt is able to store pointers.
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
-\TikzListingHighlightStartEnd[red]{BadParamTy}
-\TikzListingHighlightStartEnd[green]{GoodParamTy}
 \begin{clisting}[frame=single,numbers=left]
 char* example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
   return strdup((const char*)ptr_or_int);
@@ -1597,6 +1595,8 @@ char* example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodP
   return strdup((const char*)ptr_or_int);
 }
 \end{clisting}
+\TikzListingHighlightStartEnd[red]{BadParamTy}
+\TikzListingHighlightStartEnd[green]{GoodParamTy}
 \begin{compilerwarning}
 <source>:2:17: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   return strdup((const char*)ptr_or_int);
@@ -1609,7 +1609,6 @@ char* example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodP
 In some cases this warning can be a false positive.
 For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
-\TikzListingHighlightStartEnd[green]{SilenceProv}
 \begin{clisting}[frame=single,numbers=left]
 void invoke_cb(void(*cb)(void*), void*);
 void callback(void* arg);
@@ -1618,6 +1617,7 @@ void false_positive_example(int callback_data) {
   invoke_cb(&callback, (void*)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
 }
 \end{clisting}
+\TikzListingHighlightStartEnd[green]{SilenceProv}
 \begin{compilerwarning}
 <source>:4:24: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   invoke_cb(&callback, (void*)callback_data); // warning
@@ -1670,12 +1670,12 @@ void set_ptr(pointer_and_flags* p, void* value) {
 This warning is triggered when packed structures contain pointers.
 As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
 This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g.\ for compatibility between 32- and 64-bit architectures). For example:
-\TikzListingHighlightStartEnd[red]{BadAlignPacked}
 \begin{clisting}[frame=single]
 struct AtLeast8ByteAlignedBad {
   void *data;
-} __attribute__((packed, aligned(8)));
+} __attribute__((packed, £\vcpgfmark{StartBadAlignPacked}£aligned(8)£\vcpgfmark{EndBadAlignPacked}£));
 \end{clisting}
+\TikzListingHighlightStartEnd[red]{BadAlignPacked}
 \begin{compilerwarning}
 <source>:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is less than the required capability alignment (16) [-Wcheri-capability-misuse]
 struct AtLeast8ByteAlignedBad {
@@ -1686,14 +1686,14 @@ struct AtLeast8ByteAlignedBad {
 %
 The simplest fix for this issue is to either increase alignment to be CHERI-compatibile, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
 %
-\TikzListingHighlightStartEnd[green]{FixAlign1}
-\TikzListingHighlightStartEnd[green]{FixAlign2}
 \begin{clisting}[frame=single]
 £\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
 struct AtLeast8ByteAlignedGood {
   void *data;
 } __attribute__((packed,aligned(£\vcpgfmark{StartFixAlign2}£alignof(void*) > 8 ? alignof(void*) : 8£\vcpgfmark{EndFixAlign2}£)));
 \end{clisting}
+\TikzListingHighlightStartEnd[green]{FixAlign1}
+\TikzListingHighlightStartEnd[green]{FixAlign2}
 %
 In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
 %
