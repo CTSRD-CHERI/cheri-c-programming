@@ -833,13 +833,12 @@ For example, if an integer pointer difference \cvar{D} is taken between
 pointers to two different allocations (\cvar{B} and \cvar{A}), and later
 added to pointer \cvar{A}, the new pointer will have an address
 within \cvar{B}, but permit access only to \cvar{A}.
-% This idiom is not frequently used, but is particularly prevalent within
-% memory allocators, linkers, and language runtimes.
-% \bdnote{I don't think the list of things is representative.  The one place I can recall off hand is a tcsh bug.}
 This idiom is mostly likely to be found with non-trivial uses of \cfunc{realloc} (e.g., cases where multiple pointers into a buffer allocated or reallocated by \cfunc{realloc} need to be updated).
 We note that the subtraction of two pointers from different
 allocations is undefined behaviour in ISO C, and risks mis-optimization from
 breaking compiler alias analysis assumptions.
+Futher, any operation on the pointer passed to realloc is undefined upon
+return.
 
 \subsubsection{Subobject bounds}
 
