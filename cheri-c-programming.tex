@@ -211,9 +211,6 @@ run in a pure-capability programming environment.
 We conclude by recommending further reading, including our pertinent technical
 reports and papers.
 
-%\textbf{NOTE: We have included some notes on potential areas of future change
-%  as we continue to refine CHERI C/\cpp{} and its toolchain.}
-
 \psnote{This could probably do with a bit more clarity about the CHERI C/C++ \emph{languages} vs their \emph{implementations}, eg by mentioning what their current implementations are?}
 
 \section{Background}
@@ -960,12 +957,12 @@ struct message {
 };
 \end{lstlisting}
 
-\textbf{NOTE:
 The use of subobject bounds imposes additional compatibility constraints on
-existing C and \cpp{} code. While we have not encountered many issues related to
-subobject bounds in existing code, it does slightly increase the porting effort.
-Therefore, this feature is currently not enabled by default and requires a compiler
-flag to be enabled; we hope to enable it by default in the future.}
+existing C and \cpp{} code.
+While we have not encountered many issues related to subobject bounds in
+existing code, it does slightly increase the porting effort.
+Therefore, this feature is currently not enabled by default and requires a
+compiler flag to be enabled.
 
 \psnote{that seems excessively bold to me}
 \psnote{what flag?}
