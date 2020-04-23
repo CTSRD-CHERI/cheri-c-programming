@@ -1072,8 +1072,6 @@ addresses are less useful and therefore it can still be enabled by
 passing \commandline{-cheri-uintcap=offset}.
 However, this may result in significantly reduced compatibility with legacy C code.
 }
-As this can result in hard-to-debug failure modes, the compiler will emit a
-warning when using bitwise-AND on capability types such as \cuintptrt. \arnote{FIXME: This is not longer true now that we infer provenance, delete most of this}
 Most bitwise operations on \cuintptrt fall into one of three categories for which we provide
 higher-level abstractions.
 
