@@ -1308,11 +1308,10 @@ The following APIs allow capability properties to be retrieved from pointers:
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_address\_get}.
 
-\item[\ccode{size\_t cheri\_getlen(void *c)}] Return the length of the bounds for the capability \cvar{c}.
+\item[\ccode{size\_t cheri\_getlength(void *c)}] Return the length of the bounds for the capability \cvar{c}.
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_length\_get}.
   (The base plus the length gives the upper bound on \cvar{c}'s address.)
-  \arnote{I would quite like it if we used ``cheri\_getlength'' instead and deprecated the ``len'' version.}
 
 \item[\ccode{size\_t cheri\_getoffset(void *c)}] Return the difference between the address and the lower bound of the capability \cvar{c}.
  %  This macro wraps the compiler built-in
