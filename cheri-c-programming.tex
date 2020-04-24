@@ -1399,6 +1399,12 @@ to pure-capability memory protection are enumerated here:
   capability.
   If the permission is not present, and the tag on the stored capability is
   valid, then a hardware exception will be thrown.
+
+\item[\cconst{CHERI\_PERM\_CHERIABI\_VMMAP}] A CheriABI-specific user
+  permission which the kernel uses to authorize modifications to
+  virtual-memory mappings.
+  If the permission is not present, system calls that alter the contents
+  or present of memory mappings will reject the request.
 \end{description}
 
 \subsection{Bounds alignment due to compression}
