@@ -1176,7 +1176,9 @@ programming styles that fail to unambiguously differentiate these types:
   The C-language default of using an integer type for function arguments when
   there is not an appropriate function prototype will cause pointer values to
   be handled improperly; this is also true on LP64 ABIs (e.g., most 64-bit
-  POSIX systems).
+  POSIX systems)\footnote{The forthcoming ISO C2x standard
+  makes function declerations with an empty parameter list equivalent to
+  a parameter list consisting of a single \ccode{void}.}.
   The compiler will warn when a function without a declared prototype is
   called.\footnote{If the \textit{K\&R} function is defined within the same
   file, the compiler can determine the correct calling convention and will not
