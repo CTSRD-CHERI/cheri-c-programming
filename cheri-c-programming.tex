@@ -482,20 +482,27 @@ present in compilation to conventional architectures:
 
 \psnote{this reads as if temporal safety is always on, for heap and stack and everything, and the post-caveat isn't really enough to counteract that.  I'd suggest putting the first part of the post-caveat text here}
   
-\item[Temporal Safety] prevents a pointer retained after release of its allocation
-  (e.g., a call to \cfunc{free}) from granting access to future memory allocators
-  (e.g., \cfunc{malloc}) via that pointer.
+\item[Temporal Safety] prevents a pointer retained after the release of its
+  underlying allocation from being used to access its memory if that memory
+  has been reused for a fresh allocation (e.g., after a fresh pointer to that
+  memory has been returned by a further call to \cfunc{malloc} after the
+  current pointer passed to \cfunc{free}).
 
-  This is accomplished by preventing new pointers being returned to a
-  previously allocated region of memory while any pointers to the prior
-  allocation persist in application-accessible memory.
-  Memory will be held in \textit{quarantine} until any such pointers have been
-  atomically revoked; then the memory may be reallocated.
-  Architectural capability tags allow pointers implemented using capabilities
-  to be accurately and efficiently located and overwritten in memory.
+  Heap temporal safety is accomplished by preventing new pointers being
+  returned to a previously allocated region of memory while any prior pointers
+  to that memory persist in application-accessible memory.
+  Memory will be held in \textit{quarantine} until any prior pointers have
+  been revoked; then the memory may be reallocated.
+  Architectural capability tags and virtual memory allow intermittent
+  \textit{revocation sweeps} to accurately and efficiently location and
+  overwrite any capabilities implementing stale pointers.
   Spatial safety ensures that pointer cannot be used to reference other
-  memory, including freed memory.
+  memory, including other freed memory.
 \end{description}
+
+\rwnote{I wonder if we should make a note somewhere about the nature of the
+  overwrite -- e.g., that we anticipate that it will simply clear the tag, but
+  that other implementations are possible?}
 
 \textbf{Referential safety} and \textbf{spatial safety} are
 implemented in CheriBSD's pure-capability CheriABI execution
@@ -504,7 +511,8 @@ environment and for bare-metal in CheriFreeRTOS and CHERI-RTEMS.
 guards \emph{heap} allocations has been developed for CheriABI on CheriBSD, but
 is not yet integrated with the main development branch.
 We currently have no plans to develop support for temporal memory safety in
-CheriFreeRTOS and CHERI-RTEMS.
+CheriFreeRTOS and CHERI-RTEMS, both due to the complexity of the temporal
+safety runtime, and also because of its dependence on an MMU for performance.
 
 %% nwf thinks this might belong in here, lest someone think that the restriction
 %% to heap temporal safety is all that we can achieve even in theory.
@@ -1067,6 +1075,30 @@ the tag or other metadata into account.\footnote{
 The CHERI Clang compiler supports an experimental flag \texttt{-cheri-comparison=exact} that causes capability equality comparisons to also include capability metadata and the tag bit.
 \arnote{default behaviour=\texttt{-cheri-comparison=address}}
 }
+
+\subsection{Implications of capability revocation for temporal safety}
+
+Heap temporal safety utilizes revocation sweeps, which, after some quarantine
+period, replace in-register and in-memory capabilities to freed memory with
+non-dereferenceable values.
+For performance reasons, that replacement may be substantially deferred -- or,
+if there is little demand for fresh allocations, never occur.
+Pointer value replacement may also be non-atomic, permitting some instances of
+a pointer to continue to be usable for longer than others.
+This model does permit limited \textit{use-after-free}, but prohibits
+\textit{use-after-allocation}.
+
+While using a pointer after \cfunc{free} is undefined behavior, in practice it
+may arise in a number of situations, including in lockless algorithms, which
+may, for example, compare an allocated pointer to a freed one.
+In current revocation implementations, revocation will replace a valid
+capability with an invalid version of the same, atomically clearing its tag.
+This allows non-dereferencing operations to continue; for example, pointer
+equality checks that compare only the addresses of the two pointers, and not
+their tag values, will continue to work as expected.
+Software making explicit use of tags (e.g., using capability tags to implement
+discriminated unions) must be designed to tolerate capability tag clearing by
+revocation.
 
 \subsection{Bitwise operations on capability types}
 
