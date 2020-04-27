@@ -1418,10 +1418,11 @@ spanning more than one object.
 The alignment required for allocations over $4$ KiB is $2^{E+3}$ bytes, where
 $E$ is determined from the length, $l$, by
 $E = 52 - \textrm{CountLeadingZeros}(l[64:13])$.
-\jrtcnote{Do we want to clarify that this is a 65-bit length? One would naively
-expect it to be 64-bit and thus be off by one in all calculations. We should
-probably also steer people towards CRRL/CRAM regardless (and add cheri\_foo
-APIs for them).}
+%\jrtcnote{Do we want to clarify that this is a 65-bit length? One would naively
+%expect it to be 64-bit and thus be off by one in all calculations. We should
+%probably also steer people towards CRRL/CRAM regardless (and add cheri\_foo
+%APIs for them).}
+%\arnote{65-bit length is probably too much detail. But CRRL/CRAM now documented}
 
 Correctly computing the rounded size and minimum alignment for a given allocation is non-trivial and may require many instructions to compute.
 Moreover, the exact limits for precise representability may vary across different implementations of CHERI.
@@ -1460,7 +1461,7 @@ size_t allocate_next(struct Buffer *buf, size_t len) {
 
 \subsection{Implications for memory-allocator design}
 
-One use case \psnote{of what?}\arnote{capability bounds?} is high-performance applications that contain custom memory
+One use case of these APIs is high-performance applications that contain custom memory
 allocators, and wish to narrow the bounds of returned pointers.
 Two kinds of modifications are typically required:
 
