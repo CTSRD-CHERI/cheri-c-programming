@@ -1093,7 +1093,7 @@ if there is little demand for fresh allocations, never occur.
 Pointer value replacement may also be non-atomic, permitting some instances of
 a pointer to continue to be usable for longer than others.
 This model does permit limited \textit{use-after-free}, but prohibits
-\textit{use-after-allocation}.
+\textit{use-after-reallocation}.
 
 While using a pointer after \cfunc{free} is undefined behavior, in practice it
 may arise in a number of situations, including in lockless algorithms, which
