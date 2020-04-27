@@ -445,7 +445,8 @@ CheriABI operates as a complete additional OS ABI, much in the style of a
 32-bit or 64-bit OS personality, in that it requires its own set of suitably
 compiled system libraries and classes.
 We have also successfully adapted bare-metal runtimes, such as newlib, and
-embedded operating systems, such as RTEMS, to support CHERI memory protection.
+embedded operating systems, such as FreeRTOS and RTEMS, to support CHERI
+memory protection.
 
 Outside of the OS and language runtime themselves, this compilation mode
 requires relatively few source-code-level changes to C/\cpp{}-language software,
@@ -1801,6 +1802,7 @@ enforcement~\cite{cerberus-popl2019}:
 \section{Acknowledgements}
 
 We gratefully acknowledge the helpful feedback from our colleagues, including
+Rod Chapman,
 Brett Gutstein, Alfredo Mazzinghi, Lee Smith, and Paul Gotch.
 This work was supported by the Defense Advanced Research Projects Agency (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
 FA8750-10-C-0237 (``CTSRD'') and HR0011-18-C-0016 (``ECATS'').
