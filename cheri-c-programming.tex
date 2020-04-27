@@ -496,7 +496,7 @@ present in compilation to conventional architectures:
   Architectural capability tags and virtual memory allow intermittent
   \textit{revocation sweeps} to accurately and efficiently location and
   overwrite any capabilities implementing stale pointers.
-  Spatial safety ensures that pointer cannot be used to reference other
+  Spatial safety ensures that pointers cannot be used to reference other
   memory, including other freed memory.
 \end{description}
 
@@ -557,6 +557,13 @@ leads to a hardware exception (trap).
 In the CheriABI process environment, the operating system catches the hardware
 exception and delivers a \SIGPROT signal to the user process;
 further information may be found in \Cref{sec:cheriabi}.
+
+In other environments, such as bare metal or under an embedded OS, behavior is
+specific to those environments, as it will depend both on how architectural
+exceptions are handled, and how those events are delivered to the C-language
+stack.
+Fail stop may be apropriate behavior in some environments, and is in fact the
+default behavior in CheriABI when \SIGPROT is not handled.
 
 \rwnote{We've opted to use the term ``hardware exception'' throughout, and
   mention ``traps'' only here.  This could cause confusion with respect to \cpp{}
