@@ -1439,22 +1439,22 @@ The precisely representable base address can be computed using:
 \end{lstlisting}
 When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:
-\begin{lstlisting}[language={C}]
+\begin{clisting}[frame=none]
 size_t required_alignment(size_t len) {
   return ~__builtin_cheri_representable_alignment_mask(len) + 1;
 }
 struct Buffer {
-  void* data;
+  void *data;
   size_t allocated;
 }
-size_t allocate_next(struct Buffer* buf, size_t len) {
-  void* result = buf->data + buf->allocated;
+size_t allocate_next(struct Buffer *buf, size_t len) {
+  void *result = buf->data + buf->allocated;
   result = __builtin_align_up(result, required_alignment(len));
   buf->allocated += __builtin_round_representable_length(len);
   return cheri_setbounds(result, len);
 }
 
-\end{lstlisting}
+\end{clisting}
 
 
 
@@ -1604,19 +1604,19 @@ As any \ccode{NULL}-derived capability is untagged, any attempt to dereference i
 
 Usually, this warning is caused by programmers incorrectly assuming that \clongt is able to store pointers.
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
-\begin{clisting}[frame=single,numbers=left]
-char* example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
-  return strdup((const char*)ptr_or_int);
+\begin{clisting}[numbers=left]
+char *example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
+  return strdup((const char *)ptr_or_int);
 }
-char* example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodParamTy}£ ptr_or_int) {
-  return strdup((const char*)ptr_or_int);
+char *example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodParamTy}£ ptr_or_int) {
+  return strdup((const char *)ptr_or_int);
 }
 \end{clisting}
 \TikzListingHighlightStartEnd[red]{BadParamTy}
 \TikzListingHighlightStartEnd[green]{GoodParamTy}
 \begin{compilerwarning}
 <source>:2:17: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
-  return strdup((const char*)ptr_or_int);
+  return strdup((const char *)ptr_or_int);
                 ^
 <source>:2:17: note: insert cast to intptr_t to silence this warning
 1 warning generated.
@@ -1626,22 +1626,22 @@ char* example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodP
 In some cases this warning can be a false positive.
 For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
-\begin{clisting}[frame=single,numbers=left]
-void invoke_cb(void(*cb)(void*), void*);
-void callback(void* arg);
+\begin{clisting}[numbers=left]
+void invoke_cb(void (*cb)(void *), void *);
+void callback(void *arg);
 void false_positive_example(int callback_data) {
-  invoke_cb(&callback, (void*)callback_data); // warning
-  invoke_cb(&callback, (void*)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
+  invoke_cb(&callback, (void *)callback_data); // warning
+  invoke_cb(&callback, (void *)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
 }
 \end{clisting}
 \TikzListingHighlightStartEnd[green]{SilenceProv}
 \begin{compilerwarning}
 <source>:4:24: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
-  invoke_cb(&callback, (void*)callback_data); // warning
+  invoke_cb(&callback, (void *)callback_data); // warning
                        ^
 <source>:4:24: note: insert cast to intptr_t to silence this warning
 <source>:15:24: warning: cast to 'void * __capability' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
-  invoke_cb(&callback, (void*)callback_data); // warning
+  invoke_cb(&callback, (void *)callback_data); // warning
                        ^
 2 warnings generated.
 \end{compilerwarning}
@@ -1652,15 +1652,16 @@ However, as noted in \cref{sec:ambiguous-provenance}, there are cases that are a
 
 Consider for example a structure that holds a pointer and a small amount of flags.
 In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:
-\begin{clisting}[frame=single,numbers=left]
+\begin{clisting}[numbers=left]
 typedef struct { uintptr_t data; } pointer_and_flags;
-void set_ptr(pointer_and_flags* p, void* value) {
+void set_ptr(pointer_and_flags *p, void *value) {
     p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
 }
-void set_flags(pointer_and_flags* p, unsigned flags) {
+void set_flags(pointer_and_flags *p, unsigned flags) {
     p->data = p->data | (flags & 7);
 }
 \end{clisting}
+
 \begin{compilerwarning}
 <source>:3:40: warning: binary expression on capability types '__uintcap_t' and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as the source of provenance; currently provenance is inherited from the left-hand side [-Wcheri-provenance]
     p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
@@ -1672,8 +1673,8 @@ void set_flags(pointer_and_flags* p, unsigned flags) {
 Unlike the compiler, the programmer knows that inside \cfunc{set\_ptr} capability metadata should always be taken from the \ccode{value} argument.
 The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:
 \TikzListingHighlightStartEnd[green]{FixAmbig}
-\begin{clisting}[frame=single,numbers=left]
-void set_ptr(pointer_and_flags* p, void* value) {
+\begin{clisting}[numbers=left]
+void set_ptr(pointer_and_flags *p, void *value) {
     p->data = £\vcpgfmark{StartFixAmbig}£(size_t)£\vcpgfmark{EndFixAmbig}£(p->data & (uintptr_t)7) | (uintptr_t)(value);
 }
 \end{clisting}
@@ -1687,7 +1688,7 @@ void set_ptr(pointer_and_flags* p, void* value) {
 This warning is triggered when packed structures contain pointers.
 As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
 This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g.\ for compatibility between 32- and 64-bit architectures). For example:
-\begin{clisting}[frame=single]
+\begin{clisting}[numbers=left]
 struct AtLeast8ByteAlignedBad {
   void *data;
 } __attribute__((packed, £\vcpgfmark{StartBadAlignPacked}£aligned(8)£\vcpgfmark{EndBadAlignPacked}£));
@@ -1703,11 +1704,11 @@ struct AtLeast8ByteAlignedBad {
 %
 The simplest fix for this issue is to either increase alignment to be CHERI-compatibile, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
 %
-\begin{clisting}[frame=single]
+\begin{clisting}[numbers=left]
 £\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
 struct AtLeast8ByteAlignedGood {
   void *data;
-} __attribute__((packed,aligned(£\vcpgfmark{StartFixAlign2}£alignof(void*) > 8 ? alignof(void*) : 8£\vcpgfmark{EndFixAlign2}£)));
+} __attribute__((packed,aligned(£\vcpgfmark{StartFixAlign2}£alignof(void *) > 8 ? alignof(void *) : 8£\vcpgfmark{EndFixAlign2}£)));
 \end{clisting}
 \TikzListingHighlightStartEnd[green]{FixAlign1}
 \TikzListingHighlightStartEnd[green]{FixAlign2}
@@ -1715,9 +1716,9 @@ struct AtLeast8ByteAlignedGood {
 In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
 %
 \TikzListingHighlightStartEnd[green]{SilenceAlign}
-\begin{clisting}[frame=single]
+\begin{clisting}[numbers=left]
 struct UnderalignPointerIgnoreWarning {
-  void* data;
+  void *data;
 } __attribute__((packed, aligned(4), £\vcpgfmark{StartSilenceAlign}£annotate("underaligned_capability")£\vcpgfmark{EndSilenceAlign}£));
 \end{clisting}
 
