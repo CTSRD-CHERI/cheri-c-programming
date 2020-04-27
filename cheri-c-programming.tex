@@ -776,7 +776,7 @@ While this model follows a single consistent rule, it can lead to surprising beh
 In the example above, the value of \ccode{c1} would be a valid capability, but \cvar{c2} and \cvar{c3} would hold an untagged value (albeit with the expected address).
 }
 For \cvar{c1} and \cvar{c2}, the compiler sees that one of the sides is a non-provenance-carrying integer type that was promoted to \cuintptrt and therefore selects the other operand as the provenance source.
-It is not possible\footnote{%
+It is not feasible\footnote{%
 We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
 However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.
 \psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
@@ -784,7 +784,7 @@ However, this would add significant complexity to the compiler and we have not s
 } to infer the correct provenance source for the third case, so the compiler will emit a warning.
 The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
 %
-The recommended approach to resolve such ambiguous cases is to change the type of one operand to to a non-provenance-carrying type such as \sizet.
+The recommended approach to resolve such ambiguous cases is to change the type of one operand to a non-provenance-carrying type such as \sizet.
 Alternatively, if the variable declaration cannot be changed, it is also possible to use a cast in the expression itself.
 \begin{lstlisting}[language=C]
 size_t offset_size_t = 1;
@@ -836,7 +836,7 @@ capability compression.
 In some cases, such as with global variables allocated in multiple object
 files, the actual size of the allocation may not be resolved until run time,
 by the run-time linker.
-These bounds will typically not cause unexpected behavior.
+These bounds will typically not cause observable changes in behavior -- other than hardware exceptions when (accidentally) performing an out-of-bounds access.
 
 \subsubsection{Bounds from the heap allocator}
 
@@ -855,7 +855,7 @@ This idiom is mostly likely to be found with non-trivial uses of \cfunc{realloc}
 We note that the subtraction of two pointers from different
 allocations is undefined behaviour in ISO C, and risks mis-optimization from
 breaking compiler alias analysis assumptions.
-Futher, any operation on the pointer passed to realloc is undefined upon
+Further, any operation on the pointer passed to realloc is undefined upon
 return.
 
 \subsubsection{Subobject bounds}
@@ -1843,8 +1843,8 @@ enforcement~\cite{cerberus-popl2019}:
 \section{Acknowledgements}
 
 We gratefully acknowledge the helpful feedback from our colleagues, including
-Rod Chapman,
-Brett Gutstein, Alfredo Mazzinghi, Lee Smith, and Paul Gotch.
+Ruben Ayrapetyan, Rod Chapman, Paul Gotch,
+Brett Gutstein, Alfredo Mazzinghi, and Lee Smith.
 This work was supported by the Defense Advanced Research Projects Agency (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
 FA8750-10-C-0237 (``CTSRD'') and HR0011-18-C-0016 (``ECATS'').
 The views, opinions, and/or findings contained in this report are those of the authors and should not be interpreted as representing the official views or policies of the Department of Defense or the U.S. Government.
