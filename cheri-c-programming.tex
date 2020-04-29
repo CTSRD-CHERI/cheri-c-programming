@@ -1683,7 +1683,7 @@ void false_positive_example(int callback_data) {
   invoke_cb(&callback, (void *)callback_data); // warning
                        ^
 <source>:4:24: note: insert cast to intptr_t to silence this warning
-<source>:15:24: warning: cast to 'void * __capability' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
+<source>:15:24: warning: cast to 'void *' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
   invoke_cb(&callback, (void *)callback_data); // warning
                        ^
 2 warnings generated.
