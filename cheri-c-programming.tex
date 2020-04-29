@@ -193,17 +193,20 @@ reports and papers.
 %
 This document is a brief introduction to the \purecapCOrCpp{}
 programming languages.
-It describes the most commonly encountered differences between
+It describes the most commonly encountered differences
+%%%between
 %those languages
 on CHERI versus on conventional architectures,
 \psnote{same here: that reads as ``differences between C and C++''.  Suggest:
   these CHERI dialects and conventional-architecture C and C++,
   }
-and where existing software may
-require minor changes.
+and
+indicates
+where existing software may require minor changes.
 It also explains how modest language extensions allow selected software, such
 as memory allocators, to further refine permissions and bounds on pointers.
-We document new compiler warnings and errors that may be experienced compiling
+We document new compiler warnings and errors that may be experienced
+when compiling
 code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
 through typically modest source-code changes.
 This guidance is based on the experience of adapting the FreeBSD
@@ -303,7 +306,7 @@ In order to reduce the memory footprint of capabilities, capability
 compression is used to reduce the overhead of bounds so that the full
 capability, including address, permissions, and bounds fits within 128
 bits (plus the 1-bit out-of-band tag).
-\psnote{before this, the text was talking about 64 and 128-bit caps; now it's silently shifted to only talking about 128-bit caps}
+\psnote{before this, the text was talking about 64 and 128-bit caps; now it's silently shifted to talking only about 128-bit caps}
 Bounds compression takes advantage of redundancy between the address
 and the bounds, which occurs because a pointer typically falls within (or
 close to) its associated allocation, and because allocations are typically
@@ -318,7 +321,7 @@ this metadata:
 
 \begin{description}
 \item[Provenance validity] ensures that capabilities can be used -- for
-  load, store, instruction fetch, etc., -- only if they are derived via valid
+  load, store, instruction fetch, etc. -- only if they are derived via valid
   transformations of valid capabilities.
   This property holds for capabilities in both registers and memory.
 
@@ -328,7 +331,7 @@ this metadata:
 % \pgnnote{Does that added sentence work?}
 % \rwnote{I'm not really sure that that helps.}
 
-%  \psnote{As they are stated above, ``provenance validity'' 
+%  \psnote{As they are stated above, ``provenance validity''
 %    subsumes ``capability integrity'', which is a bit confusing.  One
 %    could just lose the latter, or (I suppose) split ``provenance
 %    validity'' into the case of capability construction in registers,
@@ -343,13 +346,13 @@ this metadata:
 %    text should be elaborated to not forbid use in non-authorising
 %    ways, e.g., ``using'' a possibly-non-valid capability by pulling
 %    out its address}
-  
+
 \item[Monotonicity] requires that any capability derived from another
   cannot exceed the permissions and bounds of the capability from which it was derived.
 \psnote{That's not true as stated, unless one has a very particular notion of ``derive'' in mind.  In Kyndylan's setup, ``capability monotonicity can be formalised by stating
 that for all actions except SealCapAction, UnsealCapAction,
 InvokeCapability, and RaiseException the derived capability
-is less than or equal to the capability it is derived from''.  Probably this document shouldn't go into that much detail, as one has to define ``actions'' and ``less than or equal to'', and this is mostly to do with sealed caps.  But it should include some caveat, e.g. 
+is less than or equal to the capability it is derived from''.  Probably this document shouldn't go into that much detail, as one has to define ``actions'' and ``less than or equal to'', and this is mostly to do with sealed caps.  But it should include some caveat, e.g.,
 ``Monotonicity requires that any capability derived from another
 cannot exceed the permissions and bounds of the capability from which it was derived (leaving sealed capabilities aside, for which the property is more involved).''}
 
@@ -357,14 +360,14 @@ cannot exceed the permissions and bounds of the capability from which it was der
 %   value, not a mutable thing.  A better (but still a bit fuzzy)
 %   statement would be something like ``Monotonicity ensures that a
 %   valid capability can only be constructed from another capability
-%   with the same or greater authority''.  
+%   with the same or greater authority''.
 % Beyond that, one should talk not just about monotonicity of capability
 % construction, but monotonicity of the set of all \emph{reachable
 %   capabilities} -- compare with the cheri\_formal\_paper Section IV. }
 % \rwnote{This comment partially addressed.}
 % \rwnote{This report does not discuss compartmentalisation at all, so is
 % uninterested in the other definition of monotonicity.}
-  
+
 \end{description}
 
 At boot time, the architecture provides initial capabilities to the firmware,
@@ -395,7 +398,7 @@ carefully use only that capability to ensure that it does not access other
 process memory that was not intended by the user process -- even though the
 kernel may in fact have permission to access the entire address space through
 other capabilities it holds.
-This is important as it prevents ``confused deputy'' problems, in which a more
+This is important, as it prevents ``confused deputy'' problems, in which a more
 privileged party uses an excess of privilege when acting on behalf of a less
 privileged party, performing operations that were not intended to be
 authorized.
@@ -481,7 +484,7 @@ present in compilation to conventional architectures:
   other allocations.
 
 \psnote{this reads as if temporal safety is always on, for heap and stack and everything, and the post-caveat isn't really enough to counteract that.  I'd suggest putting the first part of the post-caveat text here}
-  
+
 \item[Temporal Safety] prevents a pointer retained after the release of its
   underlying allocation from being used to access its memory if that memory
   has been reused for a fresh allocation (e.g., after a fresh pointer to that
@@ -509,7 +512,8 @@ present in compilation to conventional architectures:
 \textbf{Referential safety} and \textbf{spatial safety} are
 implemented in CheriBSD's pure-capability CheriABI execution
 environment and for bare-metal in CheriFreeRTOS and CHERI-RTEMS.
-\textbf{Temporal safety} is the object of ongoing experiments.  A prototype which
+\textbf{Temporal safety} is the object of ongoing experiments.  A prototype
+that
 guards \emph{heap} allocations has been developed for CheriABI on CheriBSD, but
 is not yet integrated with the main development branch.
 We currently have no plans to develop support for temporal memory safety in
@@ -564,7 +568,7 @@ In other environments, such as bare metal or under an embedded OS, behavior is
 specific to those environments, as it will depend both on how architectural
 exceptions are handled, and how those events are delivered to the C-language
 stack.
-Fail stop may be apropriate behavior in some environments, and is in fact the
+Fail stop may be appropriate behavior in some environments, and is in fact the
 default behavior in CheriABI when \SIGPROT is not handled.
 
 \rwnote{We've opted to use the term ``hardware exception'' throughout, and
@@ -615,7 +619,7 @@ situations:
   needs to be changed to use a capability-oblivious type such as \cintptrt.
 
 \psnote{I'm not sure this document has explained the ISA behaviour concretely enough for this stuff to really make sense -- the previous description was quite high-level.  Maybe somewhere it should be explicit that registers have tags, that load and store instructions must be via a capability, and that there are both capability and non-capability load and store instructions, with the former preserving tags (both ways) and the latter clearing them?}
-  
+
 \item[Capability-oblivious code] In some portions of the C/\cpp{} runtime and
   com\-piler-generated code, it may not be possible to know whether memory is
   intended to contain a pointer or not -- and yet preserving pointers is
@@ -692,7 +696,7 @@ any other purpose.
   to place a pointer value in an integer type for the purposes of arithmetic
   (which takes place on the capability's address and in units of bytes, as if
   the pointer had been cast to \texttt{char *}).
-  
+
   \note{The observable, integer range of a \cuintptrt is the same as
   that of a \vaddrt, despite the increased \emph{alignment} (and,
   ``incidentally,'' \emph{storage}) requirements, yes?}{nwf}
@@ -728,8 +732,9 @@ This ensures that provenance is maintained.
 
 \subsubsection{Capability alignment in memory}
 
-Because tags apply only to capability-aligned, capability-sized locations in
-memory, unaligned storage of pointers will either generate a run-time
+Because tags apply only to memory locations that are capability-aligned
+and capability-sized,
+unaligned storage of pointers will either generate a run-time
 hardware exception (if a capability-aware load or store is performed), or discard the
 tag (if a capability-oblivious memory copy is performed -- e.g., using
 \cfunc{memcpy} to copy from an aligned location to an unaligned one).
@@ -955,7 +960,7 @@ When targeting \cpp{}11/C20:
 
 \noindent
 is also supported.
-Examples of this pattern include FreeBSD's \ccode{struct dirent} which uses
+Examples of this pattern include FreeBSD's \ccode{struct dirent}, which uses
 \ccode{char d\_name[255]} for an array that is actually of variable size, with
 the containing allocation (e.g., of the heap) being sized to allow additional
 space for array entries regardless of size in the type definition.
@@ -1006,10 +1011,10 @@ More detailed information on how C/\cpp{} code can set bounds can be found in
 
 ISO C permits pointers to go only one byte beyond their original
 allocation, but real code sometimes constructs transient pointer
-values which are further out of bounds.  To support this, capabilities
+values that are further out of bounds.  To support this, capabilities
 can hold a range of out-of-bounds addresses while retaining a valid
 tag, and CHERI-enabled hardware performs bounds checks only on pointer
-use (i.e.\ dereference), not on pointer manipulation.  Dereferencing
+use (i.e., dereference), not on pointer manipulation.  Dereferencing
 an out-of-bounds pointer will raise a hardware exception (see
 \Cref{sec:faults}).  However, an out-of-bounds pointer can be
 dereferenced once it has been brought back in bounds, by adjusting the
@@ -1020,7 +1025,7 @@ The capability compression model exploits redundancy between the pointer's addre
 its bounds to reduce memory overhead.
 However, when a pointer goes out of bounds, this redundancy is reduced, and at
 some point the bounds can no longer be represented within the capability.
-As a result, the architecture prohibits manipulations which would produce such
+As a result, the architecture prohibits manipulations that would produce such
 a capability; in general%
 \psnote{slightly mysterious ``in general'' -- isn't this always true?}%
 \arnote{I think the intent of this wording was to allow for trapping behaviour?}%
@@ -1044,7 +1049,7 @@ a function of the length of the bounded region:
 In general, programmers should not rely on support for arbitrary out-of-bounds
 pointers.  Nevertheless, in practice, we have found that the CHERI capability
 compression scheme supports almost all in-the-field out-of-bounds behavior in
-widely used software.  
+widely used software.
 \psnote{That's a strong claim -- better qualify w.r.t. that that has been ported?}
 \subsection{Pointer comparison}
 
@@ -1104,8 +1109,8 @@ may, for example, compare an allocated pointer to a freed one.
 In current revocation implementations, revocation will replace a valid
 capability with an invalid version of the same, atomically clearing its tag.
 This allows non-dereferencing operations to continue; for example, pointer
-equality checks that compare only the addresses of the two pointers, and not
-their tag values, will continue to work as expected.
+equality checks that compare only the addresses of the two pointers (and not
+their tag values) will continue to work as expected.
 Software making explicit use of tags (e.g., using capability tags to implement
 discriminated unions) must be designed to tolerate capability tag clearing by
 revocation. We anticipate that revocation will remain a tag-clearing operation
@@ -1209,7 +1214,7 @@ be able to optimize it to the equivalent \vaddrt form, provided the result
 eventually is put in a \vaddrt or other non-capability type and nothing
 consumes the capability metadata for all the intermediate calculations (e.g.,
 it's used as an index).}
-\arnote{I think I was just trying to point out that it avoids wasting space for variables stored to memory (e.g. on-stack arguments, etc.)}
+\arnote{I think I was just trying to point out that it avoids wasting space for variables stored to memory (e.g., on-stack arguments, etc.)}
 
 \subsection{Function prototypes and calling conventions}
 
@@ -1226,7 +1231,7 @@ programming styles that fail to unambiguously differentiate these types:
   there is not an appropriate function prototype will cause pointer values to
   be handled improperly; this is also true on LP64 ABIs (e.g., most 64-bit
   POSIX systems)\footnote{The forthcoming ISO C2x standard
-  makes function declerations with an empty parameter list equivalent to
+  makes function declarations with an empty parameter list equivalent to
   a parameter list consisting of a single \ccode{void}.}.
   The compiler will warn when a function without a declared prototype is
   called.\footnote{If the \textit{K\&R} function is defined within the same
@@ -1327,7 +1332,7 @@ values are copied into inappropriately aligned allocations.
 \rwnote{I wonder if we should talk more about permissions?  Perhaps not in
   this document, in which case possibly we should talk about them less?}
 \amnote{If this is intended as a document to guide porting efforts perhaps
-  we should only mention them as background info? If this becomes a summary
+  we should mention them only as background info? If this becomes a summary
   of CHERI programming patterns then we probably want a section that talks
   about permissions as well.}
 
@@ -1448,7 +1453,7 @@ to pure-capability memory protection are enumerated here:
   valid, then a hardware exception will be thrown.
 
 \item[\cconst{CHERI\_PERM\_CHERIABI\_VMMAP}] A CheriABI-specific user
-  permission which the kernel uses to authorize modifications to
+  permission that the kernel uses to authorize modifications to
   virtual-memory mappings.
   If the permission is not present, system calls that alter the contents
   or present of memory mappings will reject the request.
@@ -1483,7 +1488,7 @@ These instructions can be generated using the following compiler builtins:
 
 The precisely representable base address can be computed using:
 \begin{lstlisting}[language={C}]
-	base = base & __builtin_cheri_representable_alignment_mask(len);
+        base = base & __builtin_cheri_representable_alignment_mask(len);
 \end{lstlisting}
 When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:
@@ -1560,7 +1565,7 @@ capability-related faults).
 
 \begin{description}
 \item[Writing and reading pointers via files] In the CheriABI process
-  environment, only untagged data, not tagged pointers, may be written to or
+  environment, only untagged data (not tagged pointers) may be written to or
   read from files.
   If a region of memory containing valid pointers is written to a file, and
   then read back, the pointers in that region will no longer be valid.
@@ -1595,9 +1600,9 @@ capability-related faults).
    environments, etc), it is necessary to ensure that the initial
    capability has the right permissions.
    The \cvar{prot} argument has been extended to accept additional
-   flags indicating the maximum permission the page can have so a
+   flags indicating the maximum permission the page can have so that a
    linker might request a reservation for a library with the permissions
-   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)} which
+   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)}, which
    would return a capability permitting loads, stores, and instruction
    fetch while mapping the pages with no (MMU) permissions.
 \end{description}
@@ -1646,7 +1651,7 @@ describe the cause of the fault; available values include:
 
 The CHERI Clang compiler includes many diagnostic warnings to identify code that is incompatible with \purecapCOrCpp{} or may result in behavioral differences.
 In many cases, a successful compilation that does not emit any CHERI-specific warnings will result in a functional spatially-safe program.
-However, some incompatibilities (e.g.\ memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
+However, some incompatibilities (e.g., memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
 This section describes some of the more-commonly seen compiler warnings and provides suggestions on how to change the source code to be compatible with \purecapCOrCpp{}.
 All of these warnings are enabled when the \commandline{-Wall} compiler flag
 is set.
@@ -1655,7 +1660,7 @@ is set.
 %\begin{compilerwarning}
 %cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
 %\end{compilerwarning}
-This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g. \clongt) to a pointer.
+This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g., \clongt) to a pointer.
 As mentioned in \cref{sec:pointer_provenance_validity}, the result of this cast is a \ccode{NULL}-derived capability with the address set to the integer value.
 As any \ccode{NULL}-derived capability is untagged, any attempt to dereference it will trap.
 
@@ -1720,7 +1725,7 @@ void set_flags(pointer_and_flags *p, unsigned flags) {
 \end{clisting}
 
 \begin{compilerwarning}
-<source>:3:40: warning: binary expression on capability types '__uintcap_t' and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as the source of provenance; currently provenance is inherited from the left-hand side [-Wcheri-provenance]
+<source>:3:40: warning: binary expression on capability types '__uintcap_t' and 'uintptr_t' (aka '__uintcap_t'); it is not clear which of these should be used as the source of provenance; currently provenance is inherited from the left-hand side [-Wcheri-provenance]
     p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
               ~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~
 1 warning generated.
@@ -1744,7 +1749,7 @@ void set_ptr(pointer_and_flags *p, void *value) {
 %\end{compilerwarning}
 This warning is triggered when packed structures contain pointers.
 As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
-This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g.\ for compatibility between 32- and 64-bit architectures). For example:
+This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:
 \begin{clisting}[numbers=left]
 struct AtLeast8ByteAlignedBad {
   void *data;
@@ -1759,7 +1764,7 @@ struct AtLeast8ByteAlignedBad {
 1 warning generated.
 \end{compilerwarning}
 %
-The simplest fix for this issue is to either increase alignment to be CHERI-compatibile, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
+The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
 %
 \begin{clisting}[numbers=left]
 £\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
