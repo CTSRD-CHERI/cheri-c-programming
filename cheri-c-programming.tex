@@ -494,15 +494,17 @@ present in compilation to conventional architectures:
   Memory will be held in \textit{quarantine} until any prior pointers have
   been revoked; then the memory may be reallocated.
   Architectural capability tags and virtual memory allow intermittent
-  \textit{revocation sweeps} to accurately and efficiently location and
+  \textit{revocation sweeps} to accurately and efficiently locate and
   overwrite any capabilities implementing stale pointers.
   Spatial safety ensures that pointers cannot be used to reference other
   memory, including other freed memory.
 \end{description}
 
-\rwnote{I wonder if we should make a note somewhere about the nature of the
-  overwrite -- e.g., that we anticipate that it will simply clear the tag, but
-  that other implementations are possible?}
+%\rwnote{I wonder if we should make a note somewhere about the nature of the
+  %overwrite -- e.g., that we anticipate that it will simply clear the tag, but
+  %that other implementations are possible?}
+% BFG: done below in the Implications of capability revocation for temporal
+% safety subsection.
 
 \textbf{Referential safety} and \textbf{spatial safety} are
 implemented in CheriBSD's pure-capability CheriABI execution
@@ -853,7 +855,7 @@ added to pointer \cvar{A}, the new pointer will have an address
 within \cvar{B}, but permit access only to \cvar{A}.
 This idiom is mostly likely to be found with non-trivial uses of \cfunc{realloc} (e.g., cases where multiple pointers into a buffer allocated or reallocated by \cfunc{realloc} need to be updated).
 We note that the subtraction of two pointers from different
-allocations is undefined behaviour in ISO C, and risks mis-optimization from
+allocations is undefined behavior in ISO C, and risks mis-optimization from
 breaking compiler alias analysis assumptions.
 Further, any operation on the pointer passed to realloc is undefined upon
 return.
@@ -1090,10 +1092,11 @@ period, replace in-register and in-memory capabilities to freed memory with
 non-dereferenceable values.
 For performance reasons, that replacement may be substantially deferred -- or,
 if there is little demand for fresh allocations, never occur.
-Pointer value replacement may also be non-atomic, permitting some instances of
-a pointer to continue to be usable for longer than others.
-This model does permit limited \textit{use-after-free}, but prohibits
-\textit{use-after-reallocation}.
+Pointer value replacement may also permit some instances of
+a pointer to continue to be usable for longer than others, but the referenced
+memory will not be reallocated or otherwise reused until all instances have been rendered unusable.
+This model does permit non-exploitable \textit{use-after-free} of heap memory,
+but prohibits exploitable memory aliasing by disallowing \textit{use-after-reallocation}.
 
 While using a pointer after \cfunc{free} is undefined behavior, in practice it
 may arise in a number of situations, including in lockless algorithms, which
@@ -1105,7 +1108,11 @@ equality checks that compare only the addresses of the two pointers, and not
 their tag values, will continue to work as expected.
 Software making explicit use of tags (e.g., using capability tags to implement
 discriminated unions) must be designed to tolerate capability tag clearing by
-revocation.
+revocation. We anticipate that revocation will remain a tag-clearing operation
+by default. Alternative implementations of revocation that replace a capability
+to be revoked with, for example, a tagged but permissionless version of the same
+capability or a word of all zeros are possible. Such alternative implementations
+would have different implications for the C/\cpp{} programming model.
 
 \subsection{Bitwise operations on capability types}
 
@@ -1533,6 +1540,13 @@ Two kinds of modifications are typically required:
   allocation's metadata via another global capability, rather than the one
   that has been passed to \cfunc{free}.
 \end{description}
+
+Note that it is also possible to use the above APIs to validate inputs to
+\cfunc{free}, which is useful when the consumer of \cfunc{free} is, for example,
+an untrusted compartment or a component of a web browser that might be
+influenced by an attacker. In such cases, \cfunc{free} should validate that the
+passed-in capability is tagged, is in-bounds, and points to a legitimate
+allocation.
 
 \section{The CheriABI POSIX process environment}
 \label{sec:cheriabi}
