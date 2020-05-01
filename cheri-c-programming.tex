@@ -197,6 +197,24 @@ reports and papers.
 \psnote{This could probably do with a bit more clarity about the CHERI C/C++ \emph{languages} vs their \emph{implementations}, eg by mentioning what their current implementations are?}
 \rwnote{Yes, although need to figure out where that belongs.}
 
+\subsection{Definitions}
+
+\begin{description}
+\item[Pure-capability C/\cpp{}] are C/\cpp{}-language dialects tuned to
+  requirements arising from implementing all pointers using CHERI capabilites.
+  For example, they diverge from C/\cpp{} implementations on conventional
+  architectures in terms of whether pointers passed through integer types can
+  be dereferenced.
+
+\item[Pure-capability code] is machine code that utilizes CHERI capabilities
+  to implement all pointers, explicit (i.e., those explicitly declared by the
+  programme) and implied (i.e., those implicitly used to implement the execution
+  environment, such as for return addresses and pointers).
+  Pure-capability code is not binary compatible with capability-unaware code
+  utilizing integer pointers, not least due to the different size of the
+  pointer data type.
+\end{description}
+
 \section{Background}
 
 CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
