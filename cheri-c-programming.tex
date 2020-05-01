@@ -1153,13 +1153,13 @@ significant and the 9th least significant bit may be toggled without causing
 the tag to be cleared in pointers that point to the beginning of an allocation.
 \psnote{This is confusing -- not clearing the tag isn't the same as not destroying part of the pointer data...}
 If the pointer is strongly aligned, further bits may be toggled without clearing the tag.}
+Unused high pointer bits cannot be used for additional metadata since toggling them causes a large change to the address field, and capabilities that are significantly far out-of-bounds cannot be represented (see \cref{sec:oob}).
+
 The compiler-provided header \ccode{<cheri.h>} provides explicit macros for this
 use of bitwise arithmetic on pointers.
 The use of these macros is currently optional,\footnote{%
-Until recently, not using these macros result in subtle bugs at run time since capability comparisons included the tag bit.}
+Until recently, not using these macros could result in subtle bugs at run time since capability equality comparisons included the tag bit in addition to the address.}
 but we believe that they can improve readability compared to hand-written bitwise operations.
-
-\psnote{should the non-usability of high bits, mentioned at the end of \S3, also be mentioned here?}\arnote{Yes}
 
 \begin{description}
 \item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
