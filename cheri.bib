@@ -69,6 +69,20 @@
     title = {Exploring {{C Semantics}} and {{Pointer Provenance}}},
 }
 
+@inproceedings{cheri-formal-SP2020,
+    abstract = {The root causes of many security vulnerabilities include a pernicious combination of two problems, often regarded as inescapable aspects of computing. First, the protection mechanisms provided by the mainstream processor architecture and C/C++ language abstractions, dating back to the 1970s and before, provide only coarse-grain virtual-memory-based protection. Second, mainstream system engineering relies almost exclusively on test-and-debug methods, with (at best) prose specifications. These methods have historically sufficed commercially for much of the computer industry, but they fail to prevent large numbers of exploitable bugs, and the security problems that this causes are becoming ever more acute. In this paper we show how more rigorous engineering methods can be applied to the development of a new security-enhanced processor architecture, with its accompanying hardware implementation and software stack. We use formal models of the complete instruction-set architecture (ISA) at the heart of the design and engineering process, both in lightweight ways that support and improve normal engineering practice -- as documentation, in emulators used as a test oracle for hardware and for running software, and for test generation -- and for formal verification. We formalise key intended security properties of the design, and establish that these hold with mechanised proof. This is for the same complete ISA models (complete enough to boot operating systems), without idealisation. We do this for CHERI, an architecture with \emph{hardware capabilities} that supports fine-grained memory protection and scalable secure compartmentalisation, while offering a smooth adoption path for existing software. CHERI is a maturing research architecture, developed since 2010, with work now underway on an Arm industrial prototype to explore its possible adoption in mass-market commercial processors. The rigorous engineering work described here has been an integral part of its development to date, enabling more rapid and confident experimentation, and boosting confidence in the design.},
+    author = {Nienhuis, Kyndylan and Joannou, Alexandre and Bauereiss, Thomas and Fox, Anthony and Roe, Michael and Campbell, Brian and Naylor, Matthew and Norton, Robert M. and Moore, Simon W. and Neumann, Peter G. and Stark, Ian and Watson, Robert N. M. and Sewell, Peter},
+    location = {Los Alamitos, CA, USA},
+    publisher = {IEEE Computer Society},
+    url = {https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/202005oakland-cheri-formal.pdf},
+    booktitle = {2020 {{IEEE}} Symposium on Security and Privacy ({{SP}})},
+    date = {2020-05},
+    doi = {10.1109/SP40000.2020.00055},
+    file = {https://www.cl.cam.ac.uk/users/pes20/cheri-formal.pdf},
+    pages = {1007--1024},
+    title = {Rigorous engineering for hardware security: Formal modelling and proof in the {CHERI} design and implementation process},
+}
+
 @report{UCAM-CL-TR-941,
     author = {Watson, Robert N. M. and Moore, Simon W. and Sewell, Peter and Neumann, Peter G.},
     institution = {University of Cambridge, Computer Laboratory},
@@ -123,34 +137,3 @@
     title = {{{CHERIvoke}}: {{Characterising Pointer Revocation}} Using {{CHERI Capabilities}} for {{Temporal Memory Safety}}},
 }
 
-@inproceedings{cheri-formal-SP2020,
-  author = {Kyndylan Nienhuis and Alexandre Joannou and Thomas Bauereiss and Anthony Fox and Michael Roe and Brian Campbell and Matthew Naylor and Robert M. Norton and Moore, Simon W.  and Neumann, Peter G.  and Ian Stark and Watson, Robert N. M.  and Peter Sewell},
-  title = {Rigorous engineering for hardware security: Formal modelling and proof in the {CHERI} design and implementation process},
-  optcrossref = {},
-  optkey = {},
-  conf = {Security and Privacy 2020},
-  booktitle = {Proceedings of the 41st IEEE Symposium on Security and Privacy (SP)},
-  year = {2020},
-  opteditor = {},
-  optvolume = {},
-  optnumber = {},
-  optseries = {},
-  optpages = {},
-  month = may,
-  optaddress = {},
-  optorganization = {},
-  optpublisher = {},
-  optnote = {},
-  optannote = {},
-  abstract = {The root causes of many security vulnerabilities include a pernicious combination of two problems, often regarded as inescapable aspects of computing.  First, the protection mechanisms provided by the mainstream processor architecture and C/C++ language abstractions, dating back to the 1970s and before, provide only coarse-grain virtual-memory-based protection.  Second, mainstream system engineering relies almost exclusively on test-and-debug methods, with (at best) prose specifications.  These methods have historically sufficed commercially for much of the computer industry, but they fail to prevent large numbers of exploitable bugs, and the security problems that this causes are becoming ever more acute.
-
-In this paper we show how more rigorous engineering methods can be applied to the development of a new security-enhanced processor architecture, with its accompanying hardware implementation and software stack.  We use formal models of the complete instruction-set architecture (ISA) at the heart of the design and engineering process, both in lightweight ways that support and improve normal engineering practice -- as documentation, in emulators used as a test oracle for hardware and for running software, and for test generation -- and for formal verification.  We formalise key intended security properties of the design, and establish that these hold with mechanised proof.  This is for the same complete ISA models (complete enough to boot operating systems), without idealisation.
-
-We do this for CHERI, an architecture with \emph{hardware capabilities} that supports fine-grained memory protection and scalable secure compartmentalisation, while offering a smooth adoption path for existing software.  CHERI is a maturing research architecture, developed since 2010, with work now underway on an Arm industrial prototype to explore its possible adoption in mass-market commercial processors.  The rigorous engineering work described here has been an integral part of its development to date, enabling more rapid and confident experimentation, and boosting confidence in the design.
-},
-  pdf = {https://www.cl.cam.ac.uk/users/pes20/cheri-formal.pdf},
-  project = {https://www.cl.cam.ac.uk/research/security/ctsrd/cheri/},
-  topic = {cheri},
-  cheriformal = {true},
-  recent = {true}
-}
