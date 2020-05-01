@@ -669,9 +669,19 @@ any other purpose.
   (which takes place on the capability's address and in units of bytes, as if
   the pointer had been cast to \texttt{char *}).
 
-  \note{The observable, integer range of a \cuintptrt is the same as
-  that of a \vaddrt, despite the increased \emph{alignment} (and,
-  ``incidentally,'' \emph{storage}) requirements, yes?}{nwf}
+  The observable, integer range of a \cuintptrt is the same as
+  that of a \vaddrt (or \ptrdifft for \cintptrt), despite the increased \emph{alignment} and \emph{storage} requirements.
+
+\item[\ccode{intmax\_t}, \ccode{uintmax\_t}] According to the C standard\arnote{7.20.1.5 Greatest-width integer types}, these integer types should be \enquote{capable of representing any value of any (unsigned) integer type}.
+  In \purecapCOrCpp{}, they are not provenance-carrying and can represent the integer range of \cuintptrt/\cintptrt, but not the capability metadata or tag bit.
+  As the observable value of \cuintptrt/\cintptrt is the pointer address range, we believe this choice to be compatible with the C standard.
+
+  Additionally, due to ABI constraints, it would be extremely difficult to change the width of these types from 64 to 129 bits.
+  This is also true for other architectures such as x86: despite Clang and GCC supporting an \ccode{\_\_int128} type, \ccode{intmax\_t} remains 64 bits wide.
+
+  We generally do not recommend use of these types in \purecapCOrCpp{}.
+  However, the types may be useful in \cfunc{printf} calls (using the \ccode{\%j} format string width modifier) as the \pathname{inttypes.h} \ccode{PRI*} macros can be rather verbose.
+
 
 \item[\maxalignt] This type is defined in C as \enquote{an object type whose alignment is the greatest fundamental alignment} \arnote{C2x \S{}7.19.2} and this includes capability types for \purecapCOrCpp{}.
 % and in \cpp{} as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
@@ -1153,9 +1163,9 @@ but we believe that they can improve readability compared to hand-written bitwis
 
 \begin{description}
 \item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
-  This builtin returns \cvar{ptr} with the low bits set to \cconst{bits}. In order to retain
-  compatibility with a non-CHERI architecture, \cconst{bits} should be less than the
-  known alignment of \cvar{ptr}.
+  This builtin performs a bitwise-OR of \cvar{ptr} with \cconst{bits}.\footnote{%
+In hindsight, this macro is incorrectly named, and should be renamed or modified to take an additional \cvar{mask} parameter to \emph{set} the low pointer bits to \cvar{bits}.}
+  In order to retain compatibility with a non-CHERI architecture, \cconst{bits} should be less than the known alignment of \cvar{ptr}.
 
 \item[\ccode{vaddr\_t cheri\_get\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
   This builtin returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
@@ -1834,7 +1844,7 @@ enforcement~\cite{cerberus-popl2019}:
 \section{Acknowledgements}
 
 We gratefully acknowledge the helpful feedback from our colleagues, including
-Ruben Ayrapetyan, Rod Chapman, Paul Gotch,
+Ruben Ayrapetyan, Rod Chapman, Paul Gotch, Al Grant,
 Brett Gutstein, Alfredo Mazzinghi, and Lee Smith.
 This work was supported by the Defense Advanced Research Projects Agency (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
 FA8750-10-C-0237 (``CTSRD'') and HR0011-18-C-0016 (``ECATS'').
