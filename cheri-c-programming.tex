@@ -158,16 +158,12 @@
 %
 % Keep Abstract in sync with the Introduction.
 %
-\begin{abstract}
-We briefly introduce the pure-capability C and \cpp{} programming languages.
-We describe the most commonly encountered differences between
-%
-those languages on CHERI versus on conventional architectures,
-\psnote{that reads as ``differences between C and C++''.  Suggest:
-  these CHERI dialects and conventional-architecture C and C++,
-  }
-and where existing software may
-require minor changes.
+\newcommand{\abstracttext}{
+This document is a brief introduction to the \purecapCOrCpp{}
+programming languages.
+We also describe the most commonly encountered differences between these
+dialects and C/C++ on conventional architectures, and where existing software
+may require minor changes.
 We explain how modest language extensions allow selected software, such
 as memory allocators, to further refine permissions and bounds on pointers.
 We document new compiler warnings and errors that may be experienced compiling
@@ -178,6 +174,11 @@ userspace, and applications such as PostgreSQL and WebKit, to run in a
 pure-capability programming environment.
 We conclude by recommending further reading, including our pertinent technical
 reports and papers.
+}
+
+
+\begin{abstract}
+\abstracttext
 \end{abstract}
 
 \newpage
@@ -191,31 +192,10 @@ reports and papers.
 %
 % Keep Abstract in sync with the Introduction.
 %
-This document is a brief introduction to the \purecapCOrCpp{}
-programming languages.
-It describes the most commonly encountered differences
-%%%between
-%those languages
-on CHERI versus on conventional architectures,
-\psnote{same here: that reads as ``differences between C and C++''.  Suggest:
-  these CHERI dialects and conventional-architecture C and C++,
-  }
-and
-indicates
-where existing software may require minor changes.
-It also explains how modest language extensions allow selected software, such
-as memory allocators, to further refine permissions and bounds on pointers.
-We document new compiler warnings and errors that may be experienced
-when compiling
-code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
-through typically modest source-code changes.
-This guidance is based on the experience of adapting the FreeBSD
-operating-system userspace, and applications such as PostgreSQL and WebKit, to
-run in a pure-capability programming environment.
-We conclude by recommending further reading, including our pertinent technical
-reports and papers.
+\abstracttext{}
 
 \psnote{This could probably do with a bit more clarity about the CHERI C/C++ \emph{languages} vs their \emph{implementations}, eg by mentioning what their current implementations are?}
+\rwnote{Yes, although need to figure out where that belongs.}
 
 \section{Background}
 
@@ -282,9 +262,7 @@ Each element of the capability contributes to the protection model:
   load, store, and instruction fetch.
 
 \item[Permissions] The permissions mask controls how the capability can be
-  used -- for example, by providing
-  \psnote{[enabling/providing]}
-  loading and storing of data and/or
+  used -- for example, by authorizingloading and storing of data and/or
   capabilities.
 
 \item[Object type] If not equal to $-1$, the capability is ``sealed'' and
@@ -304,9 +282,8 @@ corrupted capabilities from later being dereferenced.
 
 In order to reduce the memory footprint of capabilities, capability
 compression is used to reduce the overhead of bounds so that the full
-capability, including address, permissions, and bounds fits within 128
-bits (plus the 1-bit out-of-band tag).
-\psnote{before this, the text was talking about 64 and 128-bit caps; now it's silently shifted to talking only about 128-bit caps}
+capability, including address, permissions, and bounds fits within 64 or
+128 bits (plus the 1-bit out-of-band tag).
 Bounds compression takes advantage of redundancy between the address
 and the bounds, which occurs because a pointer typically falls within (or
 close to) its associated allocation, and because allocations are typically
@@ -348,13 +325,9 @@ this metadata:
 %    out its address}
 
 \item[Monotonicity] requires that any capability derived from another
-  cannot exceed the permissions and bounds of the capability from which it was derived.
-\psnote{That's not true as stated, unless one has a very particular notion of ``derive'' in mind.  In Kyndylan's setup, ``capability monotonicity can be formalised by stating
-that for all actions except SealCapAction, UnsealCapAction,
-InvokeCapability, and RaiseException the derived capability
-is less than or equal to the capability it is derived from''.  Probably this document shouldn't go into that much detail, as one has to define ``actions'' and ``less than or equal to'', and this is mostly to do with sealed caps.  But it should include some caveat, e.g.,
-``Monotonicity requires that any capability derived from another
-cannot exceed the permissions and bounds of the capability from which it was derived (leaving sealed capabilities aside, for which the property is more involved).''}
+  cannot exceed the permissions and bounds of the capability from which it was
+  derived (leaving aside sealed capabilities, used for domain transition,
+  whose mechanism is not detailed in this report).
 
 % \psnote{That's a bit odd, as a capability is really just a pure
 %   value, not a mutable thing.  A better (but still a bit fuzzy)
@@ -409,8 +382,8 @@ system-call argument.
 These architectural properties provide the foundation on which a
 capability-based OS, compiler, and runtime can implement C/\cpp{}-language memory
 safety.
-
-\psnote{Add:   They have been made precise and have been proved, with machine-checked proof, to hold for the CHERI-MIPS architecture~\cite{cheri-formal-SP2020}.}
+They have been made precise and have been proved, with machine-checked proof,
+to hold for the CHERI-MIPS architecture~\cite{cheri-formal-SP2020}.
 
 
 \subsection{CHERI Pure-capability C/\cppInHeader{}}
@@ -472,7 +445,6 @@ present in compilation to conventional architectures:
 \item[Spatial Safety] prevents manipulation of a pointer outside of the bounds
   of its associated allocation from granting access to another allocation.
 
-  \psnote{minor wording change for clarity}
   This is accomplished by adapting various memory allocators, including the run-time
   linker for global variables, the stack allocator, and the heap allocator,
   to set the bounds on the capability implementing a pointer before returning
