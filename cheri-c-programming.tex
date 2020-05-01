@@ -472,9 +472,14 @@ present in compilation to conventional architectures:
   other allocations.
   Monotonicity ensures that callers cannot later broaden the bounds to cover
   other allocations.
+\end{description}
 
-\psnote{this reads as if temporal safety is always on, for heap and stack and everything, and the post-caveat isn't really enough to counteract that.  I'd suggest putting the first part of the post-caveat text here}
+\noindent
+Referential safety and spatial safety are implemented in CheriBSD's
+pure-capability CheriABI execution environment and for bare-metal in
+CheriFreeRTOS and CHERI-RTEMS.
 
+\begin{description}
 \item[Temporal Safety] prevents a pointer retained after the release of its
   underlying allocation from being used to access its memory if that memory
   has been reused for a fresh allocation (e.g., after a fresh pointer to that
@@ -499,13 +504,11 @@ present in compilation to conventional architectures:
 % BFG: done below in the Implications of capability revocation for temporal
 % safety subsection.
 
-\textbf{Referential safety} and \textbf{spatial safety} are
-implemented in CheriBSD's pure-capability CheriABI execution
-environment and for bare-metal in CheriFreeRTOS and CHERI-RTEMS.
-\textbf{Temporal safety} is the object of ongoing experiments.  A prototype
-that
-guards \emph{heap} allocations has been developed for CheriABI on CheriBSD, but
-is not yet integrated with the main development branch.
+\noindent
+Temporal safety is the object of ongoing experiments.
+A prototype that guards \emph{heap} allocations has been developed for
+CheriABI on CheriBSD, but is not yet integrated with the main development
+branch.
 We currently have no plans to develop support for temporal memory safety in
 CheriFreeRTOS and CHERI-RTEMS, both due to the complexity of the temporal
 safety runtime, and also because of its dependence on an MMU for performance.
