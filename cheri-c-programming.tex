@@ -520,7 +520,6 @@ safety runtime, and also because of its dependence on an MMU for performance.
 % and temporal safety of its C runtime environment.
 
 \section{Impact on the C/\cppInHeader{} programming model}
-\psnote{kinds/types, to avoid needless mental disambiguation}
 Several kinds of changes may be required by programmers; the extent to which
 these changes impact a particular library or application will depend
 significantly on its idiomatic use of C.
@@ -758,7 +757,7 @@ for optimization purposes? E.g., strcmp loading a word at a time?}
 \subsubsection{Single-origin provenance}
 \label{sec:ambiguous-provenance}
 
-In the\psnote{singular ``the'', or ``CHERI architectures''?}  CHERI architecture, capabilities are derived from a single other
+In the CHERI protection model, capabilities are derived from a single other
 capability.
 However, in C code, expressions may construct a new \cintptrt value from more
 than one provenance-carrying parent \cintptrt{} -- for example, by casting both a
