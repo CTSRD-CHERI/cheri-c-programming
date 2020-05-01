@@ -262,7 +262,7 @@ Each element of the capability contributes to the protection model:
   load, store, and instruction fetch.
 
 \item[Permissions] The permissions mask controls how the capability can be
-  used -- for example, by authorizingloading and storing of data and/or
+  used -- for example, by authorizing loading and storing of data and/or
   capabilities.
 
 \item[Object type] If not equal to $-1$, the capability is ``sealed'' and
@@ -699,7 +699,7 @@ This ensures that provenance is maintained.
 \pgnnote{The above section begs questions relating to what is the
   responsibility of programmers and what can be aided or managed by
   compilers.  Ideally, the latter would be preferable to requiring
-  programmers to understand things are are possibly beyond there so-called
+  programmers to understand things are possibly beyond their so-called
   experience.}
 
 \subsubsection{Capability alignment in memory}
@@ -824,7 +824,7 @@ In typical C use, this is not a problem, as programmers expect to access
 addresses only within an allocation.
 
 However, in some uses of C, there may be an expectation that memory access can
-occur outside of the allocation bounds of the pointer via which memory access
+occur outside the allocation bounds of the pointer via which memory access
 takes place.
 For example, if an integer pointer difference \cvar{D} is taken between
 pointers to two different allocations (\cvar{B} and \cvar{A}), and later
@@ -834,7 +834,7 @@ This idiom is mostly likely to be found with non-trivial uses of \cfunc{realloc}
 We note that the subtraction of two pointers from different
 allocations is undefined behavior in ISO C, and risks mis-optimization from
 breaking compiler alias analysis assumptions.
-Further, any operation on the pointer passed to realloc is undefined upon
+Further, any operation on the pointer passed to \cfunc{realloc} is undefined upon
 return.
 
 \subsubsection{Subobject bounds}
@@ -1238,7 +1238,7 @@ be aligned at twice the integer architectural pointer width, and that
 capability compression constrains the addresses that can be used for bounds
 on larger objects.
 \amnote{Is is worth mentioning compiler flags to warn on excessive padding?
-  In particular it seems that it is often the case that the ordering of
+  In particular, it seems that it is often the case that the ordering of
   struct elements that was devised for 32bit and 64bit architectures does
   not help much to avoid extra padding with capabilities. It more or less
   depends on how much the pointers are scattered in the struct definition.}
