@@ -1180,6 +1180,8 @@ use of bitwise arithmetic on pointers.
 The use of these macros is currently optional,\footnote{%
 Until recently, not using these macros could result in subtle bugs at run time since capability equality comparisons included the tag bit in addition to the address.}
 but we believe that they can improve readability compared to hand-written bitwise operations.
+Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying \cuintptrt) and to check bits (which should return an integer value).
+In complex nested expressions, these macros can avoid ambiguous provenance sources (see \cref{sec:ambiguous-provenance}) since it shows the compiler which intermediate results can carry provenance.
 
 \begin{description}
 \item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
@@ -1191,12 +1193,12 @@ In hindsight, this macro is incorrectly named, and should be renamed or modified
   This builtin returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
   It should be used instead of the raw bitwise operation since it can never return
   an unexpectedly tagged value.
-  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr) - 1}.
+  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
 
 \item[\ccode{uintptr\_t cheri\_clear\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
   This builtin clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
   It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
-  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr) - 1}.
+  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
 \end{description}
 
 \note{Is that \texttt{cheri.h} the same as the \texttt{cheri/cheri.h} mentioned earlier or a new file?}{nwf}
@@ -1505,7 +1507,7 @@ struct Buffer {
 size_t allocate_next(struct Buffer *buf, size_t len) {
   void *result = buf->data + buf->allocated;
   result = __builtin_align_up(result, required_alignment(len));
-  buf->allocated += __builtin_round_representable_length(len);
+  buf->allocated += __builtin_cheri_round_representable_length(len);
   return cheri_setbounds(result, len);
 }
 
@@ -1864,7 +1866,7 @@ enforcement~\cite{cerberus-popl2019}:
 \section{Acknowledgements}
 
 We gratefully acknowledge the helpful feedback from our colleagues, including
-Ruben Ayrapetyan, Rod Chapman, Paul Gotch, Al Grant,
+Ruben Ayrapetyan, Jacob Bramley, Rod Chapman, Paul Gotch, Al Grant,
 Brett Gutstein, Alfredo Mazzinghi, and Lee Smith.
 This work was supported by the Defense Advanced Research Projects Agency (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
 FA8750-10-C-0237 (``CTSRD'') and HR0011-18-C-0016 (``ECATS'').
