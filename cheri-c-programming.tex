@@ -283,7 +283,7 @@ Each element of the capability contributes to the protection model:
   used -- for example, by authorizing the loading and storing of data and/or
   capabilities.
 
-\item[Object type] If not equal to $-1$, the capability is ``sealed'' and
+\item[Object type] If this value is not equal to the unsealed object type ($-1$ on CHERI-MIPS), the capability is ``sealed'' and
   cannot be modified or dereferenced, but can be used to implement opaque
   pointer types.
   This feature is not described further in this document, as it is primarily
@@ -1038,13 +1038,15 @@ manner as a loss of pointer provenance validity (see
 \Cref{sec:pointer_provenance_validity}).
 \psnote{Comment on whether that should immediately trap instead?}
 The range of out-of-bounds addresses permitted for a capability is
-a function of the length of the bounded region:
+a function of the length of the bounded region and the number of bits used for bounds in the capability representation.
+For CHERI-MIPS (with 27 bits of the capability used for bounds) we get the following guarantees:
+\arnote{Should probably say that only the lower bounds is affected by the mantissa bits.}
 
 \begin{itemize}
 \item A pointer is able to travel at least \sfrac{1}{4} the size of the object, or
-  $2$ KiB, whichever is greater, above its upper bound.
+  $2$ KiB ($2^{floor(bounds\_bits/2)-2}$), whichever is greater, above its upper bound.
 
-\item It is able to travel at least \sfrac{1}{8} the size of the object, or $1$ KiB,
+\item It is able to travel at least \sfrac{1}{8} the size of the object, or $1$ KiB ($2^{floor(bounds\_bits/2)-3}$),
   whichever is greater, below its lower bound.
 \end{itemize}
 
@@ -1466,14 +1468,14 @@ to pure-capability memory protection are enumerated here:
 \subsection{Bounds alignment due to compression}
 \label{sec:bounds_alignment}
 
-When the length of an object exceeds $4$ KiB, additional alignment requirements
+When the length of an object exceeds $2^{floor(bounds\_bits/2)-1}$ (i.e., $4$ KiB for CHERI-MIPS), additional alignment requirements
 apply to the lower and upper bounds.
 This may require a memory allocator to increase the alignment of an
 allocation, or increase padding on an allocation, to prevent bounds from
 spanning more than one object.
-The alignment required for allocations over $4$ KiB is $2^{E+3}$ bytes, where
+The alignment required for allocations exceeding the minimum representable range ($4$ KiB for CHERI-MIPS) is $2^{E+3}$ bytes, where
 $E$ is determined from the length, $l$, by
-$E = 52 - \textrm{CountLeadingZeros}(l[64:13])$.
+$E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is this too much detail?}
 %\jrtcnote{Do we want to clarify that this is a 65-bit length? One would naively
 %expect it to be 64-bit and thus be off by one in all calculations. We should
 %probably also steer people towards CRRL/CRAM regardless (and add cheri\_foo
@@ -1866,7 +1868,7 @@ enforcement~\cite{cerberus-popl2019}:
 \section{Acknowledgements}
 
 We gratefully acknowledge the helpful feedback from our colleagues, including
-Ruben Ayrapetyan, Jacob Bramley, Rod Chapman, Paul Gotch, Al Grant,
+Ruben Ayrapetyan, Silviu Baranga, Jacob Bramley, Rod Chapman, Paul Gotch, Al Grant,
 Brett Gutstein, Alfredo Mazzinghi, and Lee Smith.
 This work was supported by the Defense Advanced Research Projects Agency (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
 FA8750-10-C-0237 (``CTSRD'') and HR0011-18-C-0016 (``ECATS'').
