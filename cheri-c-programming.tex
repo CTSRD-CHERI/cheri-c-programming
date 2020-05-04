@@ -205,13 +205,17 @@ code-generation/linkage models:
   For example, they diverge from C/\cpp{} implementations on conventional
   architectures in terms of whether pointers passed through integer types can
   be dereferenced.
+  The vast majority of C/\cpp{} source code we have encounterd requires little
+  or no modification to be compiled as pure-capability C/\cpp{}.
 
-\item[Pure-capability code] is machine code that utilizes CHERI capabilities
-  to implement all pointers, explicit (i.e., those explicitly declared by the
-  programme) and implied (i.e., those implicitly used to implement the execution
-  environment, such as for return addresses and pointers).
+\item[Pure-capability machine code] utilizes CHERI
+  capabilities
+  to implement all pointers, explicit (i.e., those declared by the programmer)
+  and implied (i.e., those used to implement the execution
+  environment, such as those used in control flow or to implement the stack
+  and global variables).
   Pure-capability code is not binary compatible with capability-unaware code
-  utilizing integer pointers, not least due to the different size of the
+  using integer pointers, not least due to the different size of the
   pointer data type.
 \end{description}
 
