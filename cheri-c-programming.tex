@@ -131,6 +131,7 @@
 \hyphenation{Cheri-Free-RTOS}
 \hyphenation{Cheri-ABI}
 \hyphenation{Web-Kit}
+\hyphenation{Postgre-SQL}
 
 \title{CHERI Pure-Capability C/\cppInHeader{} Programming Guide \\ (DRAFT)}
 \author{Robert N. M. Watson$^*$, Alexander Richardson$^*$,
@@ -1065,8 +1066,8 @@ For CHERI-MIPS (with 27 bits of the capability used for bounds) we get the follo
 In general, programmers should not rely on support for arbitrary out-of-bounds
 pointers.  Nevertheless, in practice, we have found that the CHERI capability
 compression scheme supports almost all in-the-field out-of-bounds behavior in
-widely used software.
-\psnote{That's a strong claim -- better qualify w.r.t. that that has been ported?}
+widely used software such as FreeBSD, PostgreSQL, and WebKit.
+
 \subsection{Pointer comparison}
 
 In \purecapCOrCpp{}, pointer comparison considers only the
