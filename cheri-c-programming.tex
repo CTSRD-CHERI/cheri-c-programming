@@ -231,6 +231,7 @@ overview of the CHERI architecture, ISA modeling, hardware implementations,
 and software stack~\cite{UCAM-CL-TR-941}.
 
 \subsection{CHERI capabilities}
+\label{sec:cheri-capabilities}
 
 \begin{figure}[b]
 \hspace{2.5cm}
@@ -1017,7 +1018,14 @@ More detailed information on how C/\cpp{} code can set bounds can be found in
 
 ISO C permits pointers to go only one byte beyond their original
 allocation, but real code sometimes constructs transient pointer
-values that are further out of bounds.  To support this, capabilities
+values that are further out of bounds.
+For example, \ccode{for} loops iterating over an array may increment a pointer
+into the array by the array entry size before performing an overflow check
+that terminates the loop.
+This temporarily constructs an out-of-bounds pointer without an out-of-bounds
+dereference taking place.
+
+To support this behavior, capabilities
 can hold a range of out-of-bounds addresses while retaining a valid
 tag, and CHERI-enabled hardware performs bounds checks only on pointer
 use (i.e., dereference), not on pointer manipulation.  Dereferencing
@@ -1028,16 +1036,16 @@ address or suppling a suitable offset in the dereference.
 
 There is, however, a limit to the range of out-of-bounds addresses a capability can hold.
 The capability compression model exploits redundancy between the pointer's address and
-its bounds to reduce memory overhead.
+its bounds to reduce memory overhead (see
+Section~\ref{sec:cheri-capabilities}).
 However, when a pointer goes out of bounds, this redundancy is reduced, and at
 some point the bounds can no longer be represented within the capability.
-As a result, the architecture prohibits manipulations that would produce such
-a capability; in general%
-\psnote{slightly mysterious ``in general'' -- isn't this always true?}%
-\arnote{I think the intent of this wording was to allow for trapping behaviour?}%
-, attempts to do so will clear the tag, resulting in
-an invalid capability.
-Attempting to dereference such a capability will fail in the same
+The architecture prohibits manipulations that would produce such
+a capability.
+Depending on the architecture and context, this may lead to the
+tag being cleared, resulting in an invalid capability, or in an immediate
+hardware exception being thrown.
+Attempting to dereference the invalid capability will fail in the same
 manner as a loss of pointer provenance validity (see
 \Cref{sec:pointer_provenance_validity}).
 \psnote{Comment on whether that should immediately trap instead?}
