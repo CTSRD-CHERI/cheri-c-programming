@@ -925,7 +925,7 @@ fn(void)
     struct str *strp = &str_instance;
 
     /* Character pointer gets bounds of the subobject, not str_instance. */
-    char *c = str_instance.le_array;
+    char *c = str_instance.str_array;
 
     /* Struct pointer gets bounds of str_instance, not the subobject. */
     struct list_entry *lep = &str_instance.str_le;
