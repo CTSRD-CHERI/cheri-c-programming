@@ -1699,7 +1699,6 @@ char *example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodP
 <source>:2:17: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   return strdup((const char *)ptr_or_int);
                 ^
-<source>:2:17: note: insert cast to intptr_t to silence this warning
 1 warning generated.
 \end{compilerwarning}
 
@@ -1720,7 +1719,6 @@ void false_positive_example(int callback_data) {
 <source>:4:24: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   invoke_cb(&callback, (void *)callback_data); // warning
                        ^
-<source>:4:24: note: insert cast to intptr_t to silence this warning
 <source>:15:24: warning: cast to 'void *' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
   invoke_cb(&callback, (void *)callback_data); // warning
                        ^
