@@ -544,11 +544,15 @@ Other applications may compile with few or no changes -- especially if they
 are already portable across 32-bit and 64-bit platforms and are written in a contemporary C or \cpp{} dialect.
 In the following sections, we consider various kinds of programmer-visible
 changes required in the pure-capability programming environment.
+In many cases, compiler warnings and errors can be used to identify potential
+issues compiling code as \purecapCOrCpp{} (see
+\Cref{sec:cheri-compiler-warnings-and-errors}).
+\rwnote{Alex: Can we use the word ``most'' instead of ``many''?}
 
 \subsection{Capability-related faults}
 \label{sec:faults}
 
-When capability properties are violated, such as an attempt to dereference an
+When capability properties are violated, such as by an attempt to dereference an
 invalid capability, access memory outside the bounds of a capability, or perform
 accesses not authorized by the permissions on a capability, this typically
 leads to a hardware exception (trap).
@@ -1681,6 +1685,7 @@ describe the cause of the fault; available values include:
 %\textbf{XXX: Turn these into more real numbers.}
 
 \section{CHERI compiler warnings and errors}
+\label{sec:cheri-compiler-warnings-and-errors}
 
 \arnote{Feed the source code into \url{https://cheri-compiler-explorer.cl.cam.ac.uk/} to get the latest warning text}
 
