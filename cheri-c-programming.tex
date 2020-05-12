@@ -199,8 +199,8 @@ reports and papers.
 
 \subsection{Definitions}
 
-CHERI Clang/LLVM and LLD implement the following new language and
-code-generation/linkage models:
+CHERI Clang/LLVM and LLD implement the following new language,
+code-generation, and linkage models:
 
 \begin{description}
 \item[Pure-capability C/\cpp{}] are C/\cpp{}-language dialects tuned to
@@ -208,6 +208,9 @@ code-generation/linkage models:
   For example, they diverge from C/\cpp{} implementations on conventional
   architectures in terms of whether pointers passed through integer types can
   be dereferenced.
+  New APIs provide access to capability features of pointers, including
+  getting and setting their bounds, required by selected software such as
+  memory allocators.
   The vast majority of C/\cpp{} source code we have encounterd requires little
   or no modification to be compiled as pure-capability C/\cpp{}.
 
