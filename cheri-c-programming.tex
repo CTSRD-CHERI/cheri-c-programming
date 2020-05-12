@@ -463,7 +463,7 @@ which are explored in the remainder of this document.
 present in compilation to conventional architectures:
 
 \begin{description}
-\item[Referential Safety] protects pointers (references) themselves.
+\item[Referential safety] protects pointers (references) themselves.
   This includes \textit{integrity} (corrupted pointers cannot be dereferenced)
   and \textit{provenance validity} (only pointers derived from valid pointers
   via valid manipulations can be dereferenced).
@@ -471,7 +471,7 @@ present in compilation to conventional architectures:
   When pointers are implemented using architectural capabilities, CHERI's
   capability tags and provenance validity naturally provide this protection.
 
-\item[Spatial Safety] prevents manipulation of a pointer outside of the bounds
+\item[Spatial safety] prevents manipulation of a pointer outside of the bounds
   of its associated allocation from granting access to another allocation.
 
   This is accomplished by adapting various memory allocators, including the run-time
@@ -491,7 +491,7 @@ pure-capability CheriABI execution environment and for bare-metal in
 CheriFreeRTOS and CHERI-RTEMS.
 
 \begin{description}
-\item[Temporal Safety] prevents a pointer retained after the release of its
+\item[Temporal safety] prevents a pointer retained after the release of its
   underlying allocation from being used to access its memory if that memory
   has been reused for a fresh allocation (e.g., after a fresh pointer to that
   memory has been returned by a further call to \cfunc{malloc} after the
