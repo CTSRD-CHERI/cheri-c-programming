@@ -1708,7 +1708,7 @@ Usually, this warning is caused by programmers incorrectly assuming that \clongt
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
 \begin{clisting}[numbers=left]
 char *example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
-  return strdup((const char *)ptr_or_int);
+    return strdup((const char *)ptr_or_int);
 }
 char *example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodParamTy}£ ptr_or_int) {
   return strdup((const char *)ptr_or_int);
@@ -1731,8 +1731,8 @@ If this value is in fact an integer constant, the warning can be silenced by cas
 void invoke_cb(void (*cb)(void *), void *);
 void callback(void *arg);
 void false_positive_example(int callback_data) {
-  invoke_cb(&callback, (void *)callback_data); // warning
-  invoke_cb(&callback, (void *)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
+    invoke_cb(&callback, (void *)callback_data); // warning
+    invoke_cb(&callback, (void *)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
 }
 \end{clisting}
 \TikzListingHighlightStartEnd[green]{SilenceProv}
@@ -1790,7 +1790,7 @@ As mentioned in \cref{sec:restricted-capability-locations}, pointers must always
 This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:
 \begin{clisting}[numbers=left]
 struct AtLeast8ByteAlignedBad {
-  void *data;
+    void *data;
 } __attribute__((packed, £\vcpgfmark{StartBadAlignPacked}£aligned(8)£\vcpgfmark{EndBadAlignPacked}£));
 \end{clisting}
 \TikzListingHighlightStartEnd[red]{BadAlignPacked}
@@ -1807,7 +1807,7 @@ The simplest fix for this issue is to either increase alignment to be CHERI-comp
 \begin{clisting}[numbers=left]
 £\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
 struct AtLeast8ByteAlignedGood {
-  void *data;
+    void *data;
 } __attribute__((packed,aligned(£\vcpgfmark{StartFixAlign2}£alignof(void *) > 8 ? alignof(void *) : 8£\vcpgfmark{EndFixAlign2}£)));
 \end{clisting}
 \TikzListingHighlightStartEnd[green]{FixAlign1}
@@ -1818,7 +1818,7 @@ In the rare case that creating a potentially underaligned pointer is actually in
 \TikzListingHighlightStartEnd[green]{SilenceAlign}
 \begin{clisting}[numbers=left]
 struct UnderalignPointerIgnoreWarning {
-  void *data;
+    void *data;
 } __attribute__((packed, aligned(4), £\vcpgfmark{StartSilenceAlign}£annotate("underaligned_capability")£\vcpgfmark{EndSilenceAlign}£));
 \end{clisting}
 
