@@ -809,12 +809,12 @@ void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
 We also provide a new attribute \ccode{cheri\_no\_provenance} that can be used to annotate variables or fields of type \cintptrt/\cuintptrt where the underlying type cannot be changed:
 \begin{lstlisting}[language=C]
 struct S {
-  uintptr_t maybe_tagged;
-  uintptr_t never_tagged __attribute__((cheri_no_provenance));
+    uintptr_t maybe_tagged;
+    uintptr_t never_tagged __attribute__((cheri_no_provenance));
 }
 void test(struct S s, uintptr_t ptr) {
-  void* x1 = (void*)(s.maybe_tagged + ptr); // ambiguous, currently uses LHS
-  void* x2 = (void*)(s.never_tagged + ptr); // not ambiguous, uses RHS
+    void* x1 = (void*)(s.maybe_tagged + ptr); // ambiguous, currently uses LHS
+    void* x2 = (void*)(s.never_tagged + ptr); // not ambiguous, uses RHS
 }
 \end{lstlisting}
 \psnote{This doesn't really explain what \ccode{cheri\_no\_provenance} does?  And what it means when applied to other types?}\arnote{compiler error if it's not \cuintptrt. Will try to improve example later.}
@@ -1529,17 +1529,17 @@ When allocating from a contiguous buffer, the base needs to be aligned upwards i
 This can be done with the following code:
 \begin{clisting}[frame=none]
 size_t required_alignment(size_t len) {
-  return ~__builtin_cheri_representable_alignment_mask(len) + 1;
+    return ~__builtin_cheri_representable_alignment_mask(len) + 1;
 }
 struct Buffer {
-  void *data;
-  size_t allocated;
+    void *data;
+    size_t allocated;
 }
 size_t allocate_next(struct Buffer *buf, size_t len) {
-  void *result = buf->data + buf->allocated;
-  result = __builtin_align_up(result, required_alignment(len));
-  buf->allocated += __builtin_cheri_round_representable_length(len);
-  return cheri_setbounds(result, len);
+    void *result = buf->data + buf->allocated;
+    result = __builtin_align_up(result, required_alignment(len));
+    buf->allocated += __builtin_cheri_round_representable_length(len);
+    return cheri_setbounds(result, len);
 }
 
 \end{clisting}
