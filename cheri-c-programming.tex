@@ -813,8 +813,8 @@ struct S {
     uintptr_t never_tagged __attribute__((cheri_no_provenance));
 }
 void test(struct S s, uintptr_t ptr) {
-    void* x1 = (void*)(s.maybe_tagged + ptr); // ambiguous, currently uses LHS
-    void* x2 = (void*)(s.never_tagged + ptr); // not ambiguous, uses RHS
+    void *x1 = (void *)(s.maybe_tagged + ptr); // ambiguous, currently uses LHS
+    void *x2 = (void *)(s.never_tagged + ptr); // not ambiguous, uses RHS
 }
 \end{lstlisting}
 \psnote{This doesn't really explain what \ccode{cheri\_no\_provenance} does?  And what it means when applied to other types?}\arnote{compiler error if it's not \cuintptrt. Will try to improve example later.}
