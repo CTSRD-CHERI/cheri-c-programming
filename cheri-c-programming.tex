@@ -1806,7 +1806,8 @@ struct AtLeast8ByteAlignedBad {
 <source>:1:8: note: If you are certain that this is correct you can silence the warning by adding __attribute__((annotate("underaligned_capability")))
 1 warning generated.
 \end{compilerwarning}
-%
+
+\noindent
 The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
 %
 \begin{clisting}[numbers=left]
