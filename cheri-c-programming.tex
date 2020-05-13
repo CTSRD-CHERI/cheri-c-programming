@@ -1534,12 +1534,13 @@ size_t required_alignment(size_t len) {
 struct Buffer {
     void *data;
     size_t allocated;
-}
-size_t allocate_next(struct Buffer *buf, size_t len) {
-    void *result = buf->data + buf->allocated;
+};
+void *allocate_next(struct Buffer *buf, size_t len) {
+    char *result = buf->data + buf->allocated;
     result = __builtin_align_up(result, required_alignment(len));
-    buf->allocated += __builtin_cheri_round_representable_length(len);
-    return cheri_setbounds(result, len);
+    size_t rounded_len = cheri_round_representable_length(len);
+    buf->allocated = (result + rounded_len) - (char *)buf->data;
+    return cheri_setbounds(result, rounded_len);
 }
 
 \end{clisting}
