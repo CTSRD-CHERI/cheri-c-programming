@@ -30,8 +30,8 @@
 \usepackage[T1]{fontenc}
 \usepackage{listings}
 \usepackage{mdframed} % To avoid linebreaks in lstlistings
-\lstnewenvironment{clisting}[1][]{\endgraf\noindent\minipage{\linewidth}\lstset{language={C},breaklines=true,frame=L,#1}}{\endminipage}
-\lstnewenvironment{compilerwarning}[1][]{\endgraf\noindent\minipage{\linewidth}\lstset{language={},breaklines=true,basicstyle=\scriptsize\ttfamily\bfseries,frame=L,#1}}{\endminipage}
+\lstnewenvironment{clisting}[1][]{\endgraf\noindent\minipage{\linewidth}\lstset{language={C},breaklines=true,frame=L,#1}}{\endminipage\endgraf}
+\lstnewenvironment{compilerwarning}[1][]{\endgraf\noindent\minipage{\linewidth}\lstset{language={},breaklines=true,basicstyle=\scriptsize\ttfamily\bfseries,frame=L,#1}}{\endminipage\endgraf}
 
 \usepackage{subcaption}
 \usepackage{times}
