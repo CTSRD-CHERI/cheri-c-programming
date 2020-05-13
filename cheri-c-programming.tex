@@ -408,6 +408,10 @@ For example, this prevents the kernel from overflowing the bounds on a
 userspace buffer when a pointer to the buffer is passed as a
 system-call argument.
 
+The hardware furthermore guarantees that capability tags and capability data is written atomically.
+For example, if one thread stores a valid capability and another writes arbitrary data to the same location, it is impossible to observe the arbitrary data with the validity bit set.
+% \arnote{I guess the other way around is fine? I.e. capability data but \textbf{without} the tag?}
+
 These architectural properties provide the foundation on which a
 capability-based OS, compiler, and runtime can implement C/\cpp{}-language memory
 safety.
