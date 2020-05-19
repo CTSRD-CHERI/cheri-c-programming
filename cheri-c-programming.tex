@@ -123,7 +123,7 @@
 \newcommand*{\cpp}[1][]{C\textsmaller[2]{\nolinebreak[4]\hspace{-.05em}\raisebox{.45ex}{\textbf{++}}}}
 % And another macro sensible PDF metadata:
 \newcommand*{\cppInHeader}[1][]{\texorpdfstring{\cpp{}}{C++}}
-\newcommand*{\purecapCOrCpp}[1]{CHERI pure-capability C/\cpp{}}
+\newcommand*{\purecapCOrCpp}[1]{CHERI C/\cpp{}}
 
 \hyphenation{Free-BSD}
 \hyphenation{Free-RTOS}
@@ -133,7 +133,7 @@
 \hyphenation{Web-Kit}
 \hyphenation{Postgre-SQL}
 
-\title{CHERI Pure-Capability C/\cppInHeader{} Programming Guide \\ (DRAFT)}
+\title{CHERI C/\cppInHeader{} Programming Guide \\ (DRAFT)}
 \author{Robert N. M. Watson$^*$, Alexander Richardson$^*$,
   Brooks Davis$^\dagger$, \\
   John Baldwin$^\ddagger$, David Chisnall$^\S$, Jessica Clarke$^*$,
@@ -174,7 +174,7 @@ code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
 through typically modest source-code changes.
 This guidance is based on our experience adapting the FreeBSD operating-system
 userspace, and applications such as PostgreSQL and WebKit, to run in a
-pure-capability programming environment.
+CHERI C/\cpp{} capability-based programming environment.
 We conclude by recommending further reading, including our pertinent technical
 reports and papers.
 }
@@ -203,26 +203,32 @@ CHERI Clang/LLVM and LLD implement the following new language,
 code-generation, and linkage models:
 
 \begin{description}
-\item[Pure-capability C/\cpp{}] are C/\cpp{}-language dialects tuned to
+\item[CHERI C/\cpp{}] are C/\cpp{}-language dialects tuned to
   requirements arising from implementing all pointers using CHERI capabilites.
+  This includes all explicit pointers (i.e., those declared by the programmer)
+  and all implied pointers (e.g., those used to access local and global
+  variables).
   For example, they diverge from C/\cpp{} implementations on conventional
   architectures in terms of whether pointers passed through integer types can
   be dereferenced.
   New APIs provide access to capability features of pointers, including
   getting and setting their bounds, required by selected software such as
   memory allocators.
-  The vast majority of C/\cpp{} source code we have encounterd requires little
-  or no modification to be compiled as pure-capability C/\cpp{}.
+  The vast majority of C/\cpp{} source code we have encountered requires
+  little or no modification to be compiled as CHERI C/\cpp{}.
 
 \item[Pure-capability machine code] is compiled code (or hand-written
-  assembly) that utilizes CHERI capabilities
-  to implement all pointers, explicit (i.e., those declared by the programmer)
-  and implied (i.e., those used to implement the execution
-  environment, such as those used in control flow or to implement the stack
-  and global variables).
+  assembly) that utilizes CHERI capabilities for all memory accesses --
+  including loads, stores, and instruction fetches -- rather than integer
+  addresses.
+  In addition to capabilities used to implement memory accesses explicit in
+  the source program, capabilites are also used to implement implied pointers
+  in the C execution environment, such for control flow.
   Pure-capability code is not binary compatible with capability-unaware code
   using integer pointers, not least due to the different size of the
   pointer data type.
+  Pure-capability code will most frequently be used to implement CHERI C,
+  although could also be used for other purposes (e.g., non-CHERI C).
 \end{description}
 
 \section{Background}
@@ -419,12 +425,11 @@ They have been made precise and have been proved, with machine-checked proof,
 to hold for the CHERI-MIPS architecture~\cite{cheri-formal-SP2020}.
 
 
-\subsection{CHERI pure-capability C/\cppInHeader{}}
+\subsection{CHERI C/\cppInHeader{}}
 
 The architectural-capability type can be used in a variety of ways by
 software.
-One particularly useful use case is in implementing \textit{pure-capability
-C/\cpp{}}.
+One particularly useful use case is in implementing \textit{CHERI C/\cpp{}}.
 In this model, all C/\cpp{} language-visible pointer types, as well as any
 implied pointers implementing vtables, return addresses, global variables,
 arrays of variadic-function arguments, and so on, are implemented using
@@ -434,7 +439,7 @@ architectural provenance validity, bounds checking, and permission checking,
 protecting pointers from corruption and providing strong spatial memory
 safety.
 
-Pure-capability code executes within a capability-aware run-time environment
+CHERI C code executes within a capability-aware run-time environment
 -- whether ``bare metal'' with a suitable runtime, or in a richer, OS-based
 process environment such as CheriABI (see \Cref{sec:cheriabi}),
 which ensures that:
@@ -547,7 +552,7 @@ features, may also require moderate adaptation.
 Other applications may compile with few or no changes -- especially if they
 are already portable across 32-bit and 64-bit platforms and are written in a contemporary C or \cpp{} dialect.
 In the following sections, we consider various kinds of programmer-visible
-changes required in the pure-capability programming environment.
+changes required in the CHERI C/\cpp{} programming environment.
 In many cases, compiler warnings and errors can be used to identify potential
 issues compiling code as \purecapCOrCpp{} (see
 \Cref{sec:cheri-compiler-warnings-and-errors}).
@@ -1471,7 +1476,7 @@ bounds of \cvar{c} due to capability compression,
 \label{sec:available_permissions}
 
 A number of capability permissions are available for use; only those relating
-to pure-capability memory protection are enumerated here:
+to CHERI memory protection are enumerated here:
 
 \begin{description}
 \item[\cconst{CHERI\_PERM\_EXECUTE}] Authorize instruction fetch via this
@@ -1907,7 +1912,7 @@ enforcement~\cite{cerberus-popl2019}:
 
 We gratefully acknowledge the helpful feedback from our colleagues, including
 Ruben Ayrapetyan, Silviu Baranga, Jacob Bramley, Rod Chapman, Paul Gotch, Al Grant,
-Brett Gutstein, Alfredo Mazzinghi, and Lee Smith.
+Brett Gutstein, Alfredo Mazzinghi, Alan Mycroft, and Lee Smith.
 This work was supported by the Defense Advanced Research Projects Agency (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
 FA8750-10-C-0237 (``CTSRD'') and HR0011-18-C-0016 (``ECATS'').
 The views, opinions, and/or findings contained in this report are those of the authors and should not be interpreted as representing the official views or policies of the Department of Defense or the U.S. Government.
