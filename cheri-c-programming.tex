@@ -223,12 +223,12 @@ code-generation, and linkage models:
   addresses.
   In addition to capabilities used to implement memory accesses explicit in
   the source program, capabilites are also used to implement implied pointers
-  in the C execution environment, such for control flow.
-  Pure-capability code is not binary compatible with capability-unaware code
-  using integer pointers, not least due to the different size of the
-  pointer data type.
-  Pure-capability code will most frequently be used to implement CHERI C,
-  although could also be used for other purposes (e.g., non-CHERI C).
+  in the C execution environment, such as for control flow.
+  Pure-capability machine code is not binary compatible with
+  capability-unaware code using integer pointers, not least due to the
+  different size of the pointer data type.
+  %Pure-capability code will most frequently be used to implement CHERI C,
+  %although could also be used for other purposes (e.g., non-CHERI C).
 \end{description}
 
 \section{Background}
