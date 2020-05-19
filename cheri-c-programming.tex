@@ -167,11 +167,11 @@ grounding in the CHERI architecture.
 We describe the most commonly encountered differences between these
 dialects and C/C++ on conventional architectures, and where existing software
 may require minor changes.
-We explain how modest language extensions allow selected software, such
-as memory allocators, to further refine permissions and bounds on pointers.
 We document new compiler warnings and errors that may be experienced compiling
 code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
 through typically modest source-code changes.
+We explain how modest language extensions allow selected software, such
+as memory allocators, to further refine permissions and bounds on pointers.
 This guidance is based on our experience adapting the FreeBSD operating-system
 userspace, and applications such as PostgreSQL and WebKit, to run in a
 CHERI C/\cpp{} capability-based programming environment.
@@ -1352,6 +1352,225 @@ However, they can also arise in the form of stripped tag bits, leading to
 invalid capabilities that cannot be dereferenced, if, for example, pointer
 values are copied into inappropriately aligned allocations.
 
+\section{The CheriABI POSIX process environment}
+\label{sec:cheriabi}
+
+The CheriABI process environment implements a standard POSIX/UNIX API, but in
+some areas there are changes to API semantics (e.g., in the handling of tagged
+pointer values and I/O) or new functionality (such as relates to handling
+capability-related faults).
+
+\rwnote{Should there be information on a further CHERI C header here, which
+  contains OS API bits and bobs?  Or is everything either in cheri.h/cheric.h
+  or existing OS headers?}
+
+\subsection{POSIX API changes}
+
+\begin{description}
+\item[Writing and reading pointers via files] In the CheriABI process
+  environment, only untagged data (not tagged pointers) may be written to or
+  read from files.
+  If a region of memory containing valid pointers is written to a file, and
+  then read back, the pointers in that region will no longer be valid.
+  If a file is memory mapped, then pages mapped copy-on-write
+  (\cconst{MAP\_PRIVATE}) are able to hold tagged pointers, since they are
+  swap-backed rather than file-backed, but pages mapped directly from the
+  buffer cache (\cconst{MAP\_SHARED}) are not.
+
+\item[Passing pointers via IPC] In the CheriABI process environment, only
+  untagged data, not tagged pointers, may be passed via various forms of
+  message-passing Inter-Process Communication (IPC).
+  Some existing software takes advantage of a shared address-space layout
+  (via \cfunc{fork}) to pass pointers to elements of shared data structures
+  (e.g., entries in dispatch tables).
+  This code must be converted to use indexes into tables or other lookup
+  mechanisms rather than passing pointers via IPC.
+
+\item[\cfunc{mmap} bounds] In CheriABI, the \cfunc{mmap} system
+   call returns a bounded capability to the allocated address space.
+   To ensure the capability does not overlap other allocations,
+   lengths that would otherwise be unrepresentable are rounded up
+   and padded with a new type of guard pages.
+   These guard pages fault on access and may not be mapped over.
+   They are unmapped when the rest of the mapping is unmapped.
+
+\item[\cfunc{mmap} permissions] The permissions of the capability
+   returned by \cfunc{mmap} are determined by a combination of the
+   requested page protections and the capability passed as an address hint
+   (or fixed address with \cconst{MAP\_FIXED}).
+   When using the pattern of requesting a mapping with \cconst{PROT\_NONE}
+   and then filling in sections (as is done in run-time linkers, VM host
+   environments, etc), it is necessary to ensure that the initial
+   capability has the right permissions.
+   The \cvar{prot} argument has been extended to accept additional
+   flags indicating the maximum permission the page can have so that a
+   linker might request a reservation for a library with the permissions
+   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)}, which
+   would return a capability permitting loads, stores, and instruction
+   fetch while mapping the pages with no (MMU) permissions.
+\end{description}
+
+\subsection{Handling capability-related signals}
+
+When a capability hardware exception fires, the operating system will map it
+into the UNIX \SIGPROT signal.
+By default, this signal terminates the process, but the signal can be caught
+by registering a \SIGPROT handler.
+When the signal handler fires, \ccode{siginfo.si\_code} will be set to
+describe the cause of the fault; available values include:
+
+\begin{description}
+\item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
+  invalid capability was attempted.
+\item[\cconst{PROT\_CHERI\_BOUNDS}] Capability bounds fault -- an out-of-bounds
+  access was attempted.
+\item[\cconst{PROT\_CHERI\_PERM}] Capability permission fault -- the attempted
+  access exceeded the permissions granted by a capability.
+\item[\cconst{PROT\_CHERI\_SEALED}] Capability sealed fault -- dereferencing a
+  sealed capability was attempted.
+\end{description}
+
+\section{CHERI compiler warnings and errors}
+\label{sec:cheri-compiler-warnings-and-errors}
+
+\arnote{Feed the source code into \url{https://cheri-compiler-explorer.cl.cam.ac.uk/} to get the latest warning text}
+
+The CHERI Clang compiler includes many diagnostic warnings to identify code that is incompatible with \purecapCOrCpp{} or may result in behavioral differences.
+In many cases, a successful compilation that does not emit any CHERI-specific warnings will result in a functional spatially-safe program.
+However, some incompatibilities (e.g., memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
+This section describes some of the more-commonly seen compiler warnings and provides suggestions on how to change the source code to be compatible with \purecapCOrCpp{}.
+All of these warnings are enabled when the \commandline{-Wall} compiler flag
+is set.
+
+\subsection{Loss of provenance}
+%\begin{compilerwarning}
+%cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
+%\end{compilerwarning}
+This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g., \clongt) to a pointer.
+As mentioned in \cref{sec:pointer_provenance_validity}, the result of this cast is a \ccode{NULL}-derived capability with the address set to the integer value.
+As any \ccode{NULL}-derived capability is untagged, any attempt to dereference it will trap.
+
+Usually, this warning is caused by programmers incorrectly assuming that \clongt is able to store pointers.
+The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
+\begin{clisting}[numbers=left]
+char *example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
+    return strdup((const char *)ptr_or_int);
+}
+char *example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodParamTy}£ ptr_or_int) {
+  return strdup((const char *)ptr_or_int);
+}
+\end{clisting}
+\TikzListingHighlightStartEnd[red]{BadParamTy}
+\TikzListingHighlightStartEnd[green]{GoodParamTy}
+\begin{compilerwarning}
+<source>:2:17: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+  return strdup((const char *)ptr_or_int);
+                ^
+1 warning generated.
+\end{compilerwarning}
+
+\noindent
+In some cases this warning can be a false positive.
+For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
+If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
+\begin{clisting}[numbers=left]
+void invoke_cb(void (*cb)(void *), void *);
+void callback(void *arg);
+void false_positive_example(int callback_data) {
+    invoke_cb(&callback, (void *)callback_data); // warning
+    invoke_cb(&callback, (void *)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
+}
+\end{clisting}
+\TikzListingHighlightStartEnd[green]{SilenceProv}
+\begin{compilerwarning}
+<source>:4:24: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+  invoke_cb(&callback, (void *)callback_data); // warning
+                       ^
+<source>:15:24: warning: cast to 'void *' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
+  invoke_cb(&callback, (void *)callback_data); // warning
+                       ^
+2 warnings generated.
+\end{compilerwarning}
+
+\subsection{Ambiguous provenance}
+For arithmetic and bitwise binary operations between \cuintptrt/\cintptrt, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
+However, as noted in \cref{sec:ambiguous-provenance}, there are cases that are ambiguous as far as the compiler is concerned.
+
+Consider for example a structure that holds a pointer and a small amount of flags.
+In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:
+\begin{clisting}[numbers=left]
+typedef struct { uintptr_t data; } pointer_and_flags;
+void set_ptr(pointer_and_flags *p, void *value) {
+    p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
+}
+void set_flags(pointer_and_flags *p, unsigned flags) {
+    p->data = p->data | (flags & 7);
+}
+\end{clisting}
+
+\begin{compilerwarning}
+<source>:3:40: warning: binary expression on capability types '__uintcap_t' and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as the source of provenance; currently provenance is inherited from the left-hand side [-Wcheri-provenance]
+    p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
+              ~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~
+1 warning generated.
+\end{compilerwarning}
+
+\noindent
+Unlike the compiler, the programmer knows that inside \cfunc{set\_ptr} capability metadata should always be taken from the \ccode{value} argument.
+The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:
+\TikzListingHighlightStartEnd[green]{FixAmbig}
+\begin{clisting}[numbers=left]
+void set_ptr(pointer_and_flags *p, void *value) {
+    p->data = £\vcpgfmark{StartFixAmbig}£(size_t)£\vcpgfmark{EndFixAmbig}£(p->data & (uintptr_t)7) | (uintptr_t)(value);
+}
+\end{clisting}
+
+\arnote{TODO: this section should have more examples.}
+
+\subsection{Underaligned capabilities}
+%\begin{compilerwarning}
+%alignment (<N>) of '<type>' is less than the required capability alignment
+%\end{compilerwarning}
+This warning is triggered when packed structures contain pointers.
+As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
+This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:
+\begin{clisting}[numbers=left]
+struct AtLeast8ByteAlignedBad {
+    void *data;
+} __attribute__((packed, £\vcpgfmark{StartBadAlignPacked}£aligned(8)£\vcpgfmark{EndBadAlignPacked}£));
+\end{clisting}
+\TikzListingHighlightStartEnd[red]{BadAlignPacked}
+\begin{compilerwarning}
+<source>:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is less than the required capability alignment (16) [-Wcheri-capability-misuse]
+struct AtLeast8ByteAlignedBad {
+       ^
+<source>:1:8: note: If you are certain that this is correct you can silence the warning by adding __attribute__((annotate("underaligned_capability")))
+1 warning generated.
+\end{compilerwarning}
+
+\noindent
+The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
+%
+\begin{clisting}[numbers=left]
+£\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
+struct AtLeast8ByteAlignedGood {
+    void *data;
+} __attribute__((packed,aligned(£\vcpgfmark{StartFixAlign2}£alignof(void *) > 8 ? alignof(void *) : 8£\vcpgfmark{EndFixAlign2}£)));
+\end{clisting}
+\TikzListingHighlightStartEnd[green]{FixAlign1}
+\TikzListingHighlightStartEnd[green]{FixAlign2}
+%
+In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
+%
+\TikzListingHighlightStartEnd[green]{SilenceAlign}
+\begin{clisting}[numbers=left]
+struct UnderalignPointerIgnoreWarning {
+    void *data;
+} __attribute__((packed, aligned(4), £\vcpgfmark{StartSilenceAlign}£annotate("underaligned_capability")£\vcpgfmark{EndSilenceAlign}£));
+\end{clisting}
+
+\arnote{\subsection{TODO: more warnings}}
+
 \section{C APIs to get and set capability properties}
 %\section{C APIs for restricting capability permissions and bounds}
 \label{sec:cheri-apis}
@@ -1363,7 +1582,7 @@ values are copied into inappropriately aligned allocations.
   of CHERI programming patterns then we probably want a section that talks
   about permissions as well.}
 
-\purecapCOrCpp supports a number of new APIs to get and set capability
+\purecapCOrCpp{} supports a number of new APIs to get and set capability
 properties given a pointer argument.
 Although most software does not need to directly manage capability properties,
 there are some cases when application code needs to further constrain
@@ -1598,84 +1817,6 @@ influenced by an attacker. In such cases, \cfunc{free} should validate that the
 passed-in capability is tagged, is in-bounds, and points to a legitimate
 allocation.
 
-\section{The CheriABI POSIX process environment}
-\label{sec:cheriabi}
-
-The CheriABI process environment implements a standard POSIX/UNIX API, but in
-some areas there are changes to API semantics (e.g., in the handling of tagged
-pointer values and I/O) or new functionality (such as relates to handling
-capability-related faults).
-
-\rwnote{Should there be information on a further CHERI C header here, which
-  contains OS API bits and bobs?  Or is everything either in cheri.h/cheric.h
-  or existing OS headers?}
-
-\subsection{POSIX API changes}
-
-\begin{description}
-\item[Writing and reading pointers via files] In the CheriABI process
-  environment, only untagged data (not tagged pointers) may be written to or
-  read from files.
-  If a region of memory containing valid pointers is written to a file, and
-  then read back, the pointers in that region will no longer be valid.
-  If a file is memory mapped, then pages mapped copy-on-write
-  (\cconst{MAP\_PRIVATE}) are able to hold tagged pointers, since they are
-  swap-backed rather than file-backed, but pages mapped directly from the
-  buffer cache (\cconst{MAP\_SHARED}) are not.
-
-\item[Passing pointers via IPC] In the CheriABI process environment, only
-  untagged data, not tagged pointers, may be passed via various forms of
-  message-passing Inter-Process Communication (IPC).
-  Some existing software takes advantage of a shared address-space layout
-  (via \cfunc{fork}) to pass pointers to elements of shared data structures
-  (e.g., entries in dispatch tables).
-  This code must be converted to use indexes into tables or other lookup
-  mechanisms rather than passing pointers via IPC.
-
-\item[\cfunc{mmap} bounds] In CheriABI, the \cfunc{mmap} system
-   call returns a bounded capability to the allocated address space.
-   To ensure the capability does not overlap other allocations,
-   lengths that would otherwise be unrepresentable are rounded up
-   and padded with a new type of guard pages.
-   These guard pages fault on access and may not be mapped over.
-   They are unmapped when the rest of the mapping is unmapped.
-
-\item[\cfunc{mmap} permissions] The permissions of the capability
-   returned by \cfunc{mmap} are determined by a combination of the
-   requested page protections and the capability passed as an address hint
-   (or fixed address with \cconst{MAP\_FIXED}).
-   When using the pattern of requesting a mapping with \cconst{PROT\_NONE}
-   and then filling in sections (as is done in run-time linkers, VM host
-   environments, etc), it is necessary to ensure that the initial
-   capability has the right permissions.
-   The \cvar{prot} argument has been extended to accept additional
-   flags indicating the maximum permission the page can have so that a
-   linker might request a reservation for a library with the permissions
-   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)}, which
-   would return a capability permitting loads, stores, and instruction
-   fetch while mapping the pages with no (MMU) permissions.
-\end{description}
-
-\subsection{Handling capability-related signals}
-
-When a capability hardware exception fires, the operating system will map it
-into the UNIX \SIGPROT signal.
-By default, this signal terminates the process, but the signal can be caught
-by registering a \SIGPROT handler.
-When the signal handler fires, \ccode{siginfo.si\_code} will be set to
-describe the cause of the fault; available values include:
-
-\begin{description}
-\item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
-  invalid capability was attempted.
-\item[\cconst{PROT\_CHERI\_BOUNDS}] Capability bounds fault -- an out-of-bounds
-  access was attempted.
-\item[\cconst{PROT\_CHERI\_PERM}] Capability permission fault -- the attempted
-  access exceeded the permissions granted by a capability.
-\item[\cconst{PROT\_CHERI\_SEALED}] Capability sealed fault -- dereferencing a
-  sealed capability was attempted.
-\end{description}
-
 %\section{Potential performance impact}
 %
 %Pure-capability code performs very similarly to non-capability-based code on
@@ -1693,148 +1834,6 @@ describe the cause of the fault; available values include:
 %Programs with more pointer-dense access patterns, such as language runtimes
 %and compilers, may see more significant overheads, in the range of 10\%.
 %\textbf{XXX: Turn these into more real numbers.}
-
-\section{CHERI compiler warnings and errors}
-\label{sec:cheri-compiler-warnings-and-errors}
-
-\arnote{Feed the source code into \url{https://cheri-compiler-explorer.cl.cam.ac.uk/} to get the latest warning text}
-
-The CHERI Clang compiler includes many diagnostic warnings to identify code that is incompatible with \purecapCOrCpp{} or may result in behavioral differences.
-In many cases, a successful compilation that does not emit any CHERI-specific warnings will result in a functional spatially-safe program.
-However, some incompatibilities (e.g., memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
-This section describes some of the more-commonly seen compiler warnings and provides suggestions on how to change the source code to be compatible with \purecapCOrCpp{}.
-All of these warnings are enabled when the \commandline{-Wall} compiler flag
-is set.
-
-\subsection{Loss of provenance}
-%\begin{compilerwarning}
-%cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
-%\end{compilerwarning}
-This common compiler warning \arnote{that should be an error by default?} is triggered when casting a non-capability type (e.g., \clongt) to a pointer.
-As mentioned in \cref{sec:pointer_provenance_validity}, the result of this cast is a \ccode{NULL}-derived capability with the address set to the integer value.
-As any \ccode{NULL}-derived capability is untagged, any attempt to dereference it will trap.
-
-Usually, this warning is caused by programmers incorrectly assuming that \clongt is able to store pointers.
-The fix for this problem is to change the type of the cast source to a provenance-carrying type such as \cintptrt or \cuintptrt (see \cref{sec:recommended-c-types}):
-\begin{clisting}[numbers=left]
-char *example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
-    return strdup((const char *)ptr_or_int);
-}
-char *example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodParamTy}£ ptr_or_int) {
-  return strdup((const char *)ptr_or_int);
-}
-\end{clisting}
-\TikzListingHighlightStartEnd[red]{BadParamTy}
-\TikzListingHighlightStartEnd[green]{GoodParamTy}
-\begin{compilerwarning}
-<source>:2:17: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
-  return strdup((const char *)ptr_or_int);
-                ^
-1 warning generated.
-\end{compilerwarning}
-
-\noindent
-In some cases this warning can be a false positive.
-For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
-If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
-\begin{clisting}[numbers=left]
-void invoke_cb(void (*cb)(void *), void *);
-void callback(void *arg);
-void false_positive_example(int callback_data) {
-    invoke_cb(&callback, (void *)callback_data); // warning
-    invoke_cb(&callback, (void *)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
-}
-\end{clisting}
-\TikzListingHighlightStartEnd[green]{SilenceProv}
-\begin{compilerwarning}
-<source>:4:24: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
-  invoke_cb(&callback, (void *)callback_data); // warning
-                       ^
-<source>:15:24: warning: cast to 'void *' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
-  invoke_cb(&callback, (void *)callback_data); // warning
-                       ^
-2 warnings generated.
-\end{compilerwarning}
-
-\subsection{Ambiguous provenance}
-For arithmetic and bitwise binary operations between \cuintptrt/\cintptrt, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
-However, as noted in \cref{sec:ambiguous-provenance}, there are cases that are ambiguous as far as the compiler is concerned.
-
-Consider for example a structure that holds a pointer and a small amount of flags.
-In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:
-\begin{clisting}[numbers=left]
-typedef struct { uintptr_t data; } pointer_and_flags;
-void set_ptr(pointer_and_flags *p, void *value) {
-    p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
-}
-void set_flags(pointer_and_flags *p, unsigned flags) {
-    p->data = p->data | (flags & 7);
-}
-\end{clisting}
-
-\begin{compilerwarning}
-<source>:3:40: warning: binary expression on capability types '__uintcap_t' and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as the source of provenance; currently provenance is inherited from the left-hand side [-Wcheri-provenance]
-    p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
-              ~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~
-1 warning generated.
-\end{compilerwarning}
-
-\noindent
-Unlike the compiler, the programmer knows that inside \cfunc{set\_ptr} capability metadata should always be taken from the \ccode{value} argument.
-The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:
-\TikzListingHighlightStartEnd[green]{FixAmbig}
-\begin{clisting}[numbers=left]
-void set_ptr(pointer_and_flags *p, void *value) {
-    p->data = £\vcpgfmark{StartFixAmbig}£(size_t)£\vcpgfmark{EndFixAmbig}£(p->data & (uintptr_t)7) | (uintptr_t)(value);
-}
-\end{clisting}
-
-\arnote{TODO: this section should have more examples.}
-
-\subsection{Underaligned capabilities}
-%\begin{compilerwarning}
-%alignment (<N>) of '<type>' is less than the required capability alignment
-%\end{compilerwarning}
-This warning is triggered when packed structures contain pointers.
-As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
-This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:
-\begin{clisting}[numbers=left]
-struct AtLeast8ByteAlignedBad {
-    void *data;
-} __attribute__((packed, £\vcpgfmark{StartBadAlignPacked}£aligned(8)£\vcpgfmark{EndBadAlignPacked}£));
-\end{clisting}
-\TikzListingHighlightStartEnd[red]{BadAlignPacked}
-\begin{compilerwarning}
-<source>:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is less than the required capability alignment (16) [-Wcheri-capability-misuse]
-struct AtLeast8ByteAlignedBad {
-       ^
-<source>:1:8: note: If you are certain that this is correct you can silence the warning by adding __attribute__((annotate("underaligned_capability")))
-1 warning generated.
-\end{compilerwarning}
-
-\noindent
-The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
-%
-\begin{clisting}[numbers=left]
-£\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
-struct AtLeast8ByteAlignedGood {
-    void *data;
-} __attribute__((packed,aligned(£\vcpgfmark{StartFixAlign2}£alignof(void *) > 8 ? alignof(void *) : 8£\vcpgfmark{EndFixAlign2}£)));
-\end{clisting}
-\TikzListingHighlightStartEnd[green]{FixAlign1}
-\TikzListingHighlightStartEnd[green]{FixAlign2}
-%
-In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a \ccode{annotate("underaligned\_capability")} attribute:
-%
-\TikzListingHighlightStartEnd[green]{SilenceAlign}
-\begin{clisting}[numbers=left]
-struct UnderalignPointerIgnoreWarning {
-    void *data;
-} __attribute__((packed, aligned(4), £\vcpgfmark{StartSilenceAlign}£annotate("underaligned_capability")£\vcpgfmark{EndSilenceAlign}£));
-\end{clisting}
-
-\arnote{\subsection{TODO: more warnings}}
-
 
 \section{Further reading}
 \label{sec:further_reading}
