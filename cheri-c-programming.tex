@@ -1132,29 +1132,48 @@ The CHERI Clang compiler supports an experimental flag \texttt{-cheri-comparison
 Heap temporal safety utilizes revocation sweeps, which, after some quarantine
 period, replace in-register and in-memory capabilities to freed memory with
 non-dereferenceable values.
-For performance reasons, that replacement may be substantially deferred -- or,
-if there is little demand for fresh allocations, never occur.
+For performance reasons, that replacement may be substantially deferred, or,
+if there is little demand for fresh allocations, may never occur.
 Pointer value replacement may also permit some instances of
 a pointer to continue to be usable for longer than others, but the referenced
 memory will not be reallocated or otherwise reused until all instances have been rendered unusable.
 This model does permit non-exploitable \textit{use-after-free} of heap memory,
 but prohibits exploitable memory aliasing by disallowing \textit{use-after-reallocation}.
 
-While using a pointer after \cfunc{free} is undefined behavior, in practice it
-may arise in a number of situations, including in lockless algorithms, which
-may, for example, compare an allocated pointer to a freed one.
-In current revocation implementations, revocation will replace a valid
-capability with an invalid version of the same, atomically clearing its tag.
-This allows non-dereferencing operations to continue; for example, pointer
-equality checks that compare only the addresses of the two pointers (and not
-their tag values) will continue to work as expected.
-Software making explicit use of tags (e.g., using capability tags to implement
-discriminated unions) must be designed to tolerate capability tag clearing by
-revocation. We anticipate that revocation will remain a tag-clearing operation
-by default. Alternative implementations of revocation that replace a capability
-to be revoked with, for example, a tagged but permissionless version of the same
-capability or a word of all zeros are possible. Such alternative implementations
+While a pointer's value after \cfunc{free} is undefined, and so dereference is
+an undefined behavior, in practice, the value of a \cfunc{free}-d pointer may
+still be observed in a number of situations, including in lockless algorithms,
+which may compare an allocated pointer to a freed one.
+
+Our systems have a choice of replacement values for revoked pointers; all that
+is requisite for correctness is that the replacement not authorize access to
+memory.  Our prototype implementation clears the tag when replacing, as this
+certainly removes authority and possibly simplifies debugging and
+non-dereferencing operations, as the original capability bits are left behind.
+For example, pointer equality checks that compare only the addresses of the two
+pointers (and not their tag values) will continue to work as expected.  With
+revocation performed this way, software making explicit use of tags must be
+designed to tolerate capability tag clearing by revocation.
+
+Unfortunately, tag-clearing risks type confusion if programmers intend to use
+the capability tag to distinguish between integers and pointers in tagged
+unions (we have so far generally discouraged this idea, but understand why it
+may remain attractive).  Therefore, we have considered other options for
+revocation, including tag-preserving \emph{permission}-zeroing (but tag
+preservation) and wholesale replacement with \cconst{NULL} (i.e., the untagged
+all~zero value).  These options may be more attractive for some software, and
 would have different implications for the C/\cpp{} programming model.
+
+We anticipate that revocation will remain a tag-clearing operation by default,
+as tag-clearing removes any risk of needlessly re-examining the capability in
+later revocations.  However, it may be possible to allow coarse control over
+revocation behavior either per process or by region of the address space.  In
+the latter case, \cfunc{mmap} may gain flags specifing which revocation
+behavior is desirable for capabilities pointing \emph{into} the mapped region
+and/or \cfunc{madvise} may gain flags controlling the revocation behavior of
+capabilities \emph{within} a target region.  Which of these or similar
+mechanisms provide utility to software and can be offered at reasonable
+performance remains an open question.
 
 \subsection{Bitwise operations on capability types}
 
