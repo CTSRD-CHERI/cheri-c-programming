@@ -1238,25 +1238,26 @@ Additionally, the bitwise-AND operation is ambiguous since it can be used both t
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see \cref{sec:ambiguous-provenance}) since it shows the compiler which intermediate results can carry provenance.
 
 \begin{description}
-\item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
-  This builtin performs a bitwise-OR of \cvar{ptr} with \cconst{bits}.\footnote{%
-In hindsight, this macro is incorrectly named, and should be renamed or modified to take an additional \cvar{mask} parameter to \emph{set} the low pointer bits to \cvar{bits}.}
-  In order to retain compatibility with a non-CHERI architecture, \cconst{bits} should be less than the known alignment of \cvar{ptr}.
-
 \item[\ccode{vaddr\_t cheri\_get\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
-  This builtin returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
+  This function returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
   It should be used instead of the raw bitwise operation since it can never return
   an unexpectedly tagged value.
   \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
 
 \item[\ccode{uintptr\_t cheri\_clear\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask)}]
-  This builtin clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
+  This function clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
   It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
   \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
-\end{description}
 
-\note{Is that \texttt{cheri.h} the same as the \texttt{cheri/cheri.h} mentioned earlier or a new file?}{nwf}
-\arnote{Different file. I should update the compiler-provided one and use that in cheri/cheric.h}
+\item[\ccode{uintptr\_t cheri\_or\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t bits)}]
+  This function performs a bitwise-OR of \cvar{ptr} with \cconst{bits}.
+  In order to retain compatibility with a non-CHERI architecture, \cconst{bits} should be less than the known alignment of \cvar{ptr}.
+
+\arnote{Could document a new cheri\_set\_low\_ptr\_bits that clears bits first:
+\item[\ccode{uintptr\_t cheri\_set\_low\_ptr\_bits(uintptr\_t ptr, vaddr\_t mask, vaddr\_t bits)}]
+  This function sets the low bits of \cvar{ptr} to \cconst{bits} by clearing the low bits in \cvar{mask} first.
+  }
+\end{description}
 
 \paragraph{Computing hash values}
 
@@ -1627,10 +1628,23 @@ to prevent overflows between its own allocations.
 
 A set of compiler built-in functions provide access to capability properties
 of pointers.
-Two new header files provide access to further CHERI-related programming
+Two new header files (distributed as part of the CHERI Clang compiler)
+provide access to further CHERI-related programming
 interfaces including more human-friendly macro wrappers around the compiler
-built-ins, and also definitions of key CHERI constants:
+builtins, and also definitions of key CHERI constants:
 
+\begin{description}
+\item[\pathname{cheriintrin.h}] defines interfaces to access and
+  modify capability properties.
+  It also defines constants for capability permissions that are portable
+  across all implementations of CHERI.
+
+\item[\pathname{cheri.h}] provides macros for slightly higher-level operations
+  such as the manipulation of low pointer bits (\cref{sec:low-pointer-bits}).
+\end{description}
+
+\noindent
+When compiling for CheriBSD, the following two headers can be used instead:
 \begin{description}
 \item[\pathname{cheri/cheri.h}] defines constants such as those used in the
   capability permission mask.
@@ -1647,31 +1661,31 @@ built-ins, and also definitions of key CHERI constants:
 The following APIs allow capability properties to be retrieved from pointers:
 
 \begin{description}
-\item[\ccode{vaddr\_t cheri\_getbase(void *c)}] Return the lower bound of capability
+\item[\ccode{vaddr\_t cheri\_get\_base(void *c)}] Return the lower bound of capability
   \cvar{c}.
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_base\_get}.
 
-\item[\ccode{vaddr\_t cheri\_getaddress(void *c)}] Return the address of the capability \cvar{c}.
+\item[\ccode{vaddr\_t cheri\_get\_address(void *c)}] Return the address of the capability \cvar{c}.
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_address\_get}.
 
-\item[\ccode{size\_t cheri\_getlength(void *c)}] Return the length of the bounds for the capability \cvar{c}.
+\item[\ccode{size\_t cheri\_get\_length(void *c)}] Return the length of the bounds for the capability \cvar{c}.
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_length\_get}.
   (The base plus the length gives the upper bound on \cvar{c}'s address.)
 
-\item[\ccode{size\_t cheri\_getoffset(void *c)}] Return the difference between the address and the lower bound of the capability \cvar{c}.
+\item[\ccode{size\_t cheri\_get\_offset(void *c)}] Return the difference between the address and the lower bound of the capability \cvar{c}.
  %  This macro wraps the compiler built-in
  %  \cfunc{\_\_builtin\_cheri\_offset\_get}.
 
-\item[\ccode{size\_t cheri\_getperm(void *c)}] Return the permissions of capability
+\item[\ccode{size\_t cheri\_get\_perms(void *c)}] Return the permissions of capability
   \cvar{c}.
-  (See \Cref{sec:available_permissions}.)\arnote{Why did we use getperm instead of getperm\textbf{s}?}
+  (See \Cref{sec:available_permissions}.)
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_get}.
 
-\item[\ccode{\_Bool cheri\_gettag(void *c)}] Return whether capability \cvar{c} has its
+\item[\ccode{\_Bool cheri\_is\_tagged(void *c)}] Return whether capability \cvar{c} has its
   validity tag set.
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_tag\_get}.
@@ -1682,39 +1696,39 @@ The following APIs allow capability properties to be retrieved from pointers:
 The following APIs allow capability properties to be refined on pointers:
 
 \begin{description}
-\item[\ccode{void *cheri\_andperm(void *c, size\_t x)}] Perform a bitwise-AND of capability
+\item[\ccode{void *cheri\_and\_perms(void *c, size\_t x)}] Perform a bitwise-AND of capability
   \cvar{c}'s permissions and the value \cvar{x}, returning the new
   capability.
   (See \Cref{sec:available_permissions}.)
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_and}.
 
-\item[\ccode{void *cheri\_cleartag(void *c)}] Clear the tag on \cvar{c}, returning the
+\item[\ccode{void *cheri\_clear\_tag(void *c)}] Clear the tag on \cvar{c}, returning the
   new capability.
 
-\item[\ccode{void *cheri\_setbounds(void *c, size\_t x)}] Narrow the bounds of capability
+\item[\ccode{void *cheri\_set\_bounds(void *c, size\_t x)}] Narrow the bounds of capability
   \cvar{c} so that the lower bound is the current address (which may
   have been increased relative to \cvar{c}'s original lower bound), and its
   upper bound is suitable for a length of \cvar{x}.
 
   Note that the effective bounds of the returned capability may be
-  wider than the range [\ccode{cheri\_getaddress(c)},
-  \ccode{cheri\_getaddress(c) + x}) due to capability compression (see
+  wider than the range [\ccode{cheri\_get\_address(c)},
+  \ccode{cheri\_get\_address(c) + x}) due to capability compression (see
   \Cref{sec:bounds_alignment}), but they will always be a subset of
-  the original bounds of \cvar{c}.
+  the original bounds. % of \cvar{c}.
 
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_bounds\_set}
 
-\item[\ccode{void *cheri\_setaddress(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
+\item[\ccode{void *cheri\_set\_address(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
 This builtin can be useful to re-derive a valid pointer from an address.
 
-\ccode{cheri\_setaddress} is able to set an address \cvar{a} that is
+\ccode{cheri\_set\_address} is able to set an address \cvar{a} that is
 outside of the current bounds of \cvar{c}.  The resulting capability
 is treated as an out-of-bounds pointer as described in \Cref{sec:oob}.
 However, if the address \cvar{a} is not representable in the current
 bounds of \cvar{c} due to capability compression,
-\ccode{cheri\_setaddress} returns an untagged capability.
+\ccode{cheri\_set\_address} returns an untagged capability.
 
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_address\_set}.
@@ -1752,6 +1766,7 @@ to CHERI memory protection are enumerated here:
   virtual-memory mappings.
   If the permission is not present, system calls that alter the contents
   or present of memory mappings will reject the request.
+  As this is a CheriBSD-speicific permission, it is not defined in \pathname{cheriintrin.h} and requires inclusion of \pathname{cheri/cheri.h}.
 \end{description}
 
 \subsection{Bounds alignment due to compression}
@@ -1774,22 +1789,22 @@ $E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is th
 Correctly computing the rounded size and minimum alignment for a given allocation is non-trivial and may require many instructions to compute.
 Moreover, the exact limits for precise representability may vary across different implementations of CHERI.
 Therefore, the CHERI ISA provides instructions that allow determining precisely representable allocations.
-These instructions can be generated using the following compiler builtins:
+These instructions can be generated using compiler builtins that are provided by \pathname{cheriintrin.h}:
 \begin{description}
-\item[\ccode{size\_t \_\_builtin\_cheri\_round\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_setbounds} to set the length to \ccode{len} (assuming appropriate alignment of the base).
+\item[\ccode{size\_t cheri\_round\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_setbounds} to set the length to \ccode{len} (assuming appropriate alignment of the base).
 
-\item[\ccode{size\_t \_\_builtin\_cheri\_representable\_alignment\_mask(size\_t len)}] returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
+\item[\ccode{size\_t cheri\_representable\_alignment\_mask(size\_t len)}] returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
 \end{description}
 
 The precisely representable base address can be computed using:
 \begin{lstlisting}[language={C}]
-        base = base & __builtin_cheri_representable_alignment_mask(len);
+        base = base & cheri_representable_alignment_mask(len);
 \end{lstlisting}
 When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:
 \begin{clisting}[frame=none]
 size_t required_alignment(size_t len) {
-    return ~__builtin_cheri_representable_alignment_mask(len) + 1;
+    return ~cheri_representable_alignment_mask(len) + 1;
 }
 struct Buffer {
     void *data;
