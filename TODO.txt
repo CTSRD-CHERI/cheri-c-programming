@@ -1,0 +1,7 @@
+It may be useful to restructure this guide to have three sections:
+- What changes relative to ISO-conformant C code (effectively nothing, alignment
+   is already required for some architectures, but byte-by-byte copies do break)
+- Information for programmers who would like make use of CHERI features (e.g. if
+   you write an allocator you should be setting bounds). Information on low
+   pointer bits could also go here
+- Advanced topics for OS kernel developers/language runtime/etc: CHERI intrinsics, etc.
