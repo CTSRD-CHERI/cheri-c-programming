@@ -900,8 +900,10 @@ bounds when a pointer is taken to a subobject -- for example, an array
 embedded within another structure that itself has been heap allocated.
 This will prevent an overflow on that array from affecting the remainder of
 the structure, improving spatial safety.
+Subobject bounds are not enabled as they may require additional source code changes
+for compatibility, but can be enabled using the \mbox{\commandline{-Xclang}} \mbox{\commandline{-cheri-bounds=subobject-safe}} compiler flag.
 
-However, subobject bounds also prevent use of the \ccode{containerof}
+One example of C code that requires changes for subobject bounds is the \ccode{containerof}
 pattern, in which pointer arithmetic on a pointer to a subobject is used to
 recover a pointer to the container object -- for example, as seen in the
 widely used BSD \pathname{queue.h} linked-list macros or the generic C
