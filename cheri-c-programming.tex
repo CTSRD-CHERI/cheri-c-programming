@@ -1294,12 +1294,11 @@ programming styles that fail to unambiguously differentiate these types:
   POSIX systems)\footnote{The forthcoming ISO C2x standard
   makes function declarations with an empty parameter list equivalent to
   a parameter list consisting of a single \ccode{void}.}.
-  The compiler will warn when a function without a declared prototype is
-  called.\footnote{If the \textit{K\&R} function is defined within the same
+  To avoid these problems, the CHERI Clang compiler emits a warning (\commandline{-Wcheri-prototypes}) by default when a function without a declared prototype is called.
+  This warning is less strict than \commandline{-Wstrict-prototypes} and can be
+  used to convert \textit{K\&R} functions that may cause problems.\footnote{If the \textit{K\&R} function is defined within the same
   file, the compiler can determine the correct calling convention and will not
   emit a warning.}
-  This warning is less strict than \commandline{-Wstrict-prototypes} and can be
-  used to convert \textit{K\&R} functions that may cause problems.
   This should not be an issue for C code written in the last 20 years, but
   many core operating-system components can be significantly older.
 
