@@ -175,7 +175,7 @@ as memory allocators, to further refine permissions and bounds on pointers.
 This guidance is based on our experience adapting the FreeBSD operating-system
 userspace, and applications such as PostgreSQL and WebKit, to run in a
 CHERI C/\cpp{} capability-based programming environment.
-We conclude by recommending further reading, including our pertinent technical
+We conclude by recommending further reading, including further technical
 reports and papers.
 
 \psnote{should this mention CheriFreeRTOS and CHERI-RTEMS?}
@@ -214,17 +214,14 @@ code-generation, and linkage models:
   and all implied pointers (e.g., those used to access local and global
   variables).
   For example, they diverge from C/\cpp{} implementations on conventional
-  architectures in terms of whether pointers passed through integer types can
-  be dereferenced.
-  \psnote{that sounds very restrictive.  Perhaps add ``; in CHERI C/C++ this is only allowed for \cuintptrt and \cintptrt, not other integer types''.  (That's a bit much detail for this point in the document, but it's important not to put the reader off up-front by suggesting the language is super restrictive)}
+  architectures by preventing pointers passed through integer type other
+  than \cuintptrt and \cintptrt{} from being dereferenced.
   New APIs provide access to capability features of pointers, including
   getting and setting their bounds, required by selected software such as
   memory allocators.
   The vast majority of C/\cpp{} source code we have encountered requires
   little or no modification to be compiled as CHERI C/\cpp{}.
-\psnote{Is ``or no'' an overclaim, or am I mislead by the chat about the cases where it does need modification?}
 
-  
 \item[Pure-capability machine code] is compiled code (or hand-written
   assembly) that utilizes CHERI capabilities for all memory accesses --
   including loads, stores, and instruction fetches -- rather than integer
