@@ -286,8 +286,10 @@ compressed in order to fit in the remaining 32 or 64 bits of the capability
 (see \Cref{figure:cheri-capability-representation} for an example; details
 vary across underlying architectures and word sizes).
 In addition, they are associated with a 1-bit validity ``tag'' whose value is
-maintained in registers and memory by the architecture.
-Each element of the \psnote{``additional metadata and tag of the'', to tie onto the previous words better  (btw, it's a bit annoying that the tag isn't deemed part of the metadata in these words, no?)} capability contributes to the protection model:
+maintained in registers and memory by the architecture, but not part of
+addressable memory.
+Each element of the additional metadata and tag of the capability contributes
+to the protection model:
 
 \begin{description}
 \item[Validity tag] The tag tracks the validity of a capability.
