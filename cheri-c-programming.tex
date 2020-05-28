@@ -163,7 +163,8 @@
 This document is a brief introduction to the \purecapCOrCpp{}
 programming languages.
 We explain the principles underlying these language variants, and their
-grounding in the CHERI architecture.
+grounding in CHERI's multiple architectural instantiations:
+CHERI-MIPS, CHERI-RISC-V, and Arm's Morello.
 We describe the most commonly encountered differences between these
 dialects and C/C++ on conventional architectures, and where existing software
 may require minor changes.
@@ -282,7 +283,8 @@ and 64-bit capabilities on 32-bit platforms.
 Each capability consists of an integer (virtual) address of the natural size for
 the architecture (e.g., 32 or 64 bit), and also additional metadata that is
 compressed in order to fit in the remaining 32 or 64 bits of the capability
-(see \Cref{figure:cheri-capability-representation}).
+(see \Cref{figure:cheri-capability-representation} for an example; details
+vary across underlying architectures and word sizes).
 In addition, they are associated with a 1-bit validity ``tag'' whose value is
 maintained in registers and memory by the architecture.
 Each element of the \psnote{``additional metadata and tag of the'', to tie onto the previous words better  (btw, it's a bit annoying that the tag isn't deemed part of the metadata in these words, no?)} capability contributes to the protection model:
