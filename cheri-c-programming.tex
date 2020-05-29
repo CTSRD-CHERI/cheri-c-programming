@@ -201,8 +201,6 @@ reports and papers.
 %
 \abstracttext{}
 
-\psnote{Shouldn't the abstract or intro say something about the h/w variants of the architecture that ``CHERI clang/LLVM and LLD'' currently target (CHERI-MIPS, CHERI-RISC-V, CHERI-ARM/Morello in progress?), and especially that what's described as CHERI C/C++ is supposed to be portable across them?  Otherwise it'd be easy (for example) for the slightly-informed reader to leap to the conclusion that this is all CHERI-MIPS specific}
-
 \subsection{Definitions}
 
 CHERI Clang/LLVM and LLD implement the following new language,
@@ -448,6 +446,8 @@ architectural provenance validity, bounds checking, and permission checking,
 protecting pointers from corruption and providing strong spatial memory
 safety.
 
+\subsection{The CHERI C/C++ run-time environment}
+
 CHERI C code executes within a capability-aware run-time environment
 -- whether ``bare metal'' with a suitable runtime, or in a richer, OS-based
 process environment such as CheriABI (see \Cref{sec:cheriabi}),
@@ -464,15 +464,14 @@ run-time linker, and other aspects of the OS Application Binary Interface
     \\
     (e.g., in \cfunc{memcpy}) and restriction (e.g., in \cfunc{malloc}).
 \end{itemize}
-CheriABI operates as a complete additional OS ABI, much in the style of a
-32-bit or 64-bit OS personality, in that it requires its own set of suitably
-compiled system libraries and classes.
+
+In CheriBSD, our CHERI-extended version of the open-source FreeBSD operating
+system, CheriABI operates as a complete additional OS ABI.
+CheriABI is implemented in the style of a 32-bit or 64-bit OS personality, in
+that it requires its own set of suitably compiled system libraries and classes.
 We have also successfully adapted bare-metal runtimes, such as newlib, and
-embedded operating systems, such as FreeRTOS and RTEMS, to support CHERI
-memory protection.
-
-\psnote{later, the names CheriBSD, CheriFreeRTOS and CHERI-RTEMS all appear out of thin air (another psnote).  Shouldn't they be actually introduced here?}
-
+embedded operating systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS
+(CHERI-RTEMS), to support CHERI memory protection.
 
 Outside of the OS and language runtime themselves, this compilation mode
 requires relatively few source-code-level changes to C/\cpp{}-language software,
@@ -510,8 +509,6 @@ present in compilation to conventional architectures:
 Referential safety and spatial safety are implemented in CheriBSD's
 pure-capability CheriABI execution environment and for bare-metal in
 CheriFreeRTOS and CHERI-RTEMS.
-\psnote{Those names appear out of thin air here.} 
-
 
 \begin{description}
 \item[Temporal safety] prevents a pointer retained after the release of its
