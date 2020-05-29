@@ -170,7 +170,7 @@ dialects and C/C++ on conventional architectures, and where existing software
 may require minor changes.
 We document new compiler warnings and errors that may be experienced compiling
 code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
-through typically modest source-code changes.
+through typically minor source-code changes.
 We explain how modest language extensions allow selected software, such
 as memory allocators, to further refine permissions and bounds on pointers.
 This guidance is based on our experience adapting the FreeBSD operating-system
@@ -224,9 +224,9 @@ code-generation, and linkage models:
   assembly) that utilizes CHERI capabilities for all memory accesses --
   including loads, stores, and instruction fetches -- rather than integer
   addresses.
-  In addition to capabilities used to implement memory accesses explicit in
-  the source program, capabilities are also used to implement implied pointers
-  in the C execution environment, such as for control flow.
+  Capabilities are used to implement pointers explicitly described in the
+  source program, and also to implement implied pointers in the C execution
+  environment, such as those used for control flow.
   Pure-capability machine code is not binary compatible with
   capability-unaware code using integer pointers, not least due to the
   different size of the pointer data type.
@@ -269,7 +269,8 @@ and software stack~\cite{UCAM-CL-TR-941}.
 \end{rightwordgroup}
 \end{bytefield}
 \end{subfigure}
-\caption{128-bit CHERI Concentrate capability representation: 64-bit address
+\caption{128-bit CHERI Concentrate capability representation used in
+  64-bit CHERI-MIPS and CHERI-RISC-V: 64-bit address
   and metadata in addressable memory; and 1-bit out-of-band tag.}
 \label{figure:cheri-capability-representation}
 \end{figure}
