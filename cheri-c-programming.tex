@@ -1778,7 +1778,7 @@ Correctly computing the rounded size and minimum alignment for a given
 allocation is non-trivial and may require many instructions to compute,
 especially in the context of fast allocators such as the stack allocator.
 Moreover, the architectural constants used for bounds precision differ across
-architectures or their variations, and so alignment constraints to also vary.
+architectures or their variations, and so alignment constraints also vary.
 For example, the number of bits available for bounds differs between 32-bit and
 64-bit CHERI-RISC-V, and also between 64-bit CHERI-RISC-V and Morello.
 
