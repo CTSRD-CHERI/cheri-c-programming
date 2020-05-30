@@ -1456,14 +1456,14 @@ describe the cause of the fault; available values, defined in
 \pathname{signal.h}, include:
 
 \begin{description}
-\item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
-  invalid capability was attempted.
 \item[\cconst{PROT\_CHERI\_BOUNDS}] Capability bounds fault -- an out-of-bounds
   access was attempted.
 \item[\cconst{PROT\_CHERI\_PERM}] Capability permission fault -- the attempted
   access exceeded the permissions granted by a capability.
 \item[\cconst{PROT\_CHERI\_SEALED}] Capability sealed fault -- dereferencing a
   sealed capability was attempted.
+\item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
+  invalid capability was attempted.
 \end{description}
 
 \section{CHERI compiler warnings and errors}
@@ -1737,24 +1737,32 @@ to CHERI memory protection are enumerated here:
 
 \item[\cconst{CHERI\_PERM\_LOAD}] Authorize data load via this capability.
 
-\item[\cconst{CHERI\_PERM\_STORE}] Authorize data store via this capability.
-
 \item[\cconst{CHERI\_PERM\_LOAD\_CAP}] Authorize capability load via this
   capability.
   If the permission is not present, the tag on the loaded value
   will be silently cleared.
 
+\item[\cconst{CHERI\_PERM\_STORE}] Authorize data store via this capability.
+
 \item[\cconst{CHERI\_PERM\_STORE\_CAP}] Authorize capability store via this
   capability.
   If the permission is not present, and the tag on the stored capability is
   valid, then a hardware exception will be thrown.
+\end{description}
 
+\noindent
+In addition to architectural permissions, CHERI capabilities have
+software-defined permissions.
+CheriBSD defines the following additional memory-protection-related
+permission:
+
+\begin{description}
 \item[\cconst{CHERI\_PERM\_CHERIABI\_VMMAP}] A CheriABI-specific user
   permission that the kernel uses to authorize modifications to
   virtual-memory mappings.
   If the permission is not present, system calls that alter the contents
   or present of memory mappings will reject the request.
-  As this is a CheriBSD-speicific permission, it is not defined in \pathname{cheriintrin.h} and requires inclusion of \pathname{cheri/cheri.h}.
+  As this is a CheriBSD-specific permission, it is not defined in \pathname{cheriintrin.h} and requires inclusion of \pathname{cheri/cheri.h}.
 \end{description}
 
 \subsection{Bounds alignment due to compression}
