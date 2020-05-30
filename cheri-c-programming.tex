@@ -1602,8 +1602,6 @@ struct UnderalignPointerIgnoreWarning {
 } __attribute__((packed, aligned(4), £\vcpgfmark{StartSilenceAlign}£annotate("underaligned_capability")£\vcpgfmark{EndSilenceAlign}£));
 \end{clisting}
 
-\arnote{\subsection{TODO: more warnings}}
-
 \section{C APIs to get and set capability properties}
 %\section{C APIs for restricting capability permissions and bounds}
 \label{sec:cheri-apis}
@@ -1673,8 +1671,8 @@ The following APIs allow capability properties to be retrieved from pointers:
 \item[\ccode{size\_t cheri\_perms\_get(void *c)}] Return the permissions of capability
   \cvar{c}. (See \Cref{sec:capability_permissions}.)
 
-\item[\ccode{\_Bool cheri\_tag\_valid(void *c)}] Return whether capability \cvar{c} has its
-  validity tag set. \arnote{tag\_is\_set?}
+\item[\ccode{\_Bool cheri\_is\_tagged(void *c)}] Return whether capability \cvar{c} has its
+  validity tag set. \arnote{cheri\_tag\_get?}
 
 \end{description}
 
