@@ -1449,7 +1449,8 @@ into the UNIX \SIGPROT signal.
 By default, this signal terminates the process, but the signal can be caught
 by registering a \SIGPROT handler.
 When the signal handler fires, \ccode{siginfo.si\_code} will be set to
-describe the cause of the fault; available values include:
+describe the cause of the fault; available values, defined in
+\pathname{signal.h}, include:
 
 \begin{description}
 \item[\cconst{PROT\_CHERI\_TAG}] Capability tag fault -- dereferencing an
