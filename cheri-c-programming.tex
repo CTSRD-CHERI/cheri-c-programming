@@ -1645,13 +1645,16 @@ builtins, and also definitions of key CHERI constants:
 \end{description}
 
 \noindent
-When compiling for CheriBSD, the following two headers can be used instead:
+When compiling for CheriBSD, the following header provides additional
+constants relating to OS use of capabilities -- for example, software-defined
+permission bits:
+
 \begin{description}
 \item[\pathname{cheri/cheri.h}] defines constants such as those used in the
   capability permission mask.
 
-\item[\pathname{cheri/cheric.h}] defines interfaces to access and
-  modify capability properties.
+%\item[\pathname{cheri/cheric.h}] defines interfaces to access and
+%  modify capability properties.
 \end{description}
 
 \rwnote{This section may need updating once we've converged OS and compiler
