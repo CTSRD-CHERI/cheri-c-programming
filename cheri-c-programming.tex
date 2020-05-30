@@ -1140,14 +1140,16 @@ memory will not be reallocated or otherwise reused until all instances have been
 This model does permit non-exploitable \textit{use-after-free} of heap memory,
 but prohibits exploitable memory aliasing by disallowing \textit{use-after-reallocation}.
 
-While a pointer's value after \cfunc{free} is undefined, and so dereference is
-an undefined behavior, in practice, the value of a \cfunc{free}-d pointer may
-still be observed in a number of situations, including in lockless algorithms,
-which may compare an allocated pointer to a freed one.
+A pointer's value after \cfunc{free} is undefined, and so dereference is
+an undefined behavior.
+In practice, however, the value of a \cfunc{free}-d pointer may still be
+observed in a number of situations, including in lockless algorithms, which
+may compare an allocated pointer to a freed one.
 
 Our systems have a choice of replacement values for revoked pointers; all that
-is requisite for correctness is that the replacement not authorize access to
-memory.  Our prototype implementation clears the tag when replacing, as this
+is required for correct temporal safety is that the replacement not authorize
+access to memory.
+Our prototype implementation clears the tag when replacing, as this
 certainly removes authority and possibly simplifies debugging and
 non-dereferencing operations, as the original capability bits are left behind.
 For example, pointer equality checks that compare only the addresses of the two
