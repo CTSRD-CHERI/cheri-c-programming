@@ -1680,7 +1680,7 @@ The following APIs allow capability properties to be retrieved from pointers:
 
 \item[\ccode{size\_t cheri\_get\_perms(void *c)}] Return the permissions of capability
   \cvar{c}.
-  (See \Cref{sec:available_permissions}.)
+  (See \Cref{sec:capability_permissions}.)
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_get}.
 
@@ -1698,7 +1698,7 @@ The following APIs allow capability properties to be refined on pointers:
 \item[\ccode{void *cheri\_and\_perms(void *c, size\_t x)}] Perform a bitwise-AND of capability
   \cvar{c}'s permissions and the value \cvar{x}, returning the new
   capability.
-  (See \Cref{sec:available_permissions}.)
+  (See \Cref{sec:capability_permissions}.)
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_and}.
 
@@ -1736,8 +1736,8 @@ bounds of \cvar{c} due to capability compression,
 % \note{Are the references to the \ccode{\_\_builtin\_} forms useful?  Do we
 % want to encourage their use or the \pathname{cheric.h} macros?}{nwf}
 
-\subsection{Available permissions}
-\label{sec:available_permissions}
+\subsection{Capability permissions}
+\label{sec:capability_permissions}
 
 A number of capability permissions are available for use; only those relating
 to CHERI memory protection are enumerated here:
