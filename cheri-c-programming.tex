@@ -1842,19 +1842,20 @@ Two kinds of modifications are typically required:
   It is often the case that allocators utilize the value of the pointer passed
   to their custom \cfunc{free} function to locate corresponding metadata --
   for example, by always placing that metadata immediately before the
-  allocation, which would be outside of the allocation's bounds.\footnote{%
-  When a custom allocator places metadata at the beginning of the allocation,
-  care must be taken that the resulting pointer is still strongly aligned.
-  While porting programs to run on CHERI, we found multiple sub-allocators
-  that used 8 bytes of metadata after the result from \cfunc{malloc}.
-  This causes the resulting pointer to no longer be sufficiently aligned to
-  store capabilities without faulting or stripping tag bits.
-  \note{Does CHERI ISAv7 still fault in any of these scenarios?}{nwf}
-  }
+  allocation, which would be outside of the allocation's bounds.
   Therefore, some additional work may be required to derive a pointer to the
   allocation's metadata via another global capability, rather than the one
   that has been passed to \cfunc{free}.
 \end{description}
+
+These two concerns may interact: When a custom allocator places metadata at
+the beginning of the allocation, care must be taken that the resulting pointer
+is still strongly aligned.
+While porting programs to run on CHERI, we found multiple sub-allocators
+that used 8 bytes of metadata after the result from \cfunc{malloc}.
+This causes the resulting pointer to no longer be sufficiently aligned to
+store capabilities without faulting or stripping tag bits.
+\note{Does CHERI ISAv7 still fault in any of these scenarios?}{nwf}
 
 Note that it is also possible to use the above APIs to validate inputs to
 \cfunc{free}, which is useful when the consumer of \cfunc{free} is, for example,
