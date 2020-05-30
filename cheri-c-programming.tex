@@ -270,7 +270,7 @@ and software stack~\cite{UCAM-CL-TR-941}.
 \end{bytefield}
 \end{subfigure}
 \caption{128-bit CHERI Concentrate capability representation used in
-  64-bit CHERI-MIPS and CHERI-RISC-V: 64-bit address
+  64-bit CHERI-MIPS and 64-bit CHERI-RISC-V: 64-bit address
   and metadata in addressable memory; and 1-bit out-of-band tag.}
 \label{figure:cheri-capability-representation}
 \end{figure}
@@ -1073,7 +1073,7 @@ manner as a loss of pointer provenance validity (see
 \psnote{Comment on whether that should immediately trap instead?}
 The range of out-of-bounds addresses permitted for a capability is
 a function of the length of the bounded region and the number of bits used for bounds in the capability representation.
-For CHERI-MIPS (with 27 bits of the capability used for bounds) we get the following guarantees:
+For CHERI-MIPS and 64-bit CHERI-RISC-V (with 27 bits of the capability used for bounds) we get the following guarantees:
 
 \begin{itemize}
 \item A pointer is able to travel at least \sfrac{1}{4} the size of the object, or
@@ -1773,12 +1773,12 @@ to CHERI memory protection are enumerated here:
 \subsection{Bounds alignment due to compression}
 \label{sec:bounds_alignment}
 
-When the length of an object exceeds $2^{floor(bounds\_bits/2)-1}$ (i.e., $4$ KiB for CHERI-MIPS), additional alignment requirements
+When the length of an object exceeds $2^{floor(bounds\_bits/2)-1}$ (i.e., $4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
 apply to the lower and upper bounds.
 This may require a memory allocator to increase the alignment of an
 allocation, or increase padding on an allocation, to prevent bounds from
 spanning more than one object.
-The alignment required for allocations exceeding the minimum representable range ($4$ KiB for CHERI-MIPS) is $2^{E+3}$ bytes, where
+The alignment required for allocations exceeding the minimum representable range ($4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is $2^{E+3}$ bytes, where
 $E$ is determined from the length, $l$, by
 $E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is this too much detail?}
 %\jrtcnote{Do we want to clarify that this is a 65-bit length? One would naively
@@ -1822,7 +1822,15 @@ void *allocate_next(struct Buffer *buf, size_t len) {
 
 \end{clisting}
 
-
+\noindent
+The architectural constants used for bounds precision may differ across
+architectures or their variations, which in causes alignment constraints to
+also vary.
+For example, the number of bits available for bounds varies between 32-bit and
+64-bit CHERI-RISC-V, and also between 64-bit CHERI-RISC-V and Morello.
+Software written to use these compiler builtins, rather than encode alignment
+requirements directly, is more likely to be portable between CHERI-MIPS,
+CHERI-RISC-V, and Morello.
 
 \subsection{Implications for memory-allocator design}
 
