@@ -1074,7 +1074,6 @@ manner as a loss of pointer provenance validity (see
 The range of out-of-bounds addresses permitted for a capability is
 a function of the length of the bounded region and the number of bits used for bounds in the capability representation.
 For CHERI-MIPS (with 27 bits of the capability used for bounds) we get the following guarantees:
-\arnote{Should probably say that only the lower bounds is affected by the mantissa bits.}
 
 \begin{itemize}
 \item A pointer is able to travel at least \sfrac{1}{4} the size of the object, or
@@ -1210,6 +1209,7 @@ the following compiler builtins should be used instead:
 
 \rwnote{It would be nice if we had, and could document here, cheri\_ versions
   of these macros.}
+\arnote{Probably best to use the \_\_builtin versions since that also works for upstream clang.}
 
 One advantage of these builtins compared to \cuintptrt arithmetic is that they preserve the
 type of the argument and can therefore remove the need for intermediate casts to \cuintptrt.
