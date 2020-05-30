@@ -1202,12 +1202,12 @@ higher-level abstractions.
 If the C code is attempting to align a pointer or check the alignment of pointers,
 the following compiler builtins should be used instead:
 \begin{description}
-\item[\ccode{\_Bool \_\_builtin\_is\_aligned(T ptr, size\_t alignment)}]
-  This builtin returns \cconst{true} if \cvar{ptr} is aligned to at least \cvar{alignment} bytes.
 \item[\ccode{T \_\_builtin\_align\_down(T ptr, size\_t alignment)}]
   This builtin returns \cvar{ptr} rounded down to the next multiple of \cvar{alignment}.
 \item[\ccode{T \_\_builtin\_align\_up(T ptr, size\_t alignment)}]
   This builtin returns \cvar{ptr} rounded up to the next multiple of \cvar{alignment}.
+\item[\ccode{\_Bool \_\_builtin\_is\_aligned(T ptr, size\_t alignment)}]
+  This builtin returns \cconst{true} if \cvar{ptr} is aligned to at least \cvar{alignment} bytes.
 \end{description}
 
 \rwnote{It would be nice if we had, and could document here, cheri\_ versions
@@ -1242,15 +1242,15 @@ Additionally, the bitwise-AND operation is ambiguous since it can be used both t
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see \cref{sec:ambiguous-provenance}) since it shows the compiler which intermediate results can carry provenance.
 
 \begin{description}
+\item[\ccode{uintptr\_t cheri\_low\_bits\_clear(uintptr\_t ptr, vaddr\_t mask)}]
+  This function clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
+  It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
+  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
+
 \item[\ccode{vaddr\_t cheri\_low\_bits\_get(uintptr\_t ptr, vaddr\_t mask)}]
   This function returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
   It should be used instead of the raw bitwise operation since it can never return
   an unexpectedly tagged value.
-  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
-
-\item[\ccode{uintptr\_t cheri\_low\_bits\_clear(uintptr\_t ptr, vaddr\_t mask)}]
-  This function clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
-  It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
   \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
 
 \item[\ccode{uintptr\_t cheri\_low\_bits\_or(uintptr\_t ptr, vaddr\_t bits)}]
@@ -1666,6 +1666,9 @@ The following APIs allow capability properties to be retrieved from pointers:
 
 \item[\ccode{vaddr\_t cheri\_base\_get(void *c)}] Return the lower bound of capability \cvar{c}.
 
+\item[\ccode{\_Bool cheri\_is\_tagged(void *c)}] Return whether capability \cvar{c} has its
+  validity tag set. \arnote{cheri\_tag\_get?}
+
 \item[\ccode{size\_t cheri\_length\_get(void *c)}] Return the length of the bounds for the capability \cvar{c}.
   The base plus the length gives the upper bound on \cvar{c}'s address.
 
@@ -1674,26 +1677,25 @@ The following APIs allow capability properties to be retrieved from pointers:
 \item[\ccode{size\_t cheri\_perms\_get(void *c)}] Return the permissions of capability
   \cvar{c}. (See \Cref{sec:capability_permissions}.)
 
-\item[\ccode{\_Bool cheri\_is\_tagged(void *c)}] Return whether capability \cvar{c} has its
-  validity tag set. \arnote{cheri\_tag\_get?}
-
 \end{description}
 
-\subsection{Restricting capability properties}
+\subsection{Modifying or restricting capability properties}
 
 The following APIs allow capability properties to be refined on pointers:
 
 \begin{description}
-\item[\ccode{void *cheri\_perms\_and(void *c, size\_t x)}] Perform a bitwise-AND of capability
-  \cvar{c}'s permissions and the value \cvar{x}, returning the new
-  capability (see \Cref{sec:capability_permissions}).
+\item[\ccode{void *cheri\_address\_set(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
+This builtin can be useful to re-derive a valid pointer from an address.
+
+\cfunc{cheri\_address\_set} is able to set an address \cvar{a} that is
+outside of the current bounds of \cvar{c}.  The resulting capability
+is treated as an out-of-bounds pointer as described in \Cref{sec:oob}.
+However, if the address \cvar{a} is not representable in the current
+bounds of \cvar{c} due to capability compression,
+\cfunc{cheri\_address\_set} returns a capability without the tag bit set.
 
 %  This macro wraps the compiler built-in
-%  \cfunc{\_\_builtin\_cheri\_perms\_and}.
-
-\item[\ccode{void *cheri\_tag\_clear(void *c)}] Clear the tag on \cvar{c}, returning the
-  new capability.
-
+%  \cfunc{\_\_builtin\_cheri\_address\_set}.
 \item[\ccode{void *cheri\_bounds\_set(void *c, size\_t x)}] Narrow the bounds of capability
   \cvar{c} so that the lower bound is the current address (which may
   have been increased relative to \cvar{c}'s original lower bound), and its
@@ -1708,18 +1710,16 @@ The following APIs allow capability properties to be refined on pointers:
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_bounds\_set}
 
-\item[\ccode{void *cheri\_address\_set(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
-This builtin can be useful to re-derive a valid pointer from an address.
-
-\cfunc{cheri\_address\_set} is able to set an address \cvar{a} that is
-outside of the current bounds of \cvar{c}.  The resulting capability
-is treated as an out-of-bounds pointer as described in \Cref{sec:oob}.
-However, if the address \cvar{a} is not representable in the current
-bounds of \cvar{c} due to capability compression,
-\cfunc{cheri\_address\_set} returns a capability without the tag bit set.
+\item[\ccode{void *cheri\_perms\_and(void *c, size\_t x)}] Perform a bitwise-AND of capability
+  \cvar{c}'s permissions and the value \cvar{x}, returning the new
+  capability (see \Cref{sec:capability_permissions}).
 
 %  This macro wraps the compiler built-in
-%  \cfunc{\_\_builtin\_cheri\_address\_set}.
+%  \cfunc{\_\_builtin\_cheri\_perms\_and}.
+
+\item[\ccode{void *cheri\_tag\_clear(void *c)}] Clear the tag on \cvar{c}, returning the
+  new capability.
+
 \end{description}
 
 % \note{Are the references to the \ccode{\_\_builtin\_} forms useful?  Do we
