@@ -1039,7 +1039,7 @@ More detailed information on how C/\cpp{} code can set bounds can be found in
 \note{I feel like this section wants a reference to CHERI Concentrate?}{nwf}
 
 ISO C permits pointers to go only one byte beyond their original
-allocation, but real code sometimes constructs transient pointer
+allocation, but widely used code sometimes constructs transient pointer
 values that are further out of bounds.
 For example, \ccode{for} loops iterating over an array may increment a pointer
 into the array by the array entry size before performing an overflow check
@@ -1073,7 +1073,8 @@ manner as a loss of pointer provenance validity (see
 \psnote{Comment on whether that should immediately trap instead?}
 The range of out-of-bounds addresses permitted for a capability is
 a function of the length of the bounded region and the number of bits used for bounds in the capability representation.
-For CHERI-MIPS and 64-bit CHERI-RISC-V (with 27 bits of the capability used for bounds) we get the following guarantees:
+With 27 bits of the capability used for bounds, CHERI-MIPS and 64-bit
+CHERI-RISC-V provide the following guarantees:
 
 \begin{itemize}
 \item A pointer is able to travel at least \sfrac{1}{4} the size of the object, or
@@ -1759,21 +1760,23 @@ to CHERI memory protection are enumerated here:
 \subsection{Bounds alignment due to compression}
 \label{sec:bounds_alignment}
 
-% When the length of an object exceeds $2^{floor(bounds\_bits/2)-1}$ (i.e., $4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
-% apply to the lower and upper bounds.
-% This may require a memory allocator to increase the alignment of an
-% allocation, or increase padding on an allocation, to prevent bounds from
-% spanning more than one object.
-% The alignment required for allocations exceeding the minimum representable range ($4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is $2^{E+3}$ bytes, where
-% $E$ is determined from the length, $l$, by
-% $E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is this too much detail?}
+Bounds imprecisions may require a memory allocator to increase the alignment
+of an allocation, or increase padding on an allocation, to prevent bounds from
+spanning more than one object.
+When the length of an object exceeds $2^{floor(bounds\_bits/2)-1}$ (i.e., $4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
+apply to the lower and upper bounds.
+The alignment required for allocations exceeding the minimum representable range ($4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is $2^{E+3}$ bytes, where
+$E$ is determined from the length, $l$, by
+$E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is this too much detail?}
 %\jrtcnote{Do we want to clarify that this is a 65-bit length? One would naively
 %expect it to be 64-bit and thus be off by one in all calculations. We should
 %probably also steer people towards CRRL/CRAM regardless (and add cheri\_foo
 %APIs for them).}
 %\arnote{65-bit length is probably too much detail. But CRRL/CRAM now documented}
 
-Correctly computing the rounded size and minimum alignment for a given allocation is non-trivial and may require many instructions to compute.
+Correctly computing the rounded size and minimum alignment for a given
+allocation is non-trivial and may require many instructions to compute,
+especially in the context of fast allocators such as the stack allocator.
 Moreover, the architectural constants used for bounds precision differ across
 architectures or their variations, and so alignment constraints to also vary.
 For example, the number of bits available for bounds differs between 32-bit and
