@@ -718,7 +718,7 @@ any other purpose.
   that of a \vaddrt (or \ptrdifft for \cintptrt), despite the increased \emph{alignment} and \emph{storage} requirements.
 
 \item[\ccode{intmax\_t}, \ccode{uintmax\_t}] According to the C standard\arnote{7.20.1.5 Greatest-width integer types}, these integer types should be \enquote{capable of representing any value of any (unsigned) integer type}.
-  In \purecapCOrCpp{}, they are not provenance-carrying and can represent the integer range of \cuintptrt/\cintptrt, but not the capability metadata or tag bit.
+  In \purecapCOrCpp{}, they are not provenance-carrying and can represent the integer \emph{range} of \cuintptrt/\cintptrt, but not the capability metadata or tag bit.
   As the observable value of \cuintptrt/\cintptrt is the pointer address range, we believe this choice to be compatible with the C standard.
 
   Additionally, due to ABI constraints, it would be extremely difficult to change the width of these types from 64 to 129 bits.
@@ -1054,7 +1054,7 @@ use (i.e., dereference), not on pointer manipulation.  Dereferencing
 an out-of-bounds pointer will raise a hardware exception (see
 \Cref{sec:faults}).  However, an out-of-bounds pointer can be
 dereferenced once it has been brought back in bounds, by adjusting the
-address or suppling a suitable offset in the dereference.
+address or supplying a suitable offset in the dereference.
 
 There is, however, a limit to the range of out-of-bounds addresses a capability can hold.
 The capability compression model exploits redundancy between the pointer's address and
@@ -1169,7 +1169,7 @@ We anticipate that revocation will remain a tag-clearing operation by default,
 as tag-clearing removes any risk of needlessly re-examining the capability in
 later revocations.  However, it may be possible to allow coarse control over
 revocation behavior either per process or by region of the address space.  In
-the latter case, \cfunc{mmap} may gain flags specifing which revocation
+the latter case, \cfunc{mmap} may gain flags specifying which revocation
 behavior is desirable for capabilities pointing \emph{into} the mapped region
 and/or \cfunc{madvise} may gain flags controlling the revocation behavior of
 capabilities \emph{within} a target region.  Which of these or similar
@@ -1233,7 +1233,7 @@ Unused high pointer bits cannot be used for additional metadata since toggling t
 The compiler-provided header \ccode{<cheri.h>} provides explicit macros for this
 use of bitwise arithmetic on pointers.
 The use of these macros is currently optional,\footnote{%
-Until recently, not using these macros could result in subtle bugs at run time since capability equality comparisons included the tag bit in addition to the address.}
+Until recently, not using these macros could result in subtle bugs at run time since pointer equality comparisons included the tag bit in addition to the address.}
 but we believe that they can improve readability compared to hand-written bitwise operations.
 Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying \cuintptrt) and to check bits (which should return an integer value).
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see \cref{sec:ambiguous-provenance}) since it shows the compiler which intermediate results can carry provenance.
