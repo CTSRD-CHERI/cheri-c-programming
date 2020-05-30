@@ -1797,9 +1797,10 @@ These instructions can be generated using compiler builtins that are provided by
 \item[\ccode{size\_t cheri\_representable\_alignment\_mask(size\_t len)}] returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
 \end{description}
 
+\noindent
 The precisely representable base address can be computed using:
 \begin{lstlisting}[language={C}]
-        base = base & cheri_representable_alignment_mask(len);
+base = base & cheri_representable_alignment_mask(len);
 \end{lstlisting}
 When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:
