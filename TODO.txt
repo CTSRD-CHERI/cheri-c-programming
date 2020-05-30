@@ -5,3 +5,5 @@ It may be useful to restructure this guide to have three sections:
    you write an allocator you should be setting bounds). Information on low
    pointer bits could also go here
 - Advanced topics for OS kernel developers/language runtime/etc: CHERI intrinsics, etc.
+- Try to avoid the word "should" (suggestion from Paul Gotch) due to potential
+  confusion that could arise.
