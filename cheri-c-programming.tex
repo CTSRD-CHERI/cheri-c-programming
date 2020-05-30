@@ -1773,14 +1773,14 @@ to CHERI memory protection are enumerated here:
 \subsection{Bounds alignment due to compression}
 \label{sec:bounds_alignment}
 
-When the length of an object exceeds $2^{floor(bounds\_bits/2)-1}$ (i.e., $4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
-apply to the lower and upper bounds.
-This may require a memory allocator to increase the alignment of an
-allocation, or increase padding on an allocation, to prevent bounds from
-spanning more than one object.
-The alignment required for allocations exceeding the minimum representable range ($4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is $2^{E+3}$ bytes, where
-$E$ is determined from the length, $l$, by
-$E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is this too much detail?}
+% When the length of an object exceeds $2^{floor(bounds\_bits/2)-1}$ (i.e., $4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
+% apply to the lower and upper bounds.
+% This may require a memory allocator to increase the alignment of an
+% allocation, or increase padding on an allocation, to prevent bounds from
+% spanning more than one object.
+% The alignment required for allocations exceeding the minimum representable range ($4$ KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is $2^{E+3}$ bytes, where
+% $E$ is determined from the length, $l$, by
+% $E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is this too much detail?}
 %\jrtcnote{Do we want to clarify that this is a 65-bit length? One would naively
 %expect it to be 64-bit and thus be off by one in all calculations. We should
 %probably also steer people towards CRRL/CRAM regardless (and add cheri\_foo
@@ -1788,8 +1788,12 @@ $E = 52 - \textrm{CountLeadingZeros}(l[64:floor(bounds\_bits/2)])$.\arnote{Is th
 %\arnote{65-bit length is probably too much detail. But CRRL/CRAM now documented}
 
 Correctly computing the rounded size and minimum alignment for a given allocation is non-trivial and may require many instructions to compute.
-Moreover, the exact limits for precise representability may vary across different implementations of CHERI.
-Therefore, the CHERI ISA provides instructions that allow determining precisely representable allocations.
+Moreover, the architectural constants used for bounds precision differ across
+architectures or their variations, and so alignment constraints to also vary.
+For example, the number of bits available for bounds differs between 32-bit and
+64-bit CHERI-RISC-V, and also between 64-bit CHERI-RISC-V and Morello.
+
+To avoid overly specific software knowledge of alignment requirements, and also to allow efficient calculation of alignment constraints during (for example) stack allocation, the CHERI ISA provides instructions that allow determining precisely representable allocations.
 These instructions can be generated using compiler builtins that are provided by \pathname{cheriintrin.h}:
 \begin{description}
 \item[\ccode{size\_t cheri\_round\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_setbounds} to set the length to \ccode{len} (assuming appropriate alignment of the base).
@@ -1823,11 +1827,6 @@ void *allocate_next(struct Buffer *buf, size_t len) {
 \end{clisting}
 
 \noindent
-The architectural constants used for bounds precision may differ across
-architectures or their variations, which in causes alignment constraints to
-also vary.
-For example, the number of bits available for bounds varies between 32-bit and
-64-bit CHERI-RISC-V, and also between 64-bit CHERI-RISC-V and Morello.
 Software written to use these compiler builtins, rather than encode alignment
 requirements directly, is more likely to be portable between CHERI-MIPS,
 CHERI-RISC-V, and Morello.
