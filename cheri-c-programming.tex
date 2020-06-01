@@ -235,6 +235,21 @@ code-generation, and linkage models:
   %although could also be used for other purposes (e.g., non-CHERI C).
 \end{description}
 
+While the focus of this document is \purecapCOrCpp{}, CHERI is an
+architectural feature able to support other software use cases including
+other C/\cpp{}-language mappings into its features.
+Another mapping is hybrid C/\cpp{}, in which only selected pointers are
+implemented using capabilities, with the remainder implemented using integers.
+We have primarily used hybrid C in systems software that bridges between
+environments executing pure-capability machine code and those running largely
+or entirely non-CHERI-aware machine code.
+For example, a largely CHERI-unaware CheriBSD kernel can host pure-capability
+processes using its CheriABI wrapper implemented in hybrid C
+(see \Cref{sec:cheriabi}).
+Hybrid machine code has stronger binary compatibility, but weaker protection,
+than pure-capability machine code.
+We do not consider hybrid C further in this document.
+
 \section{Background}
 
 CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
