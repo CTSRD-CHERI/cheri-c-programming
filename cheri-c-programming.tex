@@ -1502,7 +1502,7 @@ The CHERI Clang compiler includes many diagnostic warnings to identify code that
 In many cases, a successful compilation that does not emit any CHERI-specific warnings will result in a functional spatially-safe program.
 However, some incompatibilities (e.g., memory allocators returning insufficiently aligned pointers) cannot yet be diagnosed statically.
 This section describes some of the more-commonly seen compiler warnings and provides suggestions on how to change the source code to be compatible with \purecapCOrCpp{}.
-All of these warnings are enabled when the \commandline{-Wall} compiler flag
+All these warnings are enabled when the \commandline{-Wall} compiler flag
 is set.
 
 \subsection{Loss of provenance}
@@ -1533,7 +1533,7 @@ char *example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodP
 \end{compilerwarning}
 
 \noindent
-In some cases this warning can be a false positive.
+In some cases, this warning can be a false positive.
 For example, it is common for C callback APIs take a \cvoidstar data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to \cuintptrt first:
 \begin{clisting}[numbers=left]
@@ -1559,7 +1559,7 @@ void false_positive_example(int callback_data) {
 For arithmetic and bitwise binary operations between \cuintptrt/\cintptrt, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
 However, as noted in \cref{sec:ambiguous-provenance}, there are cases that are ambiguous as far as the compiler is concerned.
 
-Consider for example a structure that holds a pointer and a small amount of flags.
+Consider for example a structure that holds a pointer and a small number of flags.
 In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:
 \begin{clisting}[numbers=left]
 typedef struct { uintptr_t data; } pointer_and_flags;
@@ -1595,7 +1595,7 @@ void set_ptr(pointer_and_flags *p, void *value) {
 %alignment (<N>) of '<type>' is less than the required capability alignment
 %\end{compilerwarning}
 This warning is triggered when packed structures contain pointers.
-As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to a the size of a CHERI capability (16 bytes for a 64-bit architecture).
+As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to the size of a CHERI capability (16 bytes for a 64-bit architecture).
 This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:
 \begin{clisting}[numbers=left]
 struct AtLeast8ByteAlignedBad {
@@ -1861,7 +1861,7 @@ CHERI-RISC-V, and Morello.
 \subsection{Implications for memory-allocator design}
 
 One use case of these APIs is high-performance applications that contain custom memory
-allocators, and wish to narrow the bounds of returned pointers.
+allocators and wish to narrow the bounds of returned pointers.
 Two kinds of modifications are typically required:
 
 \begin{description}
