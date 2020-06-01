@@ -1696,10 +1696,6 @@ The following APIs allow capability properties to be retrieved from pointers:
 
 \item[\ccode{vaddr\_t cheri\_base\_get(void *c)}] Return the lower bound of capability \cvar{c}.
 
-\item[\ccode{\_Bool cheri\_tag\_get(void *c)}] Return whether capability \cvar{c} has its
-  validity tag set.
-  \arnote{This returns the raw tag value, cheriintrin.h may also provide \cfunc{cheri\_is\_valid} and \cfunc{cheri\_is\_invalid}}
-
 \item[\ccode{size\_t cheri\_length\_get(void *c)}] Return the length of the bounds for the capability \cvar{c}.
   The base plus the length gives the upper bound on \cvar{c}'s address.
 
@@ -1707,6 +1703,10 @@ The following APIs allow capability properties to be retrieved from pointers:
 
 \item[\ccode{size\_t cheri\_perms\_get(void *c)}] Return the permissions of capability
   \cvar{c}. (See \Cref{sec:capability_permissions}.)
+
+\item[\ccode{\_Bool cheri\_tag\_get(void *c)}] Return whether capability \cvar{c} has its
+  validity tag set.
+  \arnote{This returns the raw tag value, cheriintrin.h may also provide \cfunc{cheri\_is\_valid} and \cfunc{cheri\_is\_invalid}}
 
 \end{description}
 
