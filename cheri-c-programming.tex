@@ -1658,12 +1658,12 @@ void set_ptr(pointer_and_flags *p, void *value) {
 This warning is triggered when packed structures contain pointers.
 As mentioned in \cref{sec:restricted-capability-locations}, pointers must always be aligned to the size of a CHERI capability (16 bytes for a 64-bit architecture).
 This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:
+\TikzListingHighlightStartEnd[red]{BadAlignPacked}
 \begin{clisting}[numbers=left]
 struct AtLeast8ByteAlignedBad {
     void *data;
 } __attribute__((packed, £\vcpgfmark{StartBadAlignPacked}£aligned(8)£\vcpgfmark{EndBadAlignPacked}£));
 \end{clisting}
-\TikzListingHighlightStartEnd[red]{BadAlignPacked}
 \begin{compilerwarning}
 <source>:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is less than the required capability alignment (16) [-Wcheri-capability-misuse]
 struct AtLeast8ByteAlignedBad {
