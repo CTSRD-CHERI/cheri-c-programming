@@ -1799,8 +1799,11 @@ bounds of \cvar{c} due to capability compression,
   \Cref{sec:bounds_alignment}), but they will always be a subset of
   the original bounds. % of \cvar{c}.
 
-%  This macro wraps the compiler built-in
-%  \cfunc{\_\_builtin\_cheri\_bounds\_set}
+
+\item[\ccode{void *cheri\_bounds\_set\_exact(void *c, size\_t x)}] Narrow the bounds of capability
+  \cvar{c} so that the lower bound is the current address, and its
+  upper bound is \ccode{cheri\_address\_get(c) + x}.
+  This is similar to \cfunc{cheri\_bounds\_set} but will raise a hardware exception if the resulting capability is not precisely representable instead of rounding the bounds.
 
 \nwfnote{No mention of cheri\_bounds\_set\_exact?}
 
@@ -1912,7 +1915,7 @@ void *allocate_next(struct Buffer *buf, size_t len) {
     result = __builtin_align_up(result, required_alignment(len));
     size_t rounded_len = cheri_representable_length(len);
     buf->allocated = (result + rounded_len) - (char *)buf->data;
-    return cheri_bounds_set(result, rounded_len);
+    return cheri_bounds_set_exact(result, rounded_len);
 }
 
 \end{clisting}
