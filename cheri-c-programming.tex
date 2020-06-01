@@ -117,6 +117,7 @@
 \newcommand{\psnote}[1]{\note{#1}{Peter S.}}
 \newcommand{\pgnnote}[1]{\note{#1}{Peter N.}}
 \newcommand{\jrtcnote}[1]{\note{#1}{Jess C.}}
+\newcommand{\hmnote}[1]{\note{#1}{Hesham A.}}
 
 % typeset C++ sensibly
 \usepackage{relsize}
@@ -691,6 +692,7 @@ recommendations:
 \item[\sizet, \ssizet] These integer types should be used
   to hold the unsigned or signed lengths of regions of virtual address space.
   \arnote{\sizet not necessary the same as unsigned \ptrdifft.}
+  \hmnote{These types are also used in a non-virtual envs such as baremetal and embedded OSes}
 
 \item[\ptrdifft] This integer type describes the difference of indices
   between two pointers to elements of the same array, and should not be used for
