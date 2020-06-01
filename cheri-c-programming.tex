@@ -584,10 +584,10 @@ mechanisms.
 However, the language-level behavior of CHERI C/C++ is considerably more
 subtle: existing undefined behavior semantics in C are retained.
 The compiler is free to assume that loads and stores will not trap (i.e., that
-any program is free of undefined behaviour), and may optimize under this
+any program is free of undefined behavior), and may optimize under this
 assumption, including reordering code.
 Architectural traps occur when dynamic loads and stores are attempted, and
-reordering could lead to potential confusing behaviour for programmers.
+reordering could lead to potential confusing behavior for programmers.
 
 In the CheriABI process environment, the operating system catches the hardware
 exception and delivers a \SIGPROT signal to the user process;
@@ -646,7 +646,7 @@ situations:
   -- e.g., a \clongt argument to a callback in older C code -- that
   needs to be changed to use a capability-oblivious type such as \cintptrt.
 
-\psnote{I'm not sure this document has explained the ISA behaviour concretely enough for this stuff to really make sense -- the previous description was quite high-level.  Maybe somewhere it should be explicit that registers have tags, that load and store instructions must be via a capability, and that there are both capability and non-capability load and store instructions, with the former preserving tags (both ways) and the latter clearing them?}
+\psnote{I'm not sure this document has explained the ISA behavior concretely enough for this stuff to really make sense -- the previous description was quite high-level.  Maybe somewhere it should be explicit that registers have tags, that load and store instructions must be via a capability, and that there are both capability and non-capability load and store instructions, with the former preserving tags (both ways) and the latter clearing them?}
 
 \item[Capability-oblivious code] In some portions of the C/\cpp{} runtime and
   com\-piler-generated code, it may not be possible to know whether memory is
@@ -825,7 +825,7 @@ It is not feasible\footnote{%
 We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
 However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.
 \psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
-\arnote{I agree. Even the current behaviour is quite ugly, but at least it has measurable compatibility benefits.}
+\arnote{I agree. Even the current behavior is quite ugly, but at least it has measurable compatibility benefits.}
 } to infer the correct provenance source for the third case, so the compiler will emit a warning.
 The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
 %
@@ -1136,7 +1136,7 @@ However, practical experience has suggested that the current semantics produce f
 subtle bugs, and require fewer changes, than having comparison operators take
 the tag or other metadata into account.\footnote{
 The CHERI Clang compiler supports an experimental flag \texttt{-cheri-comparison=exact} that causes capability equality comparisons to also include capability metadata and the tag bit.
-\arnote{default behaviour=\texttt{-cheri-comparison=address}}
+\arnote{default behavior=\texttt{-cheri-comparison=address}}
 }
 
 \subsection{Implications of capability revocation for temporal safety}
