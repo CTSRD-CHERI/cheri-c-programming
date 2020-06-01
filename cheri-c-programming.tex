@@ -118,6 +118,7 @@
 \newcommand{\pgnnote}[1]{\note{#1}{Peter N.}}
 \newcommand{\jrtcnote}[1]{\note{#1}{Jess C.}}
 \newcommand{\hmnote}[1]{\note{#1}{Hesham A.}}
+\newcommand{\nwfnote}[1]{\note{#1}{nwf}}
 
 % typeset C++ sensibly
 \usepackage{relsize}
@@ -311,13 +312,17 @@ to the protection model:
   fetch, or other operations.
   It is still possible to extract fields from an invalid capability,
   including its address.
-  Subject to precision limits of the bounds compression model, a capability's
-  address (i.e., where it points) can be changed while maintaining the
-  validity tag.
 
 \item[Bounds] The lower and upper bounds are addresses restricting the
   portion of the address space within which the capability can be used for
   load, store, and instruction fetch.
+  %
+  Setting a capability's address (i.e., where it points) within
+  bounds will retain the capability's validity tag.  Setting addresses out of
+  bounds is subject to the precision limits of the bounds compression model
+  (see below and \cref{sec:oob}; broadly speaking, setting addresses ``near''
+  the capability's bounds will preserve the validity tag.  (These out-of-bounds
+  capabilities continue to authorize access only to memory within bounds.)
 
 \item[Permissions] The permissions mask controls how the capability can be
   used -- for example, by authorizing the loading and storing of data and/or
@@ -347,7 +352,8 @@ and the bounds, which occurs because a pointer typically falls within (or
 close to) its associated allocation, and because allocations are typically
 well aligned.
 The compression scheme uses a floating-point representation, allowing high-precision bounds for small
-objects, but requiring stronger alignment and padding for larger allocations.
+objects, but requiring stronger alignment and padding for larger allocations
+(see \cref{sec:bounds_alignment}).
 
 \subsection{Architectural rules for capability use}
 
@@ -472,14 +478,14 @@ which ensures that:
   \itemsep0em  % the default large spacing looks weird in this list
   \item capabilities are context switched (if required);
   \item tags are maintained by the OS virtual-memory subsystem (if present);
-  \item capabilities are supported in various OS control operations such as
+  \item capabilities are supported in OS control operations such as
     debugging (as needed);
   \item system-call arguments, the
 run-time linker, and other aspects of the OS Application Binary Interface
 (ABI) utilize capabilities rather than integer pointers; and
   \item the C/\cpp{}-language runtime implements suitable capability preservation
     \\
-    (e.g., in \cfunc{memcpy}) and restriction (e.g., in \cfunc{malloc}).
+    (e.g., in \cfunc{memcpy}\kern-2pt) and restriction (e.g., in \cfunc{malloc}\kern-2pt).
 \end{itemize}
 
 In CheriBSD, our CHERI-extended version of the open-source FreeBSD operating
@@ -508,16 +514,17 @@ present in compilation to conventional architectures:
   When pointers are implemented using architectural capabilities, CHERI's
   capability tags and provenance validity naturally provide this protection.
 
-\item[Spatial safety] prevents manipulation of a pointer outside of the bounds
-  of its associated allocation from granting access to another allocation.
+\item[Spatial safety] ensures that pointers may be used only to access memory
+  within bounds of their associated allocation; dually, manipulating an
+  out-of-bounds pointer will not grant access to another allocation.
 
   This is accomplished by adapting various memory allocators, including the run-time
   linker for global variables, the stack allocator, and the heap allocator,
   to set the bounds on the capability implementing a pointer before returning
   it to the caller.
   Due to precision constraints on capability bounds, bounds on returned
-  pointers may include additional padding, but will not permit access to any
-  other allocations.
+  pointers may include additional padding, but will still not permit access to any
+  other allocations (see \cref{sec:bounds_alignment}).
   Monotonicity ensures that callers cannot later broaden the bounds to cover
   other allocations.
 \end{description}
@@ -532,7 +539,7 @@ CheriFreeRTOS and CHERI-RTEMS.
   underlying allocation from being used to access its memory if that memory
   has been reused for a fresh allocation (e.g., after a fresh pointer to that
   memory has been returned by a further call to \cfunc{malloc} after the
-  current pointer passed to \cfunc{free}).
+  current pointer passed to \cfunc{free}\kern-2pt).
 
   Heap temporal safety is accomplished by preventing new pointers being
   returned to a previously allocated region of memory while any prior pointers
@@ -670,12 +677,12 @@ situations:
   desirable.
   In those cases, memory accesses must be performed in a way that preserves
   pointer provenance.
-  In the C runtime itself, this includes \cfunc{memcpy}, which must use
+  In the C runtime itself, this includes \cfunc{memcpy}\kern-2pt, which must use
   capability load and store instructions to transparently propagate capability
   metadata and tags.
 
   A useful example of potentially surprising code requiring modification for
-  \purecapCOrCpp{} is \cfunc{qsort}.
+  \purecapCOrCpp{} is \cfunc{qsort}\kern-2pt.
   Some C programs assume that \cfunc{qsort} on an array of data structures
   containing pointers will preserve the usability of those pointers.
   As a result, \cfunc{qsort} must be modified to perform memory copies using
@@ -758,10 +765,12 @@ any other purpose.
 \item[\maxalignt] This type is defined in C as \enquote{an object type whose alignment is the greatest fundamental alignment} \arnote{C2x \S{}7.19.2} and this includes capability types for \purecapCOrCpp{}.
 % and in \cpp{} as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
 We found that some custom allocators use \ccode{sizeof(long double)} or \ccode{sizeof(uint64\_t)} to align their return values.
-While this appears to work on most architectures, in \purecapCOrCpp{} this must be changed to \ccode{alignof(\maxalignt)}\footnote{
+While this appears to work on most architectures, in \purecapCOrCpp{} this must be changed to \ccode{alignof(\maxalignt)}\kern-2pt.%
+%
+\footnote{%
 It is important to use \ccode{alignof} instead of \ccode{sizeof} since many
 common implementations, such as GCC and FreeBSD, define \maxalignt as a
-\ccode{struct} and not a \ccode{union}.}.
+\ccode{struct} and not a \ccode{union}.}
 
 \item[\ccharstar, \ldots{}] These pointer types are suitable for
   dereference, but in general \psnote{that ``in general'' makes me wonder about the exceptions?}
@@ -809,11 +818,11 @@ for optimization purposes? E.g., strcmp loading a word at a time?}
 \subsubsection{Single-origin provenance}
 \label{sec:ambiguous-provenance}
 
-In the CHERI protection model, capabilities are derived from a single other
+In the CHERI memory protection model, capabilities are derived from a single other
 capability.
 However, in C code, expressions may construct a new \cintptrt value from more
 than one provenance-carrying parent \cintptrt{} -- for example, by casting both a
-pointer and a literal value to \cintptrt{}'s, and then adding them.
+pointer and a literal value to \cintptrt{}-s, and then adding them.
 \psnote{That literal value wouldn't have a non-empty provenance, so this isn't the best example.   Maybe better to have something like \texttt{p+(q1-q2)} ?}
 \psnote{More generally, there is a bit of a mismatch between this and our C provenance treatment of \cintptrt, which there is a plain integer type with no provenance -- but which regains provenance in some cases when cast back to a pointer.  To ponder...}
 In that case, the compiler must decide which input capability provides the
@@ -831,18 +840,23 @@ In C with integer pointers, the values of \cvar{c1}, \cvar{c2}, and \cvar{c3} mi
 same value as \cvar{input\_ptr}, except with the address incremented by one.
 In CHERI C, each expression includes an arithmetic operation between provenance-carrying types.
 While not visible in the source code, the constant \cconst{1} is promoted to a capability type, \cuintptrt.
-In the current implementation, the compiler will return the expected provenance-carrying result for cases \cvar{c1} and \cvar{c2} but not \cvar{c3}.\footnote{%
+In the current implementation, the compiler will return the expected provenance-carrying result for cases \cvar{c1} and \cvar{c2} but not \cvar{c3}.%
+%
+\footnote{%
 Historically, the CHERI compiler would select the left-hand-most pointer in the expression as the provenance source.
 While this model follows a single consistent rule, it can lead to surprising behavior if an expression places the provenance-carrying value to the right-hand-side.
-In the example above, the value of \ccode{c1} would be a valid capability, but \cvar{c2} and \cvar{c3} would hold an untagged value (albeit with the expected address).
-}
+In the example above, the value of \ccode{c1} would be a valid capability, but \cvar{c2} and \cvar{c3} would hold an untagged value (albeit with the expected address).}
+%
 For \cvar{c1} and \cvar{c2}, the compiler sees that one of the sides is a non-provenance-carrying integer type that was promoted to \cuintptrt and therefore selects the other operand as the provenance source.
-It is not feasible\footnote{%
+It is not feasible to infer the correct provenance source for the third case, so the compiler will emit a warning.%
+%
+\footnote{%
 We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
 However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.
 \psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
 \arnote{I agree. Even the current behavior is quite ugly, but at least it has measurable compatibility benefits.}
-} to infer the correct provenance source for the third case, so the compiler will emit a warning.
+}
+%
 The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
 %
 The recommended approach to resolve such ambiguous cases is to change the type of one operand to a non-provenance-carrying type such as \sizet.
@@ -850,6 +864,7 @@ Alternatively, if the variable declaration cannot be changed, it is also possibl
 \begin{lstlisting}[language=C]
 size_t offset_size_t = 1;
 void *c3_good1 = (void *)(offset_size_t + (uintptr_t)input_ptr);
+
 uintptr_t offset_uintptr_t = 1;
 void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
 \end{lstlisting}
@@ -890,9 +905,9 @@ The compiler will arrange that language-level pointers to stack allocations have
 bounds, and that the run-time linker will return bounded pointers to global
 variables.
 Bounds will typically be set based on an explicitly requested allocation size
-(e.g., via the size passed to \cfunc{alloca}) or, for compiler-generated
+(e.g., via the size passed to \cfunc{alloca}\kern-2pt) or, for compiler-generated
 code or linker-allocated memory, by the C type mechanism (e.g.,
-\ccode{sizeof(foo)}), adjusted for precision requirements arising from
+\ccode{sizeof(foo)}\kern-2pt), adjusted for precision requirements arising from
 capability compression.
 In some cases, such as with global variables allocated in multiple object
 files, the actual size of the allocation may not be resolved until run time,
@@ -916,8 +931,19 @@ This idiom is mostly likely to be found with non-trivial uses of \cfunc{realloc}
 We note that the subtraction of two pointers from different
 allocations is undefined behavior in ISO C, and risks mis-optimization from
 breaking compiler alias analysis assumptions.
-Further, any operation on the pointer passed to \cfunc{realloc} is undefined upon
-return.
+Further, \emph{any} operation on the pointer passed to \cfunc{realloc} is undefined upon
+return.  Instead, we suggest that the programmer measure a pointer \cvar{P}'s
+offset into an object \cvar{A} \emph{prior to} \cfunc{realloc} and derive new pointers
+from the \cfunc{realloc} result \cvar{B} and these offsets. (i.e., compute
+$\text{\cvar{B}} + (\text{\cvar{P}} - \text{\cvar{A}})$ rather than
+$\text{\cvar{P}} + (\text{\cvar{B}} - \text{\cvar{A}})$).%
+%
+\footnote{%
+While it may seem that \cvar{A} remains available after \cfunc{realloc}\kern-2pt, our
+revocation sweeps which enforce temporal safety may have atomically replaced
+this with a non-pointer value.  The scalar value
+$\text{\cvar{D}} = \text{\cvar{P}} - \text{\cvar{A}}$
+will naturally be preserved by revocation.}
 
 \subsubsection{Subobject bounds}
 
@@ -926,7 +952,7 @@ bounds when a pointer is taken to a subobject -- for example, an array
 embedded within another structure that itself has been heap allocated.
 This will prevent an overflow on that array from affecting the remainder of
 the structure, improving spatial safety.
-Subobject bounds are not enabled as they may require additional source code changes
+Subobject bounds are not enabled by default as they may require additional source code changes
 for compatibility, but can be enabled using the \mbox{\commandline{-Xclang}} \mbox{\commandline{-cheri-bounds=subobject-safe}} compiler flag.
 
 One example of C code that requires changes for subobject bounds is the \ccode{containerof}
@@ -996,9 +1022,12 @@ In certain cases, the size of the subobject is not known, but we still know that
 before the field member will not be accessed (e.g., variable size array members
 inside structs).
 Pre-C99 code will declare such members as fixed-size arrays, which will cause
-a hardware exception if the allocation does not grant access to that many bytes.\footnote{%
+a hardware exception if the allocation does not grant access to that many bytes.%
+%
+\footnote{%
 If flexible arrays members are declared using the C99 syntax with empty square
 brackets, the compiler will automatically use the remaining allocation size.}
+%
 To use the remaining allocation size instead of completely disabling bounds
 (and thus protecting against buffer underflows) the annotation:
 
@@ -1041,8 +1070,9 @@ The use of subobject bounds imposes additional compatibility constraints on
 existing C and \cpp{} code.
 While we have not encountered many issues related to subobject bounds in
 existing code, it does slightly increase the porting effort.
-Therefore, this feature is currently not enabled by default and requires a
-compiler flag to be enabled.
+%\nwfnote{Already said above:}
+%Therefore, this feature is currently not enabled by default and requires a
+%compiler flag to be enabled.
 
 \psnote{that seems excessively bold to me}
 \psnote{what flag?}
@@ -1056,7 +1086,7 @@ compiler flag to be enabled.
 Bounds may also be set by other parts of the implementation.
 For example, the kernel may set bounds on pointers to new memory mappings (see
 \Cref{sec:cheriabi}), and the system library may set bounds on pointers
-into returned buffers from APIs -- e.g., \cfunc{fgetln}.
+into returned buffers from APIs -- e.g., \cfunc{fgetln}\kern-2pt.
 More detailed information on how C/\cpp{} code can set bounds can be found in
 \Cref{sec:cheri-apis}.
 
@@ -1073,6 +1103,9 @@ into the array by the array entry size before performing an overflow check
 that terminates the loop.
 This temporarily constructs an out-of-bounds pointer without an out-of-bounds
 dereference taking place.
+%
+\nwfnote{In the straightforward case, tho, that still results in the pointer
+being only one past the end of its allocation, doesn't it?}
 
 To support this behavior, capabilities
 can hold a range of out-of-bounds addresses while retaining a valid
@@ -1125,7 +1158,11 @@ will not be considered when by C operators such as \texttt{==}, \texttt{<}, and 
 On the whole, this leads to intuitive behavior in systems software, where,
 for example, \cfunc{malloc} adjusts bounds on a pointer before returning it to
 a caller, and then expects an address-wise comparison to succeed when the
-pointer is later returned via a call to \cfunc{free}.
+pointer is later returned via a call to \cfunc{free}\kern-2pt.
+%
+\nwfnote{I don't think I particularly like that example, since the thing \cfunc{free}
+is nominally comparing against is the bounded return from \cfunc{malloc}\kern-2pt.}
+%
 However, this behavior could also lead to potentially confusing results; for
 example:
 
@@ -1150,7 +1187,9 @@ example:
 \noindent
 However, practical experience has suggested that the current semantics produce fewer
 subtle bugs, and require fewer changes, than having comparison operators take
-the tag or other metadata into account.\footnote{
+the tag or other metadata into account.%
+%
+\footnote{%
 The CHERI Clang compiler supports an experimental flag \texttt{-cheri-comparison=exact} that causes capability equality comparisons to also include capability metadata and the tag bit.
 \arnote{default behavior=\texttt{-cheri-comparison=address}}
 }
@@ -1212,7 +1251,9 @@ in the lower bits of pointers to well-aligned allocations -- will result in the 
 However, there are some corner cases where the result may be a tagged (but out-of-bounds)
 capability when an integer value is expected.
 \arnote{TODO: add an example. Maybe the mutex example checking low pointer bits + some alignment checks?}
-Dually, bitwise operations may also result in the loss of tags if intermediate results become unrepresentable (recall \Cref{sec:oob}).\footnote{%
+Dually, bitwise operations may also result in the loss of tags if intermediate results become unrepresentable (recall \Cref{sec:oob}).%
+%
+\footnote{%
 Previous versions of the compiler used the capability offset (address minus base) instead
 of the address for arithmetic on \cuintptrt.
 This often resulted in unexpected results and therefore we switched to using
@@ -1220,8 +1261,8 @@ the address in \cuintptrt arithmetic instead.
 The old offset-based mode may be interesting for garbage collected C where
 addresses are less useful and therefore it can still be enabled by
 passing \commandline{-cheri-uintcap=offset}.
-However, this may result in significantly reduced compatibility with legacy C code.
-}
+However, this may result in significantly reduced compatibility with legacy C code.}
+%
 Most bitwise operations on \cuintptrt fall into one of three categories for which we provide
 higher-level abstractions.
 
@@ -1229,11 +1270,11 @@ higher-level abstractions.
 If the C code is attempting to align a pointer or check the alignment of pointers,
 the following compiler builtins should be used instead:
 \begin{description}
-\item[\ccode{T \_\_builtin\_align\_down(T ptr, size\_t alignment)}]
+\item[\ccode{T \_\_builtin\_align\_down(T ptr, size\_t alignment)}\kern-2pt]
   This builtin returns \cvar{ptr} rounded down to the next multiple of \cvar{alignment}.
-\item[\ccode{T \_\_builtin\_align\_up(T ptr, size\_t alignment)}]
+\item[\ccode{T \_\_builtin\_align\_up(T ptr, size\_t alignment)}\kern-2pt]
   This builtin returns \cvar{ptr} rounded up to the next multiple of \cvar{alignment}.
-\item[\ccode{\_Bool \_\_builtin\_is\_aligned(T ptr, size\_t alignment)}]
+\item[\ccode{\_Bool \_\_builtin\_is\_aligned(T ptr, size\_t alignment)}\kern-2pt]
   This builtin returns \cconst{true} if \cvar{ptr} is aligned to at least \cvar{alignment} bytes.
 \end{description}
 
@@ -1251,40 +1292,48 @@ We have submitted these builtins as part of the upstream Clang 10.0 release, so 
 \label{sec:low-pointer-bits}
 In many cases the minimum alignment of pointer values is known and therefore
 programmers assume that the low bits (which will always be zero) can be
-used to store additional data.\footnote{%
+used to store additional data.%
+%
+\footnote{%
 CHERI actually provides many more usable bits than a conventional architecture.
 In the current implementation of 128-bit CHERI, any bit between\psnote{inclusive?} the least
 significant and the 9th least significant bit may be toggled without causing
-the tag to be cleared in pointers that point to the beginning of an allocation.
+the tag to be cleared in pointers that point to the beginning of an allocation (i.e., whose \emph{offset} is zero).
 \psnote{This is confusing -- not clearing the tag isn't the same as not destroying part of the pointer data...}
-If the pointer is strongly aligned, further bits may be toggled without clearing the tag.}
+If the pointer is strongly aligned, further bits may be toggled without clearing the tag.
+%
+\nwfnote{But the macros only permit the use of the bottom 5.  We should say that somewhere.}}
+%
 Unused high pointer bits cannot be used for additional metadata since toggling them causes a large change to the address field, and capabilities that are significantly far out-of-bounds cannot be represented (see \cref{sec:oob}).
 
 The compiler-provided header \ccode{<cheri.h>} provides explicit macros for this
 use of bitwise arithmetic on pointers.
-The use of these macros is currently optional,\footnote{%
+The use of these macros is currently optional,%
+%
+\footnote{%
 Until recently, not using these macros could result in subtle bugs at run time since pointer equality comparisons included the tag bit in addition to the address.}
+%
 but we believe that they can improve readability compared to hand-written bitwise operations.
 Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying \cuintptrt) and to check bits (which should return an integer value).
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see \cref{sec:ambiguous-provenance}) since it shows the compiler which intermediate results can carry provenance.
 
 \begin{description}
-\item[\ccode{uintptr\_t cheri\_low\_bits\_clear(uintptr\_t ptr, vaddr\_t mask)}]
+\item[\ccode{uintptr\_t cheri\_low\_bits\_clear(uintptr\_t ptr, vaddr\_t mask)}\kern-2pt]
   This function clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
   It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
-  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
+  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}\kern-2pt.
 
-\item[\ccode{vaddr\_t cheri\_low\_bits\_get(uintptr\_t ptr, vaddr\_t mask)}]
+\item[\ccode{vaddr\_t cheri\_low\_bits\_get(uintptr\_t ptr, vaddr\_t mask)}\kern-2pt]
   This function returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
   It should be used instead of the raw bitwise operation since it can never return
   an unexpectedly tagged value.
-  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}.
+  \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}\kern-2pt.
 
-\item[\ccode{uintptr\_t cheri\_low\_bits\_or(uintptr\_t ptr, vaddr\_t bits)}]
+\item[\ccode{uintptr\_t cheri\_low\_bits\_or(uintptr\_t ptr, vaddr\_t bits)}\kern-2pt]
   This function performs a bitwise-OR of \cvar{ptr} with \cconst{bits}.
   In order to retain compatibility with a non-CHERI architecture, \cconst{bits} should be less than the known alignment of \cvar{ptr}.
 
-\item[\ccode{uintptr\_t cheri\_low\_bits\_set(uintptr\_t ptr, vaddr\_t mask, vaddr\_t bits)}]
+\item[\ccode{uintptr\_t cheri\_low\_bits\_set(uintptr\_t ptr, vaddr\_t mask, vaddr\_t bits)}\kern-2pt]
   This function sets the low bits of \cvar{ptr} to \cconst{bits} by clearing the low bits in \cvar{mask} first.
 
 \end{description}
@@ -1319,14 +1368,22 @@ programming styles that fail to unambiguously differentiate these types:
   The C-language default of using an integer type for function arguments when
   there is not an appropriate function prototype will cause pointer values to
   be handled improperly; this is also true on LP64 ABIs (e.g., most 64-bit
-  POSIX systems)\footnote{The forthcoming ISO C2x standard
+  POSIX systems).%
+  %
+  \footnote{%
+  The forthcoming ISO C2x standard
   makes function declarations with an empty parameter list equivalent to
-  a parameter list consisting of a single \ccode{void}.}.
+  a parameter list consisting of a single \ccode{void}.}
+  %
   To avoid these problems, the CHERI Clang compiler emits a warning (\commandline{-Wcheri-prototypes}) by default when a function without a declared prototype is called.
   This warning is less strict than \commandline{-Wstrict-prototypes} and can be
-  used to convert \textit{K\&R} functions that may cause problems.\footnote{If the \textit{K\&R} function is defined within the same
+  used to convert \textit{K\&R} functions that may cause problems.%
+  %
+  \footnote{%
+  If the \textit{K\&R} function is defined within the same
   file, the compiler can determine the correct calling convention and will not
   emit a warning.}
+  %
   This should not be an issue for C code written in the last 20 years, but
   many core operating-system components can be significantly older.
 
@@ -1339,7 +1396,7 @@ programming styles that fail to unambiguously differentiate these types:
   Some C code assumes that the calling convention of variadic and non-variadic
   functions is sufficiently similar that they may be used interchangeably.
   Historically, this included the FreeBSD kernel's implementation of
-  \cfunc{open}, \cfunc{fcntl}, and \cfunc{syscall}.
+  \cfunc{open}\kern-2pt, \cfunc{fcntl}\kern-2pt, and \cfunc{syscall}\kern-2pt.
 
   \rwnote{I wonder if we need to be more specific with an example here.}\arnote{TODO: Add example such as missing open() mode arguments?}
 
@@ -1378,7 +1435,7 @@ ways:
   While the compiler and native allocators (stack, heap, \ldots{}) will
   provide sufficient alignment for capability-based pointers, custom
   allocators may align allocations to \ccode{sizeof(intmax\_t)} rather than
-  \ccode{alignof(\maxalignt)}.
+  \ccode{alignof(\maxalignt)}\kern-2pt.
 
 \item[Size] CHERI capabilities are twice the size of an integer able to
   describe the full address space.
@@ -1392,7 +1449,7 @@ ways:
   \begin{itemize}
   \item Assuming that a pointer will fit into the largest integer type.
   \item Assuming that the number of bits in a pointer type is the same
-    as the number of bits in the address space it can refer to.
+    as the number of bits indexing the address space it can refer to.
   \item Assuming that the number of bits in a pointer type is the same as the
     number of bits suitable for use in performing bit-wise manipulations of
     pointer values.
@@ -1443,7 +1500,7 @@ capability-related faults).
   untagged data, not tagged pointers, may be passed via various forms of
   message-passing Inter-Process Communication (IPC).
   Some existing software takes advantage of a shared address-space layout
-  (via \cfunc{fork}) to pass pointers to elements of shared data structures
+  (via \cfunc{fork}\kern-2pt) to pass pointers to elements of shared data structures
   (e.g., entries in dispatch tables).
   This code must be converted to use indexes into tables or other lookup
   mechanisms rather than passing pointers via IPC.
@@ -1467,7 +1524,7 @@ capability-related faults).
    The \cvar{prot} argument has been extended to accept additional
    flags indicating the maximum permission the page can have so that a
    linker might request a reservation for a library with the permissions
-   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)}, which
+   \ccode{(PROT\_MAX(PROT\_READ|PROT\_WRITE|PROT\_EXEC) | PROT\_NONE)}\kern-2pt, which
    would return a capability permitting loads, stores, and instruction
    fetch while mapping the pages with no (MMU) permissions.
 \end{description}
@@ -1555,6 +1612,8 @@ void false_positive_example(int callback_data) {
 2 warnings generated.
 \end{compilerwarning}
 
+\nwfnote{The ``:15:24'' above should also be ``:4:24''?}
+
 \subsection{Ambiguous provenance}
 For arithmetic and bitwise binary operations between \cuintptrt/\cintptrt, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
 However, as noted in \cref{sec:ambiguous-provenance}, there are cases that are ambiguous as far as the compiler is concerned.
@@ -1588,6 +1647,8 @@ void set_ptr(pointer_and_flags *p, void *value) {
 }
 \end{clisting}
 
+\nwfnote{Not use cheri\_low\_bits\_set()?}
+
 \arnote{TODO: this section should have more examples.}
 
 \subsection{Underaligned capabilities}
@@ -1612,7 +1673,7 @@ struct AtLeast8ByteAlignedBad {
 \end{compilerwarning}
 
 \noindent
-The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include \ccode{alignof(\cvoidstar)}:
+The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include \ccode{alignof(\cvoidstar)}\kern-2pt:
 %
 \begin{clisting}[numbers=left]
 £\vcpgfmark{StartFixAlign1}£#include <stdalign.h>£\vcpgfmark{EndFixAlign1}£
@@ -1692,19 +1753,19 @@ permission bits:
 The following APIs allow capability properties to be retrieved from pointers:
 
 \begin{description}
-\item[\ccode{vaddr\_t cheri\_address\_get(void *c)}] Return the address of the capability \cvar{c}.
+\item[\ccode{vaddr\_t cheri\_address\_get(void *c)}\kern-2pt] Return the address of the capability \cvar{c}.
 
-\item[\ccode{vaddr\_t cheri\_base\_get(void *c)}] Return the lower bound of capability \cvar{c}.
+\item[\ccode{vaddr\_t cheri\_base\_get(void *c)}\kern-2pt] Return the lower bound of capability \cvar{c}.
 
-\item[\ccode{size\_t cheri\_length\_get(void *c)}] Return the length of the bounds for the capability \cvar{c}.
+\item[\ccode{size\_t cheri\_length\_get(void *c)}\kern-2pt] Return the length of the bounds for the capability \cvar{c}.
   The base plus the length gives the upper bound on \cvar{c}'s address.
 
-\item[\ccode{size\_t cheri\_offset\_get(void *c)}] Return the difference between the address and the lower bound of the capability \cvar{c}.
+\item[\ccode{size\_t cheri\_offset\_get(void *c)}\kern-2pt] Return the difference between the address and the lower bound of the capability \cvar{c}.
 
-\item[\ccode{size\_t cheri\_perms\_get(void *c)}] Return the permissions of capability
+\item[\ccode{size\_t cheri\_perms\_get(void *c)}\kern-2pt] Return the permissions of capability
   \cvar{c}. (See \Cref{sec:capability_permissions}.)
 
-\item[\ccode{\_Bool cheri\_tag\_get(void *c)}] Return whether capability \cvar{c} has its
+\item[\ccode{\_Bool cheri\_tag\_get(void *c)}\kern-2pt] Return whether capability \cvar{c} has its
   validity tag set.
   \arnote{This returns the raw tag value, cheriintrin.h may also provide \cfunc{cheri\_is\_valid} and \cfunc{cheri\_is\_invalid}}
 
@@ -1715,7 +1776,7 @@ The following APIs allow capability properties to be retrieved from pointers:
 The following APIs allow capability properties to be refined on pointers:
 
 \begin{description}
-\item[\ccode{void *cheri\_address\_set(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
+\item[\ccode{void *cheri\_address\_set(void *c, vaddr\_t a)}\kern-2pt] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
 This can be useful to re-derive a valid pointer from an address.
 
 \cfunc{cheri\_address\_set} is able to set an address \cvar{a} that is
@@ -1727,13 +1788,13 @@ bounds of \cvar{c} due to capability compression,
 
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_address\_set}.
-\item[\ccode{void *cheri\_bounds\_set(void *c, size\_t x)}] Narrow the bounds of capability
+\item[\ccode{void *cheri\_bounds\_set(void *c, size\_t x)}\kern-2pt] Narrow the bounds of capability
   \cvar{c} so that the lower bound is the current address (which may
   have been increased relative to \cvar{c}'s original lower bound), and its
   upper bound is suitable for a length of \cvar{x}.
 
   Note that the effective bounds of the returned capability may be
-  wider than the range [\ccode{cheri\_address\_get(c)},
+  wider than the range [\ccode{cheri\_address\_get(c)}\kern-2pt,
   \ccode{cheri\_address\_get(c) + x}) due to capability compression (see
   \Cref{sec:bounds_alignment}), but they will always be a subset of
   the original bounds. % of \cvar{c}.
@@ -1741,14 +1802,16 @@ bounds of \cvar{c} due to capability compression,
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_bounds\_set}
 
-\item[\ccode{void *cheri\_perms\_and(void *c, size\_t x)}] Perform a bitwise-AND of capability
+\nwfnote{No mention of cheri\_bounds\_set\_exact?}
+
+\item[\ccode{void *cheri\_perms\_and(void *c, size\_t x)}\kern-2pt] Perform a bitwise-AND of capability
   \cvar{c}'s permissions and the value \cvar{x}, returning the new
   capability (see \Cref{sec:capability_permissions}).
 
 %  This macro wraps the compiler built-in
 %  \cfunc{\_\_builtin\_cheri\_perms\_and}.
 
-\item[\ccode{void *cheri\_tag\_clear(void *c)}] Clear the tag on \cvar{c}, returning the
+\item[\ccode{void *cheri\_tag\_clear(void *c)}\kern-2pt] Clear the tag on \cvar{c}, returning the
   new capability.
 
 \end{description}
@@ -1824,9 +1887,9 @@ For example, the number of bits available for bounds differs between 32-bit and
 To avoid overly specific software knowledge of alignment requirements, and also to allow efficient calculation of alignment constraints during (for example) stack allocation, the CHERI ISA provides instructions that allow determining precisely representable allocations.
 These instructions can be generated using compiler builtins that are provided by \pathname{cheriintrin.h}:
 \begin{description}
-\item[\ccode{size\_t cheri\_representable\_length(size\_t len)}] returns the length that a capability would have after using \ccode{cheri\_bounds\_set} to set the length to \ccode{len} (assuming appropriate alignment of the base).
+\item[\ccode{size\_t cheri\_representable\_length(size\_t len)}\kern-2pt] returns the length that a capability would have after using \ccode{cheri\_bounds\_set} to set the length to \ccode{len} (assuming appropriate alignment of the base).
 
-\item[\ccode{size\_t cheri\_representable\_alignment\_mask(size\_t len)}] returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
+\item[\ccode{size\_t cheri\_representable\_alignment\_mask(size\_t len)}\kern-2pt] returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
 \end{description}
 
 \noindent
@@ -1867,7 +1930,7 @@ Two kinds of modifications are typically required:
 
 \begin{description}
 \item[Changes to alignment to allow for capabilities and bounds]
-  Changes relating to alignment fall into two categories:
+  Changes relating to alignment fall into two categories.
   First, those required to allow pointers to be stored within allocations,
   which requires that allocations be aligned to the pointer width (128 bits).
   Second, further alignment changes will be required to ensure that bounds can
@@ -1876,31 +1939,34 @@ Two kinds of modifications are typically required:
   any other live allocations, as described in
   \Cref{sec:bounds_alignment}.\arnote{May want to switch order of sections?}
 
-\item[Reaching allocation metadata on \cfunc{free}]
+\item[Reaching allocation metadata on \cfunc{free}\kern-2pt]
   It is often the case that allocators utilize the value of the pointer passed
   to their custom \cfunc{free} function to locate corresponding metadata --
   for example, by always placing that metadata immediately before the
   allocation, which would be outside of the allocation's bounds.
   Therefore, some additional work may be required to derive a pointer to the
   allocation's metadata via another global capability, rather than the one
-  that has been passed to \cfunc{free}.
+  that has been passed to \cfunc{free}\kern-2pt.
 \end{description}
 
 These two concerns may interact: When a custom allocator places metadata at
 the beginning of the allocation, care must be taken that the resulting pointer
 is still strongly aligned.
 While porting programs to run on CHERI, we found multiple sub-allocators
-that used 8 bytes of metadata after the result from \cfunc{malloc}.
+that used 8 bytes of metadata after the result from \cfunc{malloc}\kern-2pt.
 This causes the resulting pointer to no longer be sufficiently aligned to
 store capabilities without faulting or stripping tag bits.
-\note{Does CHERI ISAv7 still fault in any of these scenarios?}{nwf}
+\nwfnote{Does CHERI ISAv7 still fault in any of these scenarios?}
 
 Note that it is also possible to use the above APIs to validate inputs to
-\cfunc{free}, which is useful when the consumer of \cfunc{free} is, for example,
+\cfunc{free}\kern-2pt, which is useful when the consumer of \cfunc{free} is, for example,
 an untrusted compartment or a component of a web browser that might be
 influenced by an attacker. In such cases, \cfunc{free} should validate that the
-passed-in capability is tagged, is in-bounds, and points to a legitimate
-allocation.
+passed-in capability is tagged, is in-bounds, and points to a legitimate,
+still-allocated allocation.  For allocators engaged in revocation for temporal
+safety, concurrent revocation opens the door to TOCTTOU races within
+\cfunc{free}\kern-2pt; additional care must be taken to prevent a double-\cfunc{free}
+using a stale pointer from freeing an object allocated after revocation.
 
 %\section{Potential performance impact}
 %
