@@ -1716,7 +1716,7 @@ The following APIs allow capability properties to be refined on pointers:
 
 \begin{description}
 \item[\ccode{void *cheri\_address\_set(void *c, vaddr\_t a)}] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
-This builtin can be useful to re-derive a valid pointer from an address.
+This can be useful to re-derive a valid pointer from an address.
 
 \cfunc{cheri\_address\_set} is able to set an address \cvar{a} that is
 outside of the current bounds of \cvar{c}.  The resulting capability
