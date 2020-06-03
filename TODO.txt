@@ -7,3 +7,5 @@ It may be useful to restructure this guide to have three sections:
 - Advanced topics for OS kernel developers/language runtime/etc: CHERI intrinsics, etc.
 - Try to avoid the word "should" (suggestion from Paul Gotch) due to potential
   confusion that could arise.
+- Make observation about 32/64-bit transition and impact on recent / updated code, as well as longer-term maintainability
+- Any thoughts on standardisation?
