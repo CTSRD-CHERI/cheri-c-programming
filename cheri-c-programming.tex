@@ -90,7 +90,7 @@
 \newcommand{\maxalignt}{{\ccode{max\_align\_t}}\xspace}
 \newcommand{\sizet}{{\ccode{size\_t}}\xspace}
 \newcommand{\ssizet}{{\ccode{ssize\_t}}\xspace}
-\newcommand{\vaddrt}{{\ccode{vaddr\_t}}\xspace}
+\newcommand{\ptraddrt}{{\ccode{ptraddr\_t}}\xspace}
 \newcommand{\cuintptrt}{{\ccode{uintptr\_t}}\xspace}
 \newcommand{\cintptrt}{{\ccode{intptr\_t}}\xspace}
 \newcommand{\ccharstar}{{\ccode{char *}}\xspace}
@@ -704,9 +704,9 @@ recommendations:
   another pointer value -- e.g., by using them as an array offset.
   Most integers in a C/\cpp{}-language program will be of these types.
 
-\item[\vaddrt] This is a new integer type introduced by CHERI C and should be used to hold virtual
+\item[\ptraddrt] This is a new integer type introduced by CHERI C and should be used to hold
   addresses.
-  \vaddrt should not be directly cast to a pointer type for
+  \ptraddrt should not be directly cast to a pointer type for
   dereference; instead, it must be combined with an existing valid capability
   to the address space to generate a dereferenceable pointer.
   Typically, this is done using the \ccode{cheri\_address\_set(c, x)} function.
@@ -749,7 +749,7 @@ any other purpose.
   the pointer had been cast to \texttt{char *}).
 
   The observable, integer range of a \cuintptrt is the same as
-  that of a \vaddrt (or \ptrdifft for \cintptrt), despite the increased \emph{alignment} and \emph{storage} requirements.
+  that of a \ptraddrt (or \ptrdifft for \cintptrt), despite the increased \emph{alignment} and \emph{storage} requirements.
 
 \item[\ccode{intmax\_t}, \ccode{uintmax\_t}] According to the C standard\arnote{7.20.1.5 Greatest-width integer types}, these integer types should be \enquote{capable of representing any value of any (unsigned) integer type}.
   In \purecapCOrCpp{}, they are not provenance-carrying and can represent the integer \emph{range} of \cuintptrt/\cintptrt, but not the capability metadata or tag bit.
@@ -1318,22 +1318,22 @@ Additionally, the bitwise-AND operation is ambiguous since it can be used both t
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see \cref{sec:ambiguous-provenance}) since it shows the compiler which intermediate results can carry provenance.
 
 \begin{description}
-\item[\ccode{uintptr\_t cheri\_low\_bits\_clear(uintptr\_t ptr, vaddr\_t mask)}\kern-2pt]
+\item[\ccode{uintptr\_t cheri\_low\_bits\_clear(uintptr\_t ptr, ptraddr\_t mask)}\kern-2pt]
   This function clears the low bits of \cvar{ptr} in the same way as \ccode{ptr \& \textasciitilde{}mask}.
   It returns a new \cuintptrt value that can be used for memory accesses when cast to a pointer.
   \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}\kern-2pt.
 
-\item[\ccode{vaddr\_t cheri\_low\_bits\_get(uintptr\_t ptr, vaddr\_t mask)}\kern-2pt]
+\item[\ccode{ptraddr\_t cheri\_low\_bits\_get(uintptr\_t ptr, ptraddr\_t mask)}\kern-2pt]
   This function returns the low bits of \cvar{ptr} in the same way as \ccode{ptr \& mask}.
   It should be used instead of the raw bitwise operation since it can never return
   an unexpectedly tagged value.
   \cvar{mask} should be a bitwise-AND mask less than \ccode{\_Alignof(ptr)}\kern-2pt.
 
-\item[\ccode{uintptr\_t cheri\_low\_bits\_or(uintptr\_t ptr, vaddr\_t bits)}\kern-2pt]
+\item[\ccode{uintptr\_t cheri\_low\_bits\_or(uintptr\_t ptr, ptraddr\_t bits)}\kern-2pt]
   This function performs a bitwise-OR of \cvar{ptr} with \cconst{bits}.
   In order to retain compatibility with a non-CHERI architecture, \cconst{bits} should be less than the known alignment of \cvar{ptr}.
 
-\item[\ccode{uintptr\_t cheri\_low\_bits\_set(uintptr\_t ptr, vaddr\_t mask, vaddr\_t bits)}\kern-2pt]
+\item[\ccode{uintptr\_t cheri\_low\_bits\_set(uintptr\_t ptr, ptraddr\_t mask, ptraddr\_t bits)}\kern-2pt]
   This function sets the low bits of \cvar{ptr} to \cconst{bits} by clearing the low bits in \cvar{mask} first.
 
 \end{description}
@@ -1344,12 +1344,12 @@ The compiler will also warn when operators such as modulus or shifts are used on
 \cuintptrt. This usually indicates that the pointer is being used as the input to a hash
 function or similar computations.
 In this case, the programmer should not be using \cuintptrt but instead cast the pointer
-to \vaddrt and perform the arithmetic on this type instead.
+to \ptraddrt and perform the arithmetic on this type instead.
 This has the advantage that it can be slightly more efficient than \cuintptrt arithmetic on
 a split-register file architecture such as CHERI-MIPS.
 \jrtcnote{This point is slightly dubious; a sufficiently-smart compiler should
-be able to optimize it to the equivalent \vaddrt form, provided the result
-eventually is put in a \vaddrt or other non-capability type and nothing
+be able to optimize it to the equivalent \ptraddrt form, provided the result
+eventually is put in a \ptraddrt or other non-capability type and nothing
 consumes the capability metadata for all the intermediate calculations (e.g.,
 it's used as an index).}
 \arnote{I think I was just trying to point out that it avoids wasting space for variables stored to memory (e.g., on-stack arguments, etc.)}
@@ -1753,9 +1753,9 @@ permission bits:
 The following APIs allow capability properties to be retrieved from pointers:
 
 \begin{description}
-\item[\ccode{vaddr\_t cheri\_address\_get(void *c)}\kern-2pt] Return the address of the capability \cvar{c}.
+\item[\ccode{ptraddr\_t cheri\_address\_get(void *c)}\kern-2pt] Return the address of the capability \cvar{c}.
 
-\item[\ccode{vaddr\_t cheri\_base\_get(void *c)}\kern-2pt] Return the lower bound of capability \cvar{c}.
+\item[\ccode{ptraddr\_t cheri\_base\_get(void *c)}\kern-2pt] Return the lower bound of capability \cvar{c}.
 
 \item[\ccode{size\_t cheri\_length\_get(void *c)}\kern-2pt] Return the length of the bounds for the capability \cvar{c}.
   The base plus the length gives the upper bound on \cvar{c}'s address.
@@ -1776,7 +1776,7 @@ The following APIs allow capability properties to be retrieved from pointers:
 The following APIs allow capability properties to be refined on pointers:
 
 \begin{description}
-\item[\ccode{void *cheri\_address\_set(void *c, vaddr\_t a)}\kern-2pt] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
+\item[\ccode{void *cheri\_address\_set(void *c, ptraddr\_t a)}\kern-2pt] Return a new capability with the same permissions and bounds as \cvar{c} with the address set to \cvar{a}.
 This can be useful to re-derive a valid pointer from an address.
 
 \cfunc{cheri\_address\_set} is able to set an address \cvar{a} that is
