@@ -1,6 +1,10 @@
 name: CI
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
 
 env:
   doc_name: cheri-c-programming
@@ -16,11 +20,21 @@ jobs:
     - name: Build document
       run: make
     - name: Upload artifact
-
       uses: actions/upload-artifact@master
       with:
         name: ${{ env.doc_name }}.pdf
         path: ${{ env.doc_name }}.pdf
+
+  draft-release:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    needs: build
+    runs-on: [ubuntu-18.04]
+    steps:
+    - name: Download artifact
+      uses: actions/download-artifact@master
+      with:
+        name: ${{ env.doc_name }}.pdf
+        path: ./
     - name: Get current date
       id: date
       run: echo "::set-output name=date::$(date +'%Y%m%d')"
