@@ -3,7 +3,7 @@
 CHERI Clang/LLVM and LLD implement the following new language,
 code-generation, and linkage models:
 
-**CHERI C/++** are C/C++-language dialects tuned to requirements arising from
+**CHERI C/C++** are C/C++-language dialects tuned to requirements arising from
 implementing all pointers using CHERI capabilities.
 This includes all explicit pointers (i.e., those declared by the programmer)
 and all implied pointers (e.g., those used to access local and global
