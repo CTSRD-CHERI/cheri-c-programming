@@ -1,0 +1,12 @@
+[book]
+authors = ["Robert N. M. Watson", "Alexander Richardson", "Brooks Davis",
+  "John Baldwin", "David Chisnall", "Jessica Clarke", "Nathaniel Filardo",
+  "Simon W. Moore", "Edward Napierala", "Peter Sewell", "Peter G. Neumann"]
+language = "en"
+multilingual = false
+src = "src"
+title = "CHERI C/C++ Programming Guide"
+
+[output.html]
+git-repository-url = "https://github.com/CTSRD-CHERI/cheri-c-programming"
+site-url = "/cheric-programming/"

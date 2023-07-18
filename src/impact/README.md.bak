@@ -1,0 +1,937 @@
+# Impact on the C/C++ programming model
+
+Several kinds of changes may be required by programmers; the extent to which
+these changes impact a particular library or application will depend
+significantly on its idiomatic use of C.
+Our experience suggests that low-level system components such as run-time
+linkers, debuggers, memory allocators, and language runtimes require a modest
+but non-trivial porting effort.
+Similarly, support classes that include, for example, custom synchronization
+features, may also require moderate adaptation.
+Other applications may compile with few or no changes &mdash; especially if they
+are already portable across 32-bit and 64-bit platforms and are written in a contemporary C or C++ dialect.
+In the following sections, we consider various kinds of programmer-visible
+changes required in the CHERI C/C++ programming environment.
+In many cases, compiler warnings and errors can be used to identify potential
+issues compiling code as CHERI C/C++ (see
+\Cref{sec:cheri-compiler-warnings-and-errors}).
+
+<!--
+\rwnote{Alex: Can we use the word "most" instead of "many"?}
+-->
+
+## Capability-related faults
+<!--
+\label{sec:faults}
+-->
+
+When architectural capability properties are violated, such as by an attempt
+to dereference an invalid capability, access memory outside the bounds of a
+capability, or perform accesses not authorized by the permissions on a
+capability, this typically leads to a hardware exception (trap).
+Operating-system kernels are able to catch this exception via a trap handler,
+optionally delivering it to the run-time environment via OS-specific
+mechanisms.
+
+However, the language-level behavior of CHERI C/C++ is considerably more
+subtle: existing undefined behavior semantics in C are retained.
+The compiler is free to assume that loads and stores will not trap (i.e., that
+any program is free of undefined behavior), and may optimize under this
+assumption, including reordering code.
+Architectural traps occur when dynamic loads and stores are attempted, and
+reordering could lead to potential confusing behavior for programmers.
+
+In the CheriABI process environment, the operating system catches the hardware
+exception and delivers a `SIGPROT` signal to the user process;
+further information may be found in \Cref{sec:cheriabi}.
+In other environments, such as bare metal or under an embedded OS, behavior is
+specific to those environments, as it will depend both on how architectural
+exceptions are handled, and how those events are delivered to the C-language
+stack.
+Fail stop may be appropriate behavior in some environments, and is in fact the
+default behavior in CheriABI when `SIGPROT` is not handled.
+
+<!--
+\rwnote{We've opted to use the term "hardware exception" throughout, and
+  mention "traps" only here.  This could cause confusion with respect to C++
+  exceptions .. but perhaps less so than if we used the word "exception"
+  unadorned.}
+-->
+
+## Pointer provenance validity
+<!--
+\label{sec:pointer_provenance_validity}
+-->
+
+CHERI C/C++ implement pointers using architectural
+capabilities, rather than using conventional 32-bit or 64-bit integers.
+This allows the provenance validity of language-level pointers to be
+protected by the provenance properties of CHERI architectural capabilities:
+only pointers implemented using valid capabilities can be dereferenced.
+Other types that contain pointers, `uintptr_t` and `intptr_t`,
+<!--
+%\psnote{It would be better to exhaustively list them (is it just intptr\_t and uintptr\_t?) rather than this vague "such as"}
+%\arnote{There are also cases such as C++11 strongly typed enums that use uintcap\_t as the underlying type, but we really don't need to mention this here. And I'm also not sure if we want to keep allowing that since enums should really be integer values only}
+-->
+are similarly implemented
+using architectural capabilities, so that casts through these types
+can retain capability properties.
+When a dereference is attempted on a capability without a valid tag &mdash;
+including load, store, and instruction fetch &mdash; a hardware exception fires
+(see \Cref{sec:faults}).
+
+On the whole, the effects of pointer provenance validity are non-disruptive to
+C/C++ source code.
+However, a number of cases exist in language runtimes and other
+(typically less portable) C code that conflate integers and pointers that can
+disrupt provenance validity.
+In general, generated code will propagate provenance validity in only two
+situations:
+
+* **Pointer types** The compiler will generate suitable code to propagate
+  the provenance validity of pointers by using capability load and store
+  instructions.
+  This occurs when using a pointer type (e.g., `void *`) or an
+  integer type defined as being able to hold a pointer (e.g.,
+  `intptr_t`).
+  As with attempting to store 64-bit pointers in 32-bit integers on 64-bit
+  architectures, passing a pointer through an inappropriate type will lead to
+  truncation of metadata (e.g., the validity tag and bounds).
+  It is therefore important that a suitable type be used to hold pointers.
+
+  This pattern often occurs where an opaque field exists in a data structure
+  &mdash; e.g., a `long_t` argument to a callback in older C code &mdash; that
+  needs to be changed to use a capability-oblivious type such as `intptr_t`.
+
+<!--
+\psnote{I'm not sure this document has explained the ISA behavior concretely enough for this stuff to really make sense &mdash; the previous description was quite high-level.  Maybe somewhere it should be explicit that registers have tags, that load and store instructions must be via a capability, and that there are both capability and non-capability load and store instructions, with the former preserving tags (both ways) and the latter clearing them?}
+-->
+
+* **Capability-oblivious code** In some portions of the C/C++ runtime and
+  compiler-generated code, it may not be possible to know whether memory is
+  intended to contain a pointer or not &mdash; and yet preserving pointers is
+  desirable.
+  In those cases, memory accesses must be performed in a way that preserves
+  pointer provenance.
+  In the C runtime itself, this includes `memcpy`, which must use
+  capability load and store instructions to transparently propagate capability
+  metadata and tags.
+
+  A useful example of potentially surprising code requiring modification for
+  CHERI C/C++ is `qsort`.
+  Some C programs assume that `qsort` on an array of data structures
+  containing pointers will preserve the usability of those pointers.
+  As a result, `qsort` must be modified to perform memory copies using
+  pointer-based types, such as `intptr_t`, when size and alignment
+  require it.
+
+### Recommended use of C-language types
+<!--
+\label{sec:recommended-c-types}
+-->
+
+As confusion frequently arises about the most appropriate types to use for
+integers, pointers, and pointer-related values, we make the following
+recommendations:
+
+* `int_t`, `int32_t`, `long_t`, `int64_t`, ...: These pure integer types
+  should be used to hold integer values
+  that will never be cast to a pointer type without first combining them with
+  another pointer value &mdash; e.g., by using them as an array offset.
+  Most integers in a C/C++-language program will be of these types.
+
+* `ptraddr_t`: This is a new integer type introduced by CHERI C and should be
+  used to hold addresses.
+  `ptraddr_t` should not be directly cast to a pointer type for
+  dereference; instead, it must be combined with an existing valid capability
+  to the address space to generate a dereferenceable pointer.
+  Typically, this is done using the `cheri_address_set(c, x)` function.
+
+* `size_t`, `ssize_t` These integer types should be used
+  to hold the unsigned or signed lengths of regions of address space.
+<!--
+  \arnote{\sizet not necessary the same as unsigned `ptrdiff_t`.}
+-->
+
+* `ptrdiff_t`: This integer type describes the difference of indices
+  between two pointers to elements of the same array, and should not be used
+  for any other purpose.
+  It can be added to a pointer to obtain a new pointer, but the result will
+  be dereferenceable only if the address lies within the bounds of the
+  pointer from which it was derived.
+
+  <!--
+  \note{Isn't that last sentence true of any combination?}{nwf}
+  -->
+
+  Less standards-compliant code sometimes uses `ptrdiff_t` when the
+  programmer more likely meant `intptr_t` or (less commonly)
+  `size_t`.
+  When porting code, it is worthwhile to audit use of `ptrdiff_t`.
+
+  <!--
+  \note{Should we recommend that \sizet be used to hold lengths of
+  allocations and \ptrdifft be used to talk about spans of
+  address space (e.g., the offsets between two subobjects of an allocation)?  I feel
+  like the recommendations here are not as concrete as I'd like.}{nwf}
+  -->
+
+* `intptr_t`, `uintptr_t`: These integer types should be
+  used to hold values that may be valid pointers if cast back to a pointer
+  type.
+  When an `intptr_t` is assigned an integer value &mdash; e.g., due to
+  constant initialization to an integer in the source &mdash; and the result is
+  cast to a pointer type, the pointer will be invalid and hence
+  non-dereferenceable.
+  These types will be used in two cases: (1) Where there is uncertainty as to
+  whether the value to be held will be an integer or a pointer &mdash; e.g., for an
+  opaque argument to a callback function; or (2) Where it is more convenient
+  to place a pointer value in an integer type for the purposes of arithmetic
+  (which takes place on the capability's address and in units of bytes, as if
+  the pointer had been cast to `char *`).
+
+  The observable, integer range of a `uintptr_t` is the same as
+  that of a `ptraddr_t` (or `ptrdiff_t` for `intptr_t`), despite the increased
+  *alignment* and *storage* requirements.
+
+* `intmax_t`, `uintmax_t`: According to the C standard,
+  <!--
+  \arnote{7.20.1.5 Greatest-width integer types}
+  -->
+  these integer types should be *capable of representing any value of any (unsigned) integer type*.
+  In CHERI C/C++, they are not provenance-carrying and can represent the integer *range* of `uintptr_t`/`intptr_t`, but not the capability metadata or tag bit.
+  As the observable value of `intptr_t`/`intptr_t` is the pointer address
+  range, we believe this choice to be compatible with the C standard.
+
+  Additionally, due to ABI constraints, it would be extremely difficult to change the width of these types from 64 to 129 bits.
+  This is also true for other architectures such as x86: despite Clang and GCC supporting an `__int128` type, `intmax_t` remains 64 bits wide.
+
+  We generally do not recommend use of these types in CHERI C/C++.
+  However, the types may be useful in `printf` calls (using the `%j` format string width modifier) as the `inttypes.h` `PRI*` macros can be rather verbose.
+
+* `maxalign_t`: This type is defined in C as *an object type whose alignment is the greatest fundamental alignment*
+  and this includes capability types for CHERI C/C++.  <!--
+  \arnote{C2x \S{}7.19.2} 
+  % and in C++ as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
+  -->
+  We found that some custom allocators use `sizeof(long double)` or `sizeof(uint64_t)` to align their return values.
+  While this appears to work on most architectures, in CHERI C/C++ this must be changed to `alignof(maxalign_t)`.[^1]
+
+* `char *`, ...: These pointer types are suitable for
+  dereference, but in general <!--
+  \psnote{that "in general" makes me wonder about the exceptions?}
+  \arnote{The only exception I can think of is requiring `void *` due to bad API design (callback parameters, etc).}
+  -->
+  should not be cast to or from arbitrary integer
+  values.
+  Valid pointers are always derived from other valid pointers (including those cast to `intptr_t` or `uintptr_t`), and cannot be
+  constructed using arbitrary integer arithmetic.
+
+It is important to note that `uintptr_t` is no longer the same size as
+`size_t`. This difference may require making some changes to
+existing code to use the correct type depending on whether the variable
+needs to be able store a pointer type. In cases where this is not obvious
+(such as for a callback argument), we recommend the use of `uintptr_t`.
+This ensures that provenance is maintained.
+
+<!--
+\pgnnote{The above section begs questions relating to what is the
+  responsibility of programmers and what can be aided or managed by
+  compilers.  Ideally, the latter would be preferable to requiring
+  programmers to understand things are possibly beyond their so-called
+  experience.}
+-->
+
+[^1]: It is important to use `alignof` instead of `sizeof` since many
+common implementations, such as GCC and FreeBSD, define `maxalign_t` as a
+`struct` and not a `union`.}
+
+### Capability alignment in memory
+
+Because tags apply only to memory locations that are capability-aligned
+and capability-sized,
+unaligned storage of pointers will either generate a run-time
+hardware exception (if a capability-aware load or store is performed), or discard the
+tag (if a capability-oblivious memory copy is performed &mdash; e.g., using
+`memcpy` to copy from an aligned location to an unaligned one).
+One example of this is Berkeley DB (BDB) when used as an in-memory
+implementation rather than as an on-disk database format.
+Even when patched to use `memcpy` to copy objects stored as data, it
+does not ensure sufficient alignment in its internal storage to preserve tags.
+We therefore recommend against using BDB for this purpose.
+While unaligned pointer use is uncommon in C programs, as data-structure
+layouts are normally designed to keep them strongly aligned for performance
+and atomicity reasons, any code depending on unaligned pointers will need
+to be changed.
+
+<!--
+\amnote{Should we mention code that assumes that it is ok to go out of bounds
+for optimization purposes? E.g., strcmp loading a word at a time?}
+\psnote{yes}
+-->
+
+### Single-origin provenance
+<!--
+\label{sec:ambiguous-provenance}
+-->
+
+In the CHERI memory protection model, capabilities are derived from a single other
+capability.
+However, in C code, expressions may construct a new `intptr_t` value from more
+than one provenance-carrying parent `intptr_t` &mdash; for example, by casting both a
+pointer and a literal value to `intptr_t`-s, and then adding them. <!--
+\psnote{That literal value wouldn't have a non-empty provenance, so this isn't the best example.   Maybe better to have something like \texttt{p+(q1-q2)} ?}
+\psnote{More generally, there is a bit of a mismatch between this and our C provenance treatment of \cintptrt, which there is a plain integer type with no provenance &mdash; but which regains provenance in some cases when cast back to a pointer.  To ponder...}
+-->
+In that case, the compiler must decide which input capability provides the
+capability metadata (bounds, permissions, ...) to be used in the output
+value.
+Consider for example the following code:
+
+```
+void *c1 = (void *)((uintptr_t)input_ptr + 1);
+void *c2 = (void *)(1 + (uintptr_t)input_ptr);
+uintptr_t offset = 1;
+void *c3 = (void *)(offset + (uintptr_t)input_ptr);
+```
+
+In C with integer pointers, the values of `c1`, `c2`, and `c3` might be expected to have the
+same value as `input_ptr`, except with the address incremented by one.
+In CHERI C, each expression includes an arithmetic operation between provenance-carrying types.
+While not visible in the source code, the constant `1` is promoted to a capability type, `uintptr_t`.
+In the current implementation, the compiler will return the expected provenance-carrying result for cases `c1` and `c2` but not `c3`.[^2]
+
+For `c1` and `c2`, the compiler sees that one of the sides is a non-provenance-carrying integer type that was promoted to `uintptr_t` and therefore selects the other operand as the provenance source.
+It is not feasible to infer the correct provenance source for the third case, so the compiler will emit a warning.[^3]
+
+The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.
+
+The recommended approach to resolve such ambiguous cases is to change the type of one operand to a non-provenance-carrying type such as `size_t`.
+Alternatively, if the variable declaration cannot be changed, it is also possible to use a cast in the expression itself.
+
+```
+size_t offset_size_t = 1;
+void *c3_good1 = (void *)(offset_size_t + (uintptr_t)input_ptr);
+
+uintptr_t offset_uintptr_t = 1;
+void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
+```
+
+We also provide a new attribute `cheri_no_provenance` that can be used to annotate variables or fields of type `intptr_t`/`uintptr_t` where the underlying type cannot be changed:
+
+```
+struct S {
+    uintptr_t maybe_tagged;
+    uintptr_t never_tagged __attribute__((cheri_no_provenance));
+}
+void test(struct S s, uintptr_t ptr) {
+    void *x1 = (void *)(s.maybe_tagged + ptr); // ambiguous, currently uses LHS
+    void *x2 = (void *)(s.never_tagged + ptr); // not ambiguous, uses RHS
+}
+```
+
+<!--
+\psnote{This doesn't really explain what `cheri_no_provenance` does?  And what it means when applied to other types?}\arnote{compiler error if it's not \cuintptrt. Will try to improve example later.}
+-->
+
+[^2]: Historically, the CHERI compiler would select the left-hand-most pointer in the expression as the provenance source.
+While this model follows a single consistent rule, it can lead to surprising behavior if an expression places the provenance-carrying value to the right-hand-side.
+In the example above, the value of `c1` would be a valid capability, but `c2` and `c3` would hold an untagged value (albeit with the expected address).
+
+[^3]: We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
+However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.
+<!--
+\psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
+\arnote{I agree. Even the current behavior is quite ugly, but at least it has measurable compatibility benefits.}
+-->
+
+## Bounds
+
+CHERI C/C++ pointers are implemented using capabilities that enforce lower and
+upper bounds on access.
+In the pure-capability run-time environment, those bounds are normally set to
+the range of the memory allocation into which the pointer is intended to
+point.
+Because of capability compression, increased alignment requirements may apply
+to larger allocations (see \Cref{sec:bounds_alignment}).
+
+Bounds may be set on pointers returned by multiple system components including
+the OS kernel, the run-time linker, compiler-generated code, system libraries,
+and other utility functions.
+As with violations of provenance validity, out-of-bounds accesses &mdash; including
+load, store, and instruction fetch &mdash; trigger a hardware exception (see
+\Cref{sec:faults}).
+
+### Bounds from the compiler and linker
+
+The compiler will arrange that language-level pointers to stack allocations have suitable
+bounds, and that the run-time linker will return bounded pointers to global
+variables.
+Bounds will typically be set based on an explicitly requested allocation size
+(e.g., via the size passed to `alloca` or, for compiler-generated
+code or linker-allocated memory, by the C type mechanism (e.g.,
+`sizeof(foo)`), adjusted for precision requirements arising from
+capability compression.
+In some cases, such as with global variables allocated in multiple object
+files, the actual size of the allocation may not be resolved until run time,
+by the run-time linker.
+These bounds will typically not cause observable changes in behavior &mdash; other than hardware exceptions when (accidentally) performing an out-of-bounds access.
+
+### Bounds from the heap allocator
+
+`malloc` will set bounds on pointers to new heap allocations.
+In typical C use, this is not a problem, as programmers expect to access
+addresses only within an allocation.
+
+However, in some uses of C, there may be an expectation that memory access can
+occur outside the allocation bounds of the pointer via which memory access
+takes place.
+For example, if an integer pointer difference `D` is taken between
+pointers to two different allocations (`B` and `A`), and later
+added to pointer `A`, the new pointer will have an address
+within `B`, but permit access only to `A`.
+This idiom is mostly likely to be found with non-trivial uses of `realloc` (e.g., cases where multiple pointers into a buffer allocated or reallocated by `realloc` need to be updated).
+We note that the subtraction of two pointers from different
+allocations is undefined behavior in ISO C, and risks mis-optimization from
+breaking compiler alias analysis assumptions.
+Further, *any* operation on the pointer passed to `realloc` is undefined upon
+return.  Instead, we suggest that the programmer measure a pointer `P`'s
+offset into an object `A` *prior to* `realloc` and derive new pointers
+from the `realloc` result `B` and these offsets. (i.e., compute
+*`B` + (`P` - `A`)* rather than
+*`P` + (`B` - `A`)*).[^4]
+
+[^4]: While it may seem that `A` remains available after `realloc`, our
+revocation sweeps which enforce temporal safety may have atomically replaced
+this with a non-pointer value.  The scalar value
+*`D` = `P` - `A`* will naturally be preserved by revocation.
+
+### Subobject bounds
+
+CHERI C/C++ also supports automatically restricting the
+bounds when a pointer is taken to a subobject &mdash; for example, an array
+embedded within another structure that itself has been heap allocated.
+This will prevent an overflow on that array from affecting the remainder of
+the structure, improving spatial safety.
+Subobject bounds are not enabled by default as they may require additional source code changes
+for compatibility, but can be enabled using the `-Xclang -cheri-bounds=subobject-safe` compiler flag.
+
+One example of C code that requires changes for subobject bounds is the `containerof`
+pattern, in which pointer arithmetic on a pointer to a subobject is used to
+recover a pointer to the container object &mdash; for example, as seen in the
+widely used BSD `queue.h` linked-list macros or the generic C
+hash-table implementation, `uthash.h`.
+
+In these cases, an opt-out annotation can be applied to a given type, field or variable
+that instructs the compiler to not tighten bounds when creating pointers to subobjects.
+We currently define three opt-out annotations that can be used to allow
+existing code to disable use of subobject bounds:
+
+**Completely disable subobject bounds**: It is possible to annotate a typedef,
+record member, or variable declaration with:
+
+```
+__attribute__((cheri_no_subobject_bounds))
+```
+
+to indicate that the compiler should not tighten bounds when taking the address or a C++ reference. In C++11/C20 mode this can also be spelled as `[[cheri::no_subobject_bounds]]`.
+
+```
+struct str {
+    /*
+     * Nul-terminated string array -- pointers taken to this subobject will
+     * use the array's bounds, not those of the container structure.
+     */
+    char               str_array[128];
+
+    /*
+     * Linked-list entry element -- because of the additional attribute,
+     * pointers taken to this subobject will use the container structure's
+     * bounds, not those of the specific field.
+     */
+    struct list_entry  str_le __attribute__((cheri_no_subobject_bounds));
+} str_instance;
+
+void
+fn(void)
+{
+    /* Struct pointer gets bounds of str_instance. */
+    struct str *strp = &str_instance;
+
+    /* Character pointer gets bounds of the subobject, not str_instance. */
+    char *c = str_instance.str_array;
+
+    /* Struct pointer gets bounds of str_instance, not the subobject. */
+    struct list_entry *lep = &str_instance.str_le;
+}
+```
+
+**Disable subobject bounds in specific expressions**:
+It is also possible to opt out of bounds-tightening on a per-expression
+granularity by casting to an annotated type:
+
+```
+char *foo(struct str *strp) {
+    return (&((__attribute__((cheri_no_subobject_bounds))struct str *)
+        strp)->str_array);
+}
+```
+
+**Use remaining allocation size**:
+In certain cases, the size of the subobject is not known, but we still know that data
+before the field member will not be accessed (e.g., variable size array members
+inside structs).
+Pre-C99 code will declare such members as fixed-size arrays, which will cause
+a hardware exception if the allocation does not grant access to that many bytes.
+[^5]
+To use the remaining allocation size instead of completely disabling bounds
+(and thus protecting against buffer underflows) the annotation:
+
+```
+__attribute__((cheri_subobject_bounds_use_remaining_size))
+```
+
+can be used.
+When targeting C++11/C20:
+
+```
+[[cheri::subobject_bounds_use_remaining_size]]
+```
+
+is also supported.
+Examples of this pattern include FreeBSD's `struct dirent`, which uses
+`char d_name[255]` for an array that is actually of variable size, with
+the containing allocation (e.g., of the heap) being sized to allow additional
+space for array entries regardless of size in the type definition.
+For example:
+
+```
+struct message {
+    int     m_type;
+
+    /*
+     * Variable-length character array -- because of the additional
+     * attribute, pointers taken to this subobject will have a lower bound
+     * at the first address of the array, but retain an upper bound of the
+     * allocation containing the array, rather than 252 bytes higher.
+     */
+    char    m_data[252]
+                 __attribute__((cheri_subobject_bounds_use_remaining_size));
+};
+```
+
+The use of subobject bounds imposes additional compatibility constraints on
+existing C and C++ code.
+While we have not encountered many issues related to subobject bounds in
+existing code, it does slightly increase the porting effort.
+
+<!--
+%\nwfnote{Already said above:}
+%Therefore, this feature is currently not enabled by default and requires a
+%compiler flag to be enabled.
+-->
+
+<!--
+\psnote{that seems excessively bold to me}
+\psnote{what flag?}
+\psnote{curious: what has to change before you think it'd be a good default?}
+-->
+
+[^5]: If flexible arrays members are declared using the C99 syntax with empty
+square brackets, the compiler will automatically use the remaining allocation
+size.
+%
+
+## Other sources of bounds
+
+Bounds may also be set by other parts of the implementation.
+For example, the kernel may set bounds on pointers to new memory mappings (see
+\Cref{sec:cheriabi}), and the system library may set bounds on pointers
+into returned buffers from APIs &mdash; e.g., `fgetln`.
+More detailed information on how C/C++ code can set bounds can be found in
+\Cref{sec:cheri-apis}.
+
+### Out-of-bounds pointers
+<!--
+\label{sec:oob}
+-->
+
+<!--
+\note{I feel like this section wants a reference to CHERI Concentrate?}{nwf}
+-->
+
+ISO C permits pointers to go only one byte beyond their original
+allocation, but widely used code sometimes constructs transient pointer
+values that are further out of bounds.
+For example, `for` loops iterating over an array may increment a pointer
+into the array by the array entry size before performing an overflow check
+that terminates the loop.
+This temporarily constructs an out-of-bounds pointer without an out-of-bounds
+dereference taking place.
+
+<!--
+\nwfnote{In the straightforward case, tho, that still results in the pointer
+being only one past the end of its allocation, doesn't it?}
+-->
+
+To support this behavior, capabilities
+can hold a range of out-of-bounds addresses while retaining a valid
+tag, and CHERI-enabled hardware performs bounds checks only on pointer
+use (i.e., dereference), not on pointer manipulation.  Dereferencing
+an out-of-bounds pointer will raise a hardware exception (see
+\Cref{sec:faults}).  However, an out-of-bounds pointer can be
+dereferenced once it has been brought back in bounds, by adjusting the
+address or supplying a suitable offset in the dereference.
+
+There is, however, a limit to the range of out-of-bounds addresses a capability can hold.
+The capability compression model exploits redundancy between the pointer's address and
+its bounds to reduce memory overhead (see
+Section~\ref{sec:cheri-capabilities}).
+However, when a pointer goes out of bounds, this redundancy is reduced, and at
+some point the bounds can no longer be represented within the capability.
+The architecture prohibits manipulations that would produce such
+a capability.
+Depending on the architecture and context, this may lead to the
+tag being cleared, resulting in an invalid capability, or in an immediate
+hardware exception being thrown.
+Attempting to dereference the invalid capability will fail in the same
+manner as a loss of pointer provenance validity (see
+\Cref{sec:pointer_provenance_validity}).  <!--
+\psnote{Comment on whether that should immediately trap instead?} -->
+The range of out-of-bounds addresses permitted for a capability is
+a function of the length of the bounded region and the number of bits used for bounds in the capability representation.
+With 27 bits of the capability used for bounds, CHERI-MIPS and 64-bit
+CHERI-RISC-V provide the following guarantees:
+
+* A pointer is able to travel at least 1/4 the size of the object, or
+  $2$ KiB ($2^{\mathit{floor}(\mathit{bounds\_bits}/2)-2}$), whichever is greater, above its upper bound.
+
+* It is able to travel at least 1/8 the size of the object, or $1$ KiB ($2^{\mathit{floor}(\mathit{bounds\_bits}/2)-3}$),
+  whichever is greater, below its lower bound.
+
+In general, programmers should not rely on support for arbitrary out-of-bounds
+pointers.  Nevertheless, in practice, we have found that the CHERI capability
+compression scheme supports almost all in-the-field out-of-bounds behavior in
+widely used software such as FreeBSD, PostgreSQL, and WebKit.
+
+## Pointer comparison
+
+In CHERI C/C++, pointer comparison considers only the
+integer address part of a capability.
+This means that differences in tag validity, bounds, permissions, and so on,
+will not be considered when by C operators such as `==`, `<`, and `<=`.
+On the whole, this leads to intuitive behavior in systems software, where,
+for example, `malloc` adjusts bounds on a pointer before returning it to
+a caller, and then expects an address-wise comparison to succeed when the
+pointer is later returned via a call to `free`.  <!--
+\nwfnote{I don't think I particularly like that example, since the thing `free`
+is nominally comparing against is the bounded return from `malloc`.}
+-->
+However, this behavior could also lead to potentially confusing results; for
+example:
+
+* If a tag on a pointer is lost due to non-provenance-preserving
+  `memcpy` (e.g., a `for` loop copying a sequence of bytes), the
+  source and destination pointers will compare as equal even though the
+  destination will not be dereferenceable.
+
+* If a `realloc` implementation returns a pointer to the same
+  address, but with different bounds, a caller check to see if the passed and
+  returned pointers are equal will return `true` even though an access
+  might be permitted via one pointer but not the other.
+
+<!--
+\psnote{I'm curious about the impact on compiler optimisation, where in the scope of \texttt{if (p==q)} compilers will often assume the two are interchangeable.  Comment on that?
+ }
+ \arnote{The choice between exact vs non-exact equals is made extremely late in code generation, it just chooses between emitting CEq and CExEq.
+ Compiler analyses use a stricter definition of equality.
+ In clang that should include some cases of taking provenance into account for alias information.}
+-->
+
+However, practical experience has suggested that the current semantics produce fewer
+subtle bugs, and require fewer changes, than having comparison operators take
+the tag or other metadata into account.[^6]
+
+[^6]: The CHERI Clang compiler supports an experimental flag `-cheri-comparison=exact` that causes capability equality comparisons to also include capability metadata and the tag bit.
+
+<!--
+\arnote{default behavior=\texttt{-cheri-comparison=address}}
+}
+-->
+
+## Implications of capability revocation for temporal safety
+
+Heap temporal safety utilizes revocation sweeps, which, after some quarantine
+period, replace in-register and in-memory capabilities to freed memory with
+non-dereferenceable values.
+For performance reasons, that replacement may be substantially deferred, or,
+if there is little demand for fresh allocations, may never occur.
+Pointer value replacement may also permit some instances of
+a pointer to continue to be usable for longer than others, but the referenced
+memory will not be reallocated or otherwise reused until all instances have been rendered unusable.
+This model does permit non-exploitable *use-after-free* of heap memory,
+but prohibits exploitable memory aliasing by disallowing *use-after-reallocation*.
+
+A pointer's value after `free` is undefined, and so dereference is
+an undefined behavior.
+In practice, however, the value of a `free`-d pointer may still be
+observed in a number of situations, including in lockless algorithms, which
+may compare an allocated pointer to a freed one.
+
+Our systems have a choice of replacement values for revoked pointers; all that
+is required for correct temporal safety is that the replacement not authorize
+access to memory.
+Our prototype implementation clears the tag when replacing, as this
+certainly removes authority and possibly simplifies debugging and
+non-dereferencing operations, as the original capability bits are left behind.
+For example, pointer equality checks that compare only the addresses of the two
+pointers (and not their tag values) will continue to work as expected.  With
+revocation performed this way, software making explicit use of tags must be
+designed to tolerate capability tag clearing by revocation.
+
+Unfortunately, tag-clearing risks type confusion if programmers intend to use
+the capability tag to distinguish between integers and pointers in tagged
+unions (we have so far generally discouraged this idea, but understand why it
+may remain attractive).  Therefore, we have considered other options for
+revocation, including tag-preserving *permission*-zeroing (but tag
+preservation) and wholesale replacement with `NULL` (i.e., the untagged
+all zero value).  These options may be more attractive for some software, and
+would have different implications for the C/C++ programming model.
+
+We anticipate that revocation will remain a tag-clearing operation by default,
+as tag-clearing removes any risk of needlessly re-examining the capability in
+later revocations.  However, it may be possible to allow coarse control over
+revocation behavior either per process or by region of the address space.  In
+the latter case, `mmap` may gain flags specifying which revocation
+behavior is desirable for capabilities pointing *into* the mapped region
+and/or `madvise` may gain flags controlling the revocation behavior of
+capabilities *within* a target region.  Which of these or similar
+mechanisms provide utility to software and can be offered at reasonable
+performance remains an open question.
+
+## Bitwise operations on capability types
+
+In most cases bitwise operations &mdash; such as those used to store or clear flags
+in the lower bits of pointers to well-aligned allocations &mdash; will result in the expected `uintptr_t` value being created.
+However, there are some corner cases where the result may be a tagged (but out-of-bounds)
+capability when an integer value is expected. <!--
+\arnote{TODO: add an example. Maybe the mutex example checking low pointer bits + some alignment checks?}
+-->
+Dually, bitwise operations may also result in the loss of tags if intermediate results become unrepresentable (recall \Cref{sec:oob}).[^7]
+
+
+%
+Most bitwise operations on \cuintptrt fall into one of three categories for which we provide
+higher-level abstractions.
+
+**Aligning pointer values**:
+If the C code is attempting to align a pointer or check the alignment of pointers,
+the following compiler builtins should be used instead:
+
+* `T __builtin_align_down(T ptr, size_t alignment)`:
+  This builtin returns `ptr` rounded down to the next multiple of `alignment`.
+* `T __builtin_align_up(T ptr, size_t alignment)`:
+  This builtin returns `ptr` rounded up to the next multiple of `alignment`.
+* `_Bool __builtin_is_aligned(T ptr, size_t alignment)`:
+  This builtin returns `true` if `ptr` is aligned to at least `alignment` bytes.
+
+<!--
+\rwnote{It would be nice if we had, and could document here, `cheri_` versions
+  of these macros.}
+\arnote{Probably best to use the `__builtin` versions since that also works for upstream clang.}
+-->
+
+One advantage of these builtins compared to `intptr_t` arithmetic is that they preserve the
+type of the argument and can therefore remove the need for intermediate casts to `uintptr_t`.
+Moreover, using these builtins allows for improved compiler diagnostics and can result in better code-generation compared to hand-written functions or macros.
+We have submitted these builtins as part of the upstream Clang 10.0 release, so they can also be used for code that does not depend on CHERI.
+
+<!--
+\arnote{Should I include some of the documentation I wrote for upstream LLVM? (\url{https://clang.llvm.org/docs/LanguageExtensions.html\#alignment-builtins})}
+-->
+
+**Storing additional data in pointers**: <!--
+\label{sec:low-pointer-bits}
+-->
+In many cases the minimum alignment of pointer values is known and therefore
+programmers assume that the low bits (which will always be zero) can be
+used to store additional data.[^8]
+Unused high pointer bits cannot be used for additional metadata since toggling them causes a large change to the address field, and capabilities that are significantly far out-of-bounds cannot be represented (see \cref{sec:oob}).
+
+The compiler-provided header `<cheri.h>` provides explicit macros for this
+use of bitwise arithmetic on pointers.
+The use of these macros is currently optional,[^9]
+but we believe that they can improve readability compared to hand-written bitwise operations.
+Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying `uintptr_t`) and to check bits (which should return an integer value).
+In complex nested expressions, these macros can avoid ambiguous provenance sources (see \cref{sec:ambiguous-provenance}) since it shows the compiler which intermediate results can carry provenance.
+
+* `uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)`:
+  This function clears the low bits of `ptr` in the same way as `ptr & ~mask`.
+  It returns a new `uintptr_t` value that can be used for memory accesses when cast to a pointer.
+  `mask` should be a bitwise-AND mask less than `_Alignof(ptr)`.
+* `ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)`:
+  This function returns the low bits of `ptr` in the same way as `ptr & mask`.
+  It should be used instead of the raw bitwise operation since it can never return
+  an unexpectedly tagged value.
+  `mask` should be a bitwise-AND mask less than `_Alignof(ptr)`.
+* `uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)`:
+  This function performs a bitwise-OR of `ptr` with `bits`.
+  In order to retain compatibility with a non-CHERI architecture, `bits` should be less than the known alignment of `ptr`.
+* `uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)`:
+  This function sets the low bits of `ptr` to `bits` by clearing the low bits in  `mask` first.
+
+**Computing hash values**:
+The compiler will also warn when operators such as modulus or shifts are used on
+`uintptr_t`. This usually indicates that the pointer is being used as the input to a hash
+function or similar computations.
+In this case, the programmer should not be using `uintptr_t` but instead cast the pointer
+to `ptraddr_t` and perform the arithmetic on this type instead.
+This has the advantage that it can be slightly more efficient than `uintptr_t` arithmetic on
+a split-register file architecture such as CHERI-MIPS.
+
+<!--
+\jrtcnote{This point is slightly dubious; a sufficiently-smart compiler should
+be able to optimize it to the equivalent `ptraddr_t` form, provided the result
+eventually is put in a `ptraddr_t` or other non-capability type and nothing
+consumes the capability metadata for all the intermediate calculations (e.g.,
+it's used as an index).}
+\arnote{I think I was just trying to point out that it avoids wasting space for variables stored to memory (e.g., on-stack arguments, etc.)}
+-->
+
+[^7]: Previous versions of the compiler used the capability offset (address
+minus base) instead of the address for arithmetic on `uintptr_t`.
+This often resulted in unexpected results and therefore we switched to using
+the address in `uintptr_t` arithmetic instead.
+The old offset-based mode may be interesting for garbage collected C where
+addresses are less useful and therefore it can still be enabled by
+passing `-cheri-uintcap=offset`.
+However, this may result in significantly reduced compatibility with legacy C code.
+
+[^8]: CHERI actually provides many more usable bits than a conventional architecture.
+In the current implementation of 128-bit CHERI, any bit between<!--
+\psnote{inclusive?} --> the least
+significant and the 9th least significant bit may be toggled without causing
+the tag to be cleared in pointers that point to the beginning of an allocation (i.e., whose *offset* is zero).  <!--
+\psnote{This is confusing &mdash; not clearing the tag isn't the same as not destroying part of the pointer data...} -->
+If the pointer is strongly aligned, further bits may be toggled without clearing the tag.
+<!--
+\nwfnote{But the macros only permit the use of the bottom 5.  We should say that somewhere.}
+-->
+
+[^9]: Until recently, not using these macros could result in subtle bugs at run time since pointer equality comparisons included the tag bit in addition to the address.
+
+## Function prototypes and calling conventions
+
+CHERI C/C++ distinguishes between integer and pointer types at an
+architectural level, which can lead to compatibility problems with older C
+programming styles that fail to unambiguously differentiate these types:
+
+* **Unprototyped (*K&R*) functions**: Because pointers can no longer
+  be loaded and stored without using capability-aware instructions, the
+  compiler must know whenever a load or store might operate on a pointer
+  value.
+  The C-language default of using an integer type for function arguments when
+  there is not an appropriate function prototype will cause pointer values to
+  be handled improperly; this is also true on LP64 ABIs (e.g., most 64-bit
+  POSIX systems).[^10]
+
+  To avoid these problems, the CHERI Clang compiler emits a warning (`-Wcheri-prototypes`) by default when a function without a declared prototype is called.
+  This warning is less strict than `-Wstrict-prototypes` and can be
+  used to convert *K&R* functions that may cause problems.[^11]
+  This should not be an issue for C code written in the last 20 years, but
+  many core operating-system components can be significantly older.
+
+* **Variadic arguments**: The calling convention for variadic functions
+  passes all variadic arguments via the stack and accesses them via an
+  appropriately bounded capability.
+  This provides memory-protection benefits, but means that vararg functions
+  must be declared and called via a correct prototype.
+
+  Some C code assumes that the calling convention of variadic and non-variadic
+  functions is sufficiently similar that they may be used interchangeably.
+  Historically, this included the FreeBSD kernel's implementation of
+  `open`, `fcntl`, and `syscall`.
+
+<!--
+  \rwnote{I wonder if we need to be more specific with an example here.}\arnote{TODO: Add example such as missing open() mode arguments?}
+-->
+
+[^10]: The forthcoming ISO C2x standard makes function declarations with an
+empty parameter list equivalent to a parameter list consisting of a single
+`void`.
+
+[^11]: If the *K&R* function is defined within the same file, the compiler can
+determine the correct calling convention and will not emit a warning.
+
+## Data-structure and memory-allocation alignment
+
+CHERI C/C++ have stronger alignment requirements than C/C++ on conventional
+architectures.
+These requirements arise from two sources: that capabilities themselves must
+be aligned at twice the integer architectural pointer width, and that
+capability compression constrains the addresses that can be used for bounds
+on larger objects.
+
+<!--
+\amnote{Is is worth mentioning compiler flags to warn on excessive padding?
+  In particular, it seems that it is often the case that the ordering of
+  struct elements that was devised for 32bit and 64bit architectures does
+  not help much to avoid extra padding with capabilities. It more or less
+  depends on how much the pointers are scattered in the struct definition.}
+-->
+
+### Restrictions in capability locations in memory
+<!--
+\label{sec:restricted-capability-locations}
+-->
+
+CHERI C/C++ constrain how and where pointers can be stored in memory in two
+ways:
+
+* **Alignment**: CHERI's tags are associated with capability-aligned,
+  capability-sized locations in physical memory.
+  Because of this, all valid pointers must be stored at such locations,
+  potentially disrupting code that may use other alignments.
+
+  On the whole, for performance and atomicity reasons, pointers are strongly
+  aligned even on non-tagged architectures &mdash; however, when C constructs such
+  as `__packed` are used, unaligned pointers can arise, and will not
+  work with CHERI.
+  While the compiler and native allocators (stack, heap, ...) will
+  provide sufficient alignment for capability-based pointers, custom
+  allocators may align allocations to `sizeof(intmax_t)` rather than
+  `alignof(maxalign_t)`.
+
+* **Size**: CHERI capabilities are twice the size of an integer able to
+  describe the full address space.
+  On 64-bit systems, this means that CHERI pointers will have a width of 128
+  bits &mdash; while maintaining the arithmetic properties of a 64-bit integer
+  address.
+  C code historically embeds assumptions about pointer size in a number of forms,
+  all of which will need to be addressed when porting to CHERI,
+  including:
+
+  * Assuming that a pointer will fit into the largest integer type.
+  * Assuming that the number of bits in a pointer type is the same
+    as the number of bits indexing the address space it can refer to.
+  * Assuming that the number of bits in a pointer type is the same as the
+    number of bits suitable for use in performing bit-wise manipulations of
+    pointer values.
+  * Assuming that pointers must either be 32 or 64 bits.
+  * Assuming that aligning to `sizeof(double)` is sufficient to store any type.
+  * Assuming that high bits of the pointer address can be used for
+  additional metadata. This is not true on CHERI since toggling high bits of a
+  pointer can cause it to be so far out of bounds that it is no longer representable
+  due to the compression of pointer bounds. However, it is still possible to use
+  the low bits for additional metadata (see \Cref{sec:low-pointer-bits}).
+
+<!--
+  \rwnote{Should there be more things in this list?}
+-->
+
+These portability problems will typically be found due to hardware exceptions
+thrown on attempted unaligned accesses of capability values
+(see \Cref{sec:faults}).
+However, they can also arise in the form of stripped tag bits, leading to
+invalid capabilities that cannot be dereferenced, if, for example, pointer
+values are copied into inappropriately aligned allocations.
