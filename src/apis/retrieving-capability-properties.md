@@ -12,7 +12,7 @@ The following APIs allow capability properties to be retrieved from pointers:
 * `size_t cheri_offset_get(void *c)`: Return the difference between the address and the lower bound of the capability `c`.
 
 * `size_t cheri_perms_get(void *c)`: Return the permissions of capability `c`.
-  (See \Cref{sec:capability_permissions}.)
+  (See [Capability permissions](capability-permissions.html).)
 
 * `_Bool cheri_tag_get(void *c)`: Return whether capability `c` has its
   validity tag set.

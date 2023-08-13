@@ -18,7 +18,7 @@ using architectural capabilities, so that casts through these types
 can retain capability properties.
 When a dereference is attempted on a capability without a valid tag &mdash;
 including load, store, and instruction fetch &mdash; a hardware exception fires
-(see \Cref{sec:faults}).
+(see [Capability-related faults](capability-faults.html)).
 
 On the whole, the effects of pointer provenance validity are non-disruptive to
 C/C++ source code.

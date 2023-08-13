@@ -67,8 +67,7 @@ recommendations:
   that of a `ptraddr_t` (or `ptrdiff_t` for `intptr_t`), despite the increased
   *alignment* and *storage* requirements.
 
-* `intmax_t`, `uintmax_t`: According to the C standard,
-  <!--
+* `intmax_t`, `uintmax_t`: According to the C standard, <!--
   \arnote{7.20.1.5 Greatest-width integer types}
   -->
   these integer types should be *capable of representing any value of any (unsigned) integer type*.

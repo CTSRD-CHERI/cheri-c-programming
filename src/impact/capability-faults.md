@@ -21,7 +21,7 @@ reordering could lead to potential confusing behavior for programmers.
 
 In the CheriABI process environment, the operating system catches the hardware
 exception and delivers a `SIGPROT` signal to the user process;
-further information may be found in \Cref{sec:cheriabi}.
+further information may be found in [CheriABI](../cheriabi).
 In other environments, such as bare metal or under an embedded OS, behavior is
 specific to those environments, as it will depend both on how architectural
 exceptions are handled, and how those events are delivered to the C-language

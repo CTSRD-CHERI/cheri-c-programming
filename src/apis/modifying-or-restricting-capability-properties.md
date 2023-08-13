@@ -42,7 +42,7 @@ This can be useful to re-derive a valid pointer from an address.
 
 * `void *cheri_perms_and(void *c, size_t x)`: Perform a bitwise-AND of capability
   `c`'s permissions and the value `x`, returning the new
-  capability (see \Cref{sec:capability_permissions}).
+  capability (see [Capability permissions](capability-permissions.html)).
 
 <!--
   %  This macro wraps the compiler built-in

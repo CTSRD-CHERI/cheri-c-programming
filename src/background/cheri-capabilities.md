@@ -38,7 +38,7 @@ and 64-bit capabilities on 32-bit platforms.
 Each capability consists of an integer (virtual) address of the natural size for
 the architecture (e.g., 32 or 64 bit), and also additional metadata that is
 compressed in order to fit in the remaining 32 or 64 bits of the capability
-(see <!-- \Cref{figure:cheri-capability-representation}-->Figure 1 for an example; details
+(see Figure 1 for an example; details
 vary across underlying architectures and word sizes).
 In addition, they are associated with a 1-bit validity "tag" whose value is
 maintained in registers and memory by the architecture, but not part of
@@ -47,13 +47,13 @@ Each element of the additional metadata and tag of the capability contributes
 to the protection model:
 
 
-**Validity tag**: The tag tracks the validity of a capability.
+* **Validity tag**: The tag tracks the validity of a capability.
   If invalid, the capability cannot be used for load, store, instruction
   fetch, or other operations.
   It is still possible to extract fields from an invalid capability,
   including its address.
 
-**Bounds**: The lower and upper bounds are addresses restricting the
+* **Bounds**: The lower and upper bounds are addresses restricting the
   portion of the address space within which the capability can be used for
   load, store, and instruction fetch.
   Setting a capability's address (i.e., where it points) within
@@ -63,11 +63,11 @@ to the protection model:
   the capability's bounds will preserve the validity tag.  (These out-of-bounds
   capabilities continue to authorize access only to memory within bounds.)
 
-**Permissions**: The permissions mask controls how the capability can be
+* **Permissions**: The permissions mask controls how the capability can be
   used &mdash; for example, by authorizing the loading and storing of data and/or
   capabilities.
 
-**Object type**: If this value is not equal to the unsealed object type, the capability is "sealed" and
+* **Object type**: If this value is not equal to the unsealed object type, the capability is "sealed" and
   cannot be modified or dereferenced, but can be used to implement opaque
   pointer types.
   This feature is not described further in this document, as it is primarily

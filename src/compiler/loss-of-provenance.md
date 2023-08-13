@@ -18,22 +18,18 @@ Usually, this warning is caused by programmers incorrectly assuming that `long` 
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as `intptr_t` or `uintptr_t` (see [Recommended use of
 C-language types](../impact/recommended-use-c-types.md)):
 
-<!-- RWTODO -- fix code examples -->
 ```
-char *example_bad(£\vcpgfmark{StartBadParamTy}£long£\vcpgfmark{EndBadParamTy}£ ptr_or_int) {
+char *example_bad(long ptr_or_int) {
     return strdup((const char *)ptr_or_int);
 }
-char *example_good(£\vcpgfmark{StartGoodParamTy}£intptr_t£\vcpgfmark{EndGoodParamTy}£ ptr_or_int) {
+char *example_good(intptr_t ptr_or_int) {
   return strdup((const char *)ptr_or_int);
 }
 ```
 
-<!--
-\TikzListingHighlightStartEnd[red]{BadParamTy}
-\TikzListingHighlightStartEnd[green]{GoodParamTy}
--->
 ```
-<source>:2:17: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+<source>:2:17: warning: cast from provenance-free integer type to pointer type
+will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   return strdup((const char *)ptr_or_int);
                 ^
 1 warning generated.
@@ -48,18 +44,17 @@ void invoke_cb(void (*cb)(void *), void *);
 void callback(void *arg);
 void false_positive_example(int callback_data) {
     invoke_cb(&callback, (void *)callback_data); // warning
-    invoke_cb(&callback, (void *)£\vcpgfmark{StartSilenceProv}£(uintptr_t)£\vcpgfmark{EndSilenceProv}£callback_data); // no warning
+    invoke_cb(&callback, (void *)(uintptr_t)callback_data); // no warning
 }
 ```
 
-<!--
-\TikzListingHighlightStartEnd[green]{SilenceProv}
--->
 ```
-<source>:4:24: warning: cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+<source>:4:24: warning: cast from provenance-free integer type to pointer type
+will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   invoke_cb(&callback, (void *)callback_data); // warning
                        ^
-<source>:15:24: warning: cast to 'void *' from smaller integer type 'int' [-Wint-to-void-pointer-cast]
+<source>:15:24: warning: cast to 'void *' from smaller integer type 'int'
+[-Wint-to-void-pointer-cast]
   invoke_cb(&callback, (void *)callback_data); // warning
                        ^
 2 warnings generated.
