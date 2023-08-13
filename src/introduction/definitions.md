@@ -3,7 +3,7 @@
 CHERI Clang/LLVM and LLD implement the following new language,
 code-generation, and linkage models:
 
-**CHERI C/++** are C/C++-language dialects tuned to requirements arising from
+* **CHERI C/++** are C/C++-language dialects tuned to requirements arising from
 implementing all pointers using CHERI capabilities.
 This includes all explicit pointers (i.e., those declared by the programmer)
 and all implied pointers (e.g., those used to access local and global
@@ -17,7 +17,7 @@ by selected software such as memory allocators.
 The vast majority of C/C++ source code we have encountered requires little
 or no modification to be compiled as CHERI C/C++.
 
-**Pure-capability machine code** is compiled code (or hand-written assembly)
+* **Pure-capability machine code** is compiled code (or hand-written assembly)
 that utilizes CHERI capabilities for all memory accesses &mdash; including
 loads, stores, and instruction fetches &mdash; rather than integer addresses.
 Capabilities are used to implement pointers explicitly described in the source

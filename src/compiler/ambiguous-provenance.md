@@ -7,7 +7,6 @@ Consider for example a structure that holds a pointer and a small number of flag
 In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:
 
 ```
-\begin{clisting}[numbers=left]
 typedef struct { uintptr_t data; } pointer_and_flags;
 void set_ptr(pointer_and_flags *p, void *value) {
     p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
@@ -18,7 +17,10 @@ void set_flags(pointer_and_flags *p, unsigned flags) {
 ```
 
 ```
-<source>:3:40: warning: binary expression on capability types '__uintcap_t' and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as the source of provenance; currently provenance is inherited from the left-hand side [-Wcheri-provenance]
+<source>:3:40: warning: binary expression on capability types '__uintcap_t'
+and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as
+the source of provenance; currently provenance is inherited from the left-hand
+side [-Wcheri-provenance]
     p->data = (p->data & (uintptr_t)7) | (uintptr_t)(value);
               ~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~
 1 warning generated.
@@ -27,12 +29,9 @@ void set_flags(pointer_and_flags *p, unsigned flags) {
 Unlike the compiler, the programmer knows that inside ```set_ptr``` capability metadata should always be taken from the `value` argument.
 The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:
 
-<!--
-\TikzListingHighlightStartEnd[green]{FixAmbig}
--->
 ```
 void set_ptr(pointer_and_flags *p, void *value) {
-    p->data = £\vcpgfmark{StartFixAmbig}£(size_t)£\vcpgfmark{EndFixAmbig}£(p->data & (uintptr_t)7) | (uintptr_t)(value);
+    p->data = (size_t)(p->data & (uintptr_t)7) | (uintptr_t)(value);
 }
 ```
 

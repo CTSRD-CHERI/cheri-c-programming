@@ -3,12 +3,12 @@
 The architecture enforces several important security properties on changes to
 this metadata:
 
-**Provenance validity** ensures that capabilities can be used &mdash; for
+* **Provenance validity** ensures that capabilities can be used &mdash; for
   load, store, instruction fetch, etc. &mdash; only if they are derived via valid
   transformations of valid capabilities.
   This property holds for capabilities in both registers and memory.
 
-**Monotonicity** requires that any capability derived from another
+* **Monotonicity** requires that any capability derived from another
   cannot exceed the permissions and bounds of the capability from which it was
   derived (leaving aside sealed capabilities, used for domain transition,
   whose mechanism is not detailed in this report).

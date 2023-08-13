@@ -49,7 +49,7 @@ ways:
 
 These portability problems will typically be found due to hardware exceptions
 thrown on attempted unaligned accesses of capability values
-(see \Cref{sec:faults}).
+(see [Capability-related faults](capability-faults.html)).
 However, they can also arise in the form of stripped tag bits, leading to
 invalid capabilities that cannot be dereferenced, if, for example, pointer
 values are copied into inappropriately aligned allocations.

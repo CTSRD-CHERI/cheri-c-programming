@@ -11,8 +11,8 @@ Two kinds of modifications are typically required:
   Second, further alignment changes will be required to ensure that bounds can
   be represented precisely.
   This requires suitably aligning both the bottom and top bounds to exclude
-  any other live allocations, as described in
-  \Cref{sec:bounds_alignment}.
+  any other live allocations, as described in [Bounds alignment due to
+  compression](bounds-alignment-due-to-compression.html).
 <!--
 \arnote{May want to switch order of sections?}
 -->
