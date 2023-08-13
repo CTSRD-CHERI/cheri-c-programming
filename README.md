@@ -2,17 +2,17 @@
 
 # CHERI C/C++ Programming Guide
 
-Robert N. M. Watson (University of Cambridge),
-Alexander Richardson (University of Cambridge),
-Brooks Davis (SRI International),
-John Baldwin (Ararat River Consulting, LLC),
-David Chisnall (Microsoft Research),
-Jessica Clarke (University of Cambridge),
-Nathaniel Filardo (Microsoft Research),
-Simon W. Moore (University of Cambridge),
-Edward Napierala (University of Cambridge),
-Peter Sewell (University of Cambridge), and
-Peter G. Neumann (SRI International)
+* Robert N. M. Watson (University of Cambridge),
+* Alexander Richardson (University of Cambridge),
+* Brooks Davis (SRI International),
+* John Baldwin (Ararat River Consulting, LLC),
+* David Chisnall (Microsoft Research),
+* Jessica Clarke (University of Cambridge),
+* Nathaniel Filardo (Microsoft Research),
+* Simon W. Moore (University of Cambridge),
+* Edward Napierala (University of Cambridge),
+* Peter Sewell (University of Cambridge), and
+* Peter G. Neumann (SRI International)
 
 This is the CHERI Pure-Capability C/C++ Programming Guide, a short guide to
 help developers working with pure-capability C/C++ understand the benefits
