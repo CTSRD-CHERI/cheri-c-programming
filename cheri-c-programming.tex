@@ -1155,7 +1155,7 @@ widely used software such as FreeBSD, PostgreSQL, and WebKit.
 In \purecapCOrCpp{}, pointer comparison considers only the
 integer address part of a capability.
 This means that differences in tag validity, bounds, permissions, and so on,
-will not be considered when by C operators such as \texttt{==}, \texttt{<}, and \texttt{<=}.
+will not be considered when used by C operators such as \texttt{==}, \texttt{<}, and \texttt{<=}.
 On the whole, this leads to intuitive behavior in systems software, where,
 for example, \cfunc{malloc} adjusts bounds on a pointer before returning it to
 a caller, and then expects an address-wise comparison to succeed when the
