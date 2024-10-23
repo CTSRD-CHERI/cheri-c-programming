@@ -74,17 +74,6 @@ The compiler will also warn when operators such as modulus or shifts are used on
 function or similar computations.
 In this case, the programmer should not be using `uintptr_t` but instead cast the pointer
 to `ptraddr_t` and perform the arithmetic on this type instead.
-This has the advantage that it can be slightly more efficient than `uintptr_t` arithmetic on
-a split-register file architecture such as CHERI-MIPS.
-
-<!--
-\jrtcnote{This point is slightly dubious; a sufficiently-smart compiler should
-be able to optimize it to the equivalent `ptraddr_t` form, provided the result
-eventually is put in a `ptraddr_t` or other non-capability type and nothing
-consumes the capability metadata for all the intermediate calculations (e.g.,
-it's used as an index).}
-\arnote{I think I was just trying to point out that it avoids wasting space for variables stored to memory (e.g., on-stack arguments, etc.)}
--->
 
 [^7]: Previous versions of the compiler used the capability offset (address
 minus base) instead of the address for arithmetic on `uintptr_t`.

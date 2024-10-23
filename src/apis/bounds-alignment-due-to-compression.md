@@ -7,9 +7,9 @@
 Bounds imprecisions may require a memory allocator to increase the alignment
 of an allocation, or increase padding on an allocation, to prevent bounds from
 spanning more than one object.
-When the length of an object exceeds 2<sup>*floor*(*bounds_bits*/2)-1</sup> (i.e., 4 KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
+When the length of an object exceeds 2<sup>*floor*(*bounds_bits*/2)-1</sup> (i.e., 4 KiB for 64-bit CHERI-RISC-V), additional alignment requirements
 apply to the lower and upper bounds.
-The alignment required for allocations exceeding the minimum representable range (4 KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is 2<sup>*E*+3</sup> bytes, where
+The alignment required for allocations exceeding the minimum representable range (4 KiB for 64-bit CHERI-RISC-V) is 2<sup>*E*+3</sup> bytes, where
 *E* is determined from the length, *l*, by
 *E* = 52 - CountLeadingZeros(*l*[64: *floor*(*bounds_bits*/2)]).
 
@@ -67,5 +67,5 @@ void *allocate_next(struct Buffer *buf, size_t len) {
 ```
 
 Software written to use these compiler builtins, rather than encoding alignment
-requirements directly, is more likely to be portable between CHERI-MIPS,
-CHERI-RISC-V, and Morello.
+requirements directly, is more likely to be portable between
+CHERI-RISC-V and Morello.

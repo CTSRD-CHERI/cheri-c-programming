@@ -48,7 +48,7 @@ validity](pointer-provenance-validity.html)).<!--
 \psnote{Comment on whether that should immediately trap instead?} -->
 The range of out-of-bounds addresses permitted for a capability is
 a function of the length of the bounded region and the number of bits used for bounds in the capability representation.
-With 27 bits of the capability used for bounds, CHERI-MIPS and 64-bit
+With 27 bits of the capability used for bounds, 64-bit
 CHERI-RISC-V provide the following guarantees:
 
 * A pointer is able to travel at least 1/4 the size of the object, or
