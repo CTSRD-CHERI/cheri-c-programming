@@ -9,16 +9,16 @@ This allows the provenance validity of language-level pointers to be
 protected by the provenance properties of CHERI architectural capabilities:
 only pointers implemented using valid capabilities can be dereferenced.
 Other types that contain pointers, `uintptr_t` and `intptr_t`,
-<!--
-%\psnote{It would be better to exhaustively list them (is it just intptr\_t and uintptr\_t?) rather than this vague "such as"}
-%\arnote{There are also cases such as C++11 strongly typed enums that use uintcap\_t as the underlying type, but we really don't need to mention this here. And I'm also not sure if we want to keep allowing that since enums should really be integer values only}
--->
 are similarly implemented
 using architectural capabilities, so that casts through these types
 can retain capability properties.
 When a dereference is attempted on a capability without a valid tag &mdash;
 including load, store, and instruction fetch &mdash; a hardware exception fires
 (see [Capability-related faults](capability-faults.html)).
+<!--
+%\psnote{It would be better to exhaustively list them (is it just intptr\_t and uintptr\_t?) rather than this vague "such as"}
+%\arnote{There are also cases such as C++11 strongly typed enums that use uintcap\_t as the underlying type, but we really don't need to mention this here. And I'm also not sure if we want to keep allowing that since enums should really be integer values only}
+-->
 
 On the whole, the effects of pointer provenance validity are non-disruptive to
 C/C++ source code.

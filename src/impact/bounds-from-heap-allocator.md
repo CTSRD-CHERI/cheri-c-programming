@@ -19,10 +19,10 @@ Further, *any* operation on the pointer passed to `realloc` is undefined upon
 return.  Instead, we suggest that the programmer measure a pointer `P`'s
 offset into an object `A` *prior to* `realloc` and derive new pointers
 from the `realloc` result `B` and these offsets. (i.e., compute
-*`B` + (`P` - `A`)* rather than
-*`P` + (`B` - `A`)*).[^4]
+*`B + (P - A)`* rather than
+*`P + (B - A)`*).[^4]
 
 [^4]: While it may seem that `A` remains available after `realloc`, our
 revocation sweeps which enforce temporal safety may have atomically replaced
 this with a non-pointer value.  The scalar value
-*`D` = `P` - `A`* will naturally be preserved by revocation.
+*`D = P - A`* will naturally be preserved by revocation.

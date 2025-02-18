@@ -18,14 +18,16 @@ Usually, this warning is caused by programmers incorrectly assuming that `long` 
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as `intptr_t` or `uintptr_t` (see [Recommended use of
 C-language types](../impact/recommended-use-c-types.md)):
 
-```
-char *example_bad(long ptr_or_int) {
+<!--
+Need to use html formatting here to get the highlight colors in the code examples.
+-->
+<pre><code>char *example_bad(<mark style="background-color: #EE918D">long</mark> ptr_or_int) {
     return strdup((const char *)ptr_or_int);
 }
-char *example_good(intptr_t ptr_or_int) {
+char *example_good(<mark style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
   return strdup((const char *)ptr_or_int);
 }
-```
+</code></pre>
 
 ```
 <source>:2:17: warning: cast from provenance-free integer type to pointer type
@@ -39,14 +41,16 @@ In some cases, this warning can be a false positive.
 For example, it is common for C callback APIs take a `void *` data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to `uintptr_t` first:
 
-```
-void invoke_cb(void (*cb)(void *), void *);
+<!--
+Need to use html formatting here to get the highlight colors in the code examples.
+-->
+<pre><code>void invoke_cb(void (*cb)(void *), void *);
 void callback(void *arg);
 void false_positive_example(int callback_data) {
     invoke_cb(&callback, (void *)callback_data); // warning
-    invoke_cb(&callback, (void *)(uintptr_t)callback_data); // no warning
+    invoke_cb(&callback, (void *)<mark style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
 }
-```
+</code></pre>
 
 ```
 <source>:4:24: warning: cast from provenance-free integer type to pointer type

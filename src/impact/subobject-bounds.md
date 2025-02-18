@@ -132,4 +132,3 @@ existing code, it does slightly increase the porting effort.
 [^5]: If flexible arrays members are declared using the C99 syntax with empty
 square brackets, the compiler will automatically use the remaining allocation
 size.
-%
