@@ -8,9 +8,7 @@ capability when an integer value is expected. <!--
 -->
 Dually, bitwise operations may also result in the loss of tags if intermediate results become unrepresentable (recall [Out-of-bounds pointers](out-of-bounds-pointers.html)).[^7]
 
-
-%
-Most bitwise operations on \cuintptrt fall into one of three categories for which we provide
+Most bitwise operations on `uintptr_t` fall into one of three categories for which we provide
 higher-level abstractions.
 
 **Aligning pointer values**:

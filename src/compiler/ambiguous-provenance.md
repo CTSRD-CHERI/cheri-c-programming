@@ -29,11 +29,10 @@ side [-Wcheri-provenance]
 Unlike the compiler, the programmer knows that inside ```set_ptr``` capability metadata should always be taken from the `value` argument.
 The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:
 
-```
-void set_ptr(pointer_and_flags *p, void *value) {
-    p->data = (size_t)(p->data & (uintptr_t)7) | (uintptr_t)(value);
+<pre><code>void set_ptr(pointer_and_flags *p, void *value) {
+    p->data = <mark style="background-color: #77DD77">(size_t)</mark>(p->data & (uintptr_t)7) | (uintptr_t)(value);
 }
-```
+</code></pre>
 
 <!--
 \nwfnote{Not use cheri\_low\_bits\_set()?}

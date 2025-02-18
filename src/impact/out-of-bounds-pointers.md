@@ -52,16 +52,14 @@ With 27 bits of the capability used for bounds, CHERI-MIPS and 64-bit
 CHERI-RISC-V provide the following guarantees:
 
 * A pointer is able to travel at least 1/4 the size of the object, or
-  $2$ KiB [^1], whichever is greater, above its upper bound.
+  2 KiB (2<sup>*floor*(*bounds_bits*/2)-2</sup>), whichever is greater,
+  above its upper bound.
 
-* It is able to travel at least 1/8 the size of the object, or $1$ KiB [^2],
-  whichever is greater, below its lower bound.
+* It is able to travel at least 1/8 the size of the object, or 1 KiB
+  (2<sup>*floor*(*bounds_bits*/2)-3</sup>), whichever is greater, below
+  its lower bound.
 
 In general, programmers should not rely on support for arbitrary out-of-bounds
 pointers.  Nevertheless, in practice, we have found that the CHERI capability
 compression scheme supports almost all in-the-field out-of-bounds behavior in
 widely used software such as FreeBSD, PostgreSQL, and WebKit.
-
-[^1]: *2^(floor(bounds_bits/2)-2)*
-
-[^2]: *2^(floor(bounds_bits/2)-3)*

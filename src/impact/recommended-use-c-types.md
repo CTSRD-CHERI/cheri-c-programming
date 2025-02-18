@@ -116,4 +116,4 @@ This ensures that provenance is maintained.
 
 [^1]: It is important to use `alignof` instead of `sizeof` since many
 common implementations, such as GCC and FreeBSD, define `maxalign_t` as a
-`struct` and not a `union`.}
+`struct` and not a `union`.

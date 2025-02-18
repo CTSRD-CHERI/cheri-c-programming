@@ -29,7 +29,7 @@ This can be useful to re-derive a valid pointer from an address.
   [Bounds alignment due to
   compression](../apis/bounds-alignment-due-to-compression.html)),
   but they will always be a subset of
-  the original bounds. % of `c`.
+  the original bounds. <!--% of `c`.-->
 
 * `void *cheri_bounds_set_exact(void *c, size_t x)`: Narrow the bounds of capability
   `c` so that the lower bound is the current address, and its

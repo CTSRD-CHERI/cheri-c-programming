@@ -29,9 +29,6 @@
 \end{figure}
 -->
 
-![CHERI capability format illustration](capability-format.jpg)
-*Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-MIPS and 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.*
-
 CHERI capabilities are twice the width of the native integer pointer type of
 the baseline architecture: there are 128-bit capabilities on 64-bit platforms,
 and 64-bit capabilities on 32-bit platforms.
@@ -43,6 +40,10 @@ vary across underlying architectures and word sizes).
 In addition, they are associated with a 1-bit validity "tag" whose value is
 maintained in registers and memory by the architecture, but not part of
 addressable memory.
+
+![CHERI capability format illustration](capability-format.jpg)
+*Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-MIPS and 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.*
+
 Each element of the additional metadata and tag of the capability contributes
 to the protection model:
 

@@ -7,11 +7,11 @@
 Bounds imprecisions may require a memory allocator to increase the alignment
 of an allocation, or increase padding on an allocation, to prevent bounds from
 spanning more than one object.
-When the length of an object exceeds *2^(floor(bounds_bits/2)-1)* (i.e., 4 KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
+When the length of an object exceeds 2<sup>*floor*(*bounds_bits*/2)-1</sup> (i.e., 4 KiB for CHERI-MIPS and 64-bit CHERI-RISC-V), additional alignment requirements
 apply to the lower and upper bounds.
-The alignment required for allocations exceeding the minimum representable range (4 KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is *2^(E+3)* bytes, where
+The alignment required for allocations exceeding the minimum representable range (4 KiB for CHERI-MIPS and 64-bit CHERI-RISC-V) is 2<sup>*E*+3</sup> bytes, where
 *E* is determined from the length, *l*, by
-*E = 52 - CountLeadingZeros(l[64:floor(bounds_bits/2)])*.
+*E* = 52 - CountLeadingZeros(*l*[64: *floor*(*bounds_bits*/2)]).
 
 <!--
 \arnote{Is this too much detail?}
