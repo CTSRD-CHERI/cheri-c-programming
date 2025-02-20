@@ -1,0 +1,2070 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>CHERI C/C++ Programming Guide</title>
+        <meta name="robots" content="noindex">
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">CHERI C/C++ Programming Guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/CTSRD-CHERI/cheri-c-programming" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cheri-cc-programming-guide"><a class="header" href="#cheri-cc-programming-guide">CHERI C/C++ Programming Guide</a></h1>
+<ul>
+<li>Robert N. M. Watson (University of Cambridge),</li>
+<li>Alexander Richardson (University of Cambridge),</li>
+<li>Brooks Davis (SRI International),</li>
+<li>John Baldwin (Ararat River Consulting, LLC),</li>
+<li>David Chisnall (Microsoft Research),</li>
+<li>Jessica Clarke (University of Cambridge),</li>
+<li>Nathaniel Filardo (Microsoft Research),</li>
+<li>Simon W. Moore (University of Cambridge),</li>
+<li>Edward Napierala (University of Cambridge),</li>
+<li>Peter Sewell (University of Cambridge), and</li>
+<li>Peter G. Neumann (SRI International)</li>
+</ul>
+<p>This is the CHERI Pure-Capability C/C++ Programming Guide, a short guide to
+help developers working with pure-capability C/C++ understand the benefits
+that it brings, any code adaptations they might need to make, and how to
+interpret new compiler warnings and errors that arise with pure-capability
+code.</p>
+<p><em>This is a living document; feedback and contributions are welcomed.
+Please see our
+<a href="https://github.com/CTSRD-CHERI/cheri-c-programming">GitHub Repository</a> for
+source code and an issue tracker.
+There is a <a href="https://ctsrd-cheri.github.io/cheri-c-programming/">rendered version on the web</a>, which is automatically updated when the git repository is
+committed to.</em></p>
+<p>The <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.html">2020 published version of the CHERI C/C++ Programmers
+Guide</a> can be cited
+as follows:</p>
+<p>Robert N. M. Watson, Alexander Richardson, Brooks Davis, John Baldwin, David Chisnall, Jessica Clarke, Nathaniel Filardo, Simon W. Moore, Edward Napierala, Peter Sewell, and Peter G. Neumann. CHERI C/C++ Programming Guide, Technical Report UCAM-CL-TR-947, Computer Laboratory, June 2020.</p>
+<p>Or in BibTex:</p>
+<pre><code>@TechReport{UCAM-CL-TR-947,
+  author =	 {Watson, Robert N. M. and Richardson, Alexander and Davis,
+          	  Brooks and Baldwin, John and Chisnall, David and Clarke,
+          	  Jessica and Filardo, Nathaniel and Moore, Simon W. and
+          	  Napierala, Edward and Sewell, Peter and Neumann, Peter G.},
+  title = 	 {{CHERI C/C++ Programming Guide}},
+  year = 	 2020,
+  month = 	 jun,
+  url = 	 {https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-947.pdf},
+  institution =  {University of Cambridge, Computer Laboratory},
+  doi = 	 {10.48456/tr-947},
+  number = 	 {UCAM-CL-TR-947}
+}
+</code></pre>
+<h2 id="acknowledgments"><a class="header" href="#acknowledgments">Acknowledgments</a></h2>
+<p>We gratefully acknowledge the helpful feedback from our colleagues, including
+Hesham Almatary, Ruben Ayrapetyan, Silviu Baranga, Jacob Bramley, Rod Chapman,
+Paul Gotch, Al Grant, Brett Gutstein, Alfredo Mazzinghi, Alan Mycroft, and Lee
+Smith.</p>
+<p>This work was supported by the Defense Advanced Research Projects Agency
+(DARPA) and the Air Force Research Laboratory (AFRL), under contracts
+FA8750-10-C-0237 ("CTSRD") and HR0011-18-C-0016 ("ECATS").
+The views, opinions, and/or findings contained in this report are those of the
+authors and should not be interpreted as representing the official views or
+policies of the Department of Defense or the U.S. Government.</p>
+<p>This work was supported in part by the Innovate UK project Digital Security by
+Design (DSbD) Technology Platform Prototype, 105694.</p>
+<p>This project has received funding from the European Research Council (ERC)
+under the European Union’s Horizon 2020 research and innovation programme
+(grant agreement No 789108), ERC Advanced Grant ELVER.</p>
+<p>We also acknowledge the EPSRC REMS Programme Grant (EP/K008528/1), Arm
+Limited, HP Enterprise, and Google, Inc.
+Approved for Public Release, Distribution Unlimited.</p>
+<h2 id="building"><a class="header" href="#building">Building</a></h2>
+<p>Building the book from the Markdown sources requires
+<a href="https://github.com/rust-lang/mdBook">mdBook</a>. Once installed, <code>mdbook build</code>
+will build the static HTML files in the <code>book/</code> directory, whilst <code>mdbook serve</code> will build and serve them at <code>http://localhost:3000</code>. Please refer to
+the mdBook documentation for futher options.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>This document is a brief introduction to the CHERI C/C++
+programming languages, which employ CHERI's architectural capability
+primitive to implement C/C++-language memory safety.
+We explain the principles underlying these language variants, and their
+grounding in CHERI's multiple architectural instantiations:
+CHERI-RISC-V and Arm's Morello.
+We describe the most commonly encountered differences between these
+dialects and C/C++ on conventional architectures, and where existing
+software may require minor changes.
+We document new compiler warnings and errors that may be experienced compiling
+code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
+through typically minor source-code changes.
+We explain how modest language extensions allow selected software, such
+as memory allocators, to further refine permissions and bounds on pointers.
+This guidance is based on our experience adapting the FreeBSD operating-system
+userspace, and applications such as PostgreSQL and WebKit, to run in a
+CHERI C/C++ capability-based programming environment.
+We conclude by recommending further reading.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="definitions"><a class="header" href="#definitions">Definitions</a></h1>
+<p>CHERI Clang/LLVM and LLD implement the following new language,
+code-generation, and linkage models:</p>
+<ul>
+<li>
+<p><strong>CHERI C/C++</strong> are C/C++-language dialects tuned to requirements arising from
+implementing all pointers using CHERI capabilities.
+This includes all explicit pointers (i.e., those declared by the programmer)
+and all implied pointers (e.g., those used to access local and global
+variables).
+For example, they diverge from C/C++ implementations on conventional
+architectures by preventing pointers passed through integer type other
+than <code>uintptr_t</code> and <code>intptr_t</code> from being dereferenced.
+New Application Programming Interfaces (APIs) provide access to capability
+features of pointers, including getting and setting their bounds, required
+by selected software such as memory allocators.
+The vast majority of C/C++ source code we have encountered requires little
+or no modification to be compiled as CHERI C/C++.</p>
+</li>
+<li>
+<p><strong>Pure-capability machine code</strong> is compiled code (or hand-written assembly)
+that utilizes CHERI capabilities for all memory accesses — including
+loads, stores, and instruction fetches — rather than integer addresses.
+Capabilities are used to implement pointers explicitly described in the source
+program, and also to implement implied pointers in the C execution
+environment, such as those used for control flow.
+Pure-capability machine code is not binary compatible with capability-unaware
+code using integer pointers, not least due to the different size of the
+pointer data type.</p>
+</li>
+</ul>
+<p>While the focus of this document is CHERI C/C++, CHERI is an architectural
+feature able to support other software use cases including other
+C/C++-language mappings into its features.
+Another mapping is hybrid C/C++, in which only selected pointers are
+implemented using capabilities, with the remainder implemented using integers.
+We have primarily used hybrid C in systems software that bridges between
+environments executing pure-capability machine code and those running largely
+or entirely non-CHERI-aware machine code.
+For example, a largely CHERI-unaware CheriBSD kernel can host pure-capability
+processes using its CheriABI wrapper implemented in hybrid C (see
+<a href="introduction/../cheriabi">CheriABI</a>).
+Hybrid machine code has stronger binary compatibility, but weaker protection,
+than pure-capability machine code.
+We do not consider hybrid C further in this document.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="background"><a class="header" href="#background">Background</a></h1>
+<p>CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
+support for <em>architectural capabilities</em>.
+One important use for this new hardware data type is in the implementation
+of safer C/C++ pointers and the code or data they point at.
+Our technical report, <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf"><em>An Introduction to
+CHERI</em></a>, provides a
+more detailed overview of the CHERI architecture, ISA modeling, hardware
+implementations, and software stack<sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>Robert N. M. Watson, Simon W. Moore, Peter Sewell, and Peter G. Neumann.
+<a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf">An Introduction to
+CHERI</a>, Technical
+Report UCAM-CL-TR-941, Computer Laboratory, September 2019.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-capabilities"><a class="header" href="#cheri-capabilities">CHERI capabilities</a></h1>
+<!--
+\begin{figure}[b]
+\hspace{2.5cm}
+% Tag
+\begin{subfigure}[t!]{0.1\textwidth}
+\begin{bytefield}[bitwidth=3pt]{1}
+% \bitheader[endianness=big]{~,~} \\
+\begin{leftwordgroup}{1-bit tag}
+\bitbox{1}{}
+\end{leftwordgroup}
+\end{bytefield}
+\end{subfigure}
+% Capability
+\begin{subfigure}[t!]{0.1\textwidth}
+\begin{bytefield}[bitwidth=3pt]{64}
+\bitheader[endianness=big]{0,63} \\
+\begin{rightwordgroup}{128-bit \\ in-memory \\ capability}
+\bitbox{16}{perms} & \bitbox{3}{\color{lightgray}\rule{\width}{\height}} & \bitbox{15}{otype} & \bitbox{30}{bounds} \\
+\bitbox[lrb]{64}{64-bit~address}
+\end{rightwordgroup}
+\end{bytefield}
+\end{subfigure}
+\caption{128-bit CHERI Concentrate capability representation used in
+  64-bit CHERI-RISC-V: 64-bit address
+  and metadata in addressable memory; and 1-bit out-of-band tag.}
+\label{figure:cheri-capability-representation}
+\end{figure}
+-->
+<p>CHERI capabilities are twice the width of the native integer pointer type of
+the baseline architecture: there are 128-bit capabilities on 64-bit platforms,
+and 64-bit capabilities on 32-bit platforms.
+Each capability consists of an integer (virtual) address of the natural size for
+the architecture (e.g., 32 or 64 bit), and also additional metadata that is
+compressed in order to fit in the remaining 32 or 64 bits of the capability
+(see Figure 1 for an example; details
+vary across underlying architectures and word sizes).
+In addition, they are associated with a 1-bit validity "tag" whose value is
+maintained in registers and memory by the architecture, but not part of
+addressable memory.</p>
+<p><img src="background/capability-format.jpg" alt="CHERI capability format illustration" />
+<em>Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.</em></p>
+<p>Each element of the additional metadata and tag of the capability contributes
+to the protection model:</p>
+<ul>
+<li>
+<p><strong>Validity tag</strong>: The tag tracks the validity of a capability.
+If invalid, the capability cannot be used for load, store, instruction
+fetch, or other operations.
+It is still possible to extract fields from an invalid capability,
+including its address.</p>
+</li>
+<li>
+<p><strong>Bounds</strong>: The lower and upper bounds are addresses restricting the
+portion of the address space within which the capability can be used for
+load, store, and instruction fetch.
+Setting a capability's address (i.e., where it points) within
+bounds will retain the capability's validity tag.  Setting addresses out of
+bounds is subject to the precision limits of the bounds compression model
+(see below and <a href="background/../impact/out-of-bounds-pointers.html">Out-of-bounds pointers</a>); broadly speaking, setting addresses "near"
+the capability's bounds will preserve the validity tag.  (These out-of-bounds
+capabilities continue to authorize access only to memory within bounds.)</p>
+</li>
+<li>
+<p><strong>Permissions</strong>: The permissions mask controls how the capability can be
+used — for example, by authorizing the loading and storing of data and/or
+capabilities.</p>
+</li>
+<li>
+<p><strong>Object type</strong>: If this value is not equal to the unsealed object type, the capability is "sealed" and
+cannot be modified or dereferenced, but can be used to implement opaque
+pointer types.
+This feature is not described further in this document, as it is primarily
+used to implement software compartmentalization rather than object-level
+memory protection.</p>
+</li>
+</ul>
+<p>When stored in memory, valid capabilities must be naturally aligned — i.e.,
+at 64-bit or 128-bit boundaries, depending on capability size — as that is
+the granularity at which in-memory tags are maintained.
+Partial or complete overwrites with data, rather than a complete overwrite
+with a valid capability, lead to the in-memory tag being cleared, preventing
+corrupted capabilities from later being dereferenced.</p>
+<p>In order to reduce the memory footprint of capabilities, capability
+compression is used to reduce the overhead of bounds so that the full
+capability, including address, permissions, and bounds fits within 64 or
+128 bits (plus the 1-bit out-of-band tag).
+Bounds compression takes advantage of redundancy between the address
+and the bounds, which occurs because a pointer typically falls within (or
+close to) its associated allocation, and because allocations are typically
+well aligned.
+The compression scheme uses a floating-point representation, allowing high-precision bounds for small
+objects, but requiring stronger alignment and padding for larger allocations
+(see <a href="background/../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to compression</a>).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="architectural-rules-for-capability-use"><a class="header" href="#architectural-rules-for-capability-use">Architectural rules for capability use</a></h1>
+<p>The architecture enforces several important security properties on changes to
+this metadata:</p>
+<ul>
+<li>
+<p><strong>Provenance validity</strong> ensures that capabilities can be used — for
+load, store, instruction fetch, etc. — only if they are derived via valid
+transformations of valid capabilities.
+This property holds for capabilities in both registers and memory.</p>
+</li>
+<li>
+<p><strong>Monotonicity</strong> requires that any capability derived from another
+cannot exceed the permissions and bounds of the capability from which it was
+derived (leaving aside sealed capabilities, used for domain transition,
+whose mechanism is not detailed in this report).</p>
+</li>
+</ul>
+<p>At boot time, the architecture provides initial capabilities to the firmware,
+allowing data access and instruction fetch across the full address space.
+Additionally, all tags are cleared in memory.
+Further capabilities can then be derived (in accordance with the monotonicity
+property) as they are passed from firmware to boot loader, from boot loader to
+hypervisor, from hypervisor to the OS, and from the OS to the application.
+At each stage in the derivation chain, bounds and permissions may be
+restricted to further limit access.
+For example, the OS may assign capabilities for only a limited portion of the
+address space to the user software, preventing use of other portions of the
+address space.</p>
+<p>Similarly, capabilities carry with them <em>intentionality</em>: when a
+process passes a capability as an argument to a system call, the OS kernel can
+carefully use only that capability to ensure that it does not access other
+process memory that was not intended by the user process — even though the
+kernel may in fact have permission to access the entire address space through
+other capabilities it holds.
+This is important, as it prevents "confused deputy" problems, in which a more
+privileged party uses an excess of privilege when acting on behalf of a less
+privileged party, performing operations that were not intended to be
+authorized.
+For example, this prevents the kernel from overflowing the bounds on a
+userspace buffer when a pointer to the buffer is passed as a
+system-call argument.</p>
+<p>The hardware furthermore guarantees that capability tags and capability data is written atomically.
+For example, if one thread stores a valid capability and another writes arbitrary data to the same location, it is impossible to observe the arbitrary data with the validity bit set.</p>
+<p>These architectural properties provide the foundation on which a
+capability-based OS, compiler, and runtime can implement C/C++-language memory
+safety.
+They have been made precise and have been proved, with machine-checked proof,
+to hold for the CHERI-MIPS architecture.<sup class="footnote-reference"><a href="#1">1</a></sup></p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>Kyndylan Nienhuis, Alexandre Joannou, Thomas Bauereiss, Anthony Fox, Michael Roe, Brian Campbell, Matthew Naylor, Robert M. Norton, Simon W. Moore, Peter G. Neumann, Ian Stark, Robert N. M. Watson, and Peter Sewell. <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/202005oakland-cheri-formal.pdf">Rigorous engineering for hardware security: Formal modelling and proof in the CHERI design and implementation process</a>. In Proceedings of the 41st IEEE Symposium on Security and Privacy (Oakland 2020). San Jose, CA, USA, May 18-20, 2020.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-cc"><a class="header" href="#cheri-cc">CHERI C/C++</a></h1>
+<p>The architectural-capability type can be used in a variety of ways by
+software.
+One particularly useful use case is in implementing <em>CHERI C/C++</em>.
+In this model, all C/C++ language-visible pointer types, as well as any
+implied pointers implementing vtables, return addresses, global variables,
+arrays of variadic-function arguments, and so on, are implemented using
+capabilities with tight bounds.
+This allows the architecture to imbue pointers with protection by virtue of
+architectural provenance validity, bounds checking, and permission checking,
+protecting pointers from corruption and providing strong spatial memory
+safety.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="the-cheri-cc-run-time-environment"><a class="header" href="#the-cheri-cc-run-time-environment">The CHERI C/C++ run-time environment</a></h1>
+<p>CHERI C code executes within a capability-aware run-time environment
+— whether "bare metal" with a suitable runtime, or in a richer, OS-based
+process environment such as CheriABI (see <a href="cheri-ccpp/../cheriabi">CheriABI</a>),
+which ensures that:</p>
+<ul>
+<li>capabilities are context switched (if required);</li>
+<li>tags are maintained by the OS virtual-memory subsystem (if present);</li>
+<li>capabilities are supported in OS control operations such as
+debugging (as needed);</li>
+<li>system-call arguments, the
+run-time linker, and other aspects of the OS Application Binary Interface
+(ABI) utilize capabilities rather than integer pointers; and</li>
+<li>the C/C++-language runtime implements suitable capability preservation
+(e.g., in <code>memcpy</code>) and restriction (e.g., in <code>malloc</code>).</li>
+</ul>
+<p>In CheriBSD, our CHERI-extended version of the open-source FreeBSD operating
+system, CheriABI operates as a complete additional OS ABI.
+CheriABI is implemented in the style of a 32-bit or 64-bit OS personality, in
+that it requires its own set of suitably compiled system libraries and classes.
+We have also successfully adapted bare-metal runtimes, such as newlib, and
+embedded operating systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS
+(CHERI-RTEMS), to support CHERI memory protection.</p>
+<p>Outside of the OS and language runtime themselves, CHERI C/C++ require
+relatively few source-code-level changes to C/C++-language software.
+We explore those changes in the remainder of this document.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="referential-spatial-and-temporal-safety"><a class="header" href="#referential-spatial-and-temporal-safety">Referential, spatial, and temporal safety</a></h1>
+<p>Pure-capability C/C++ introduces a number of new types of protection not
+present in compilation to conventional architectures:</p>
+<ul>
+<li>
+<p><strong>Referential safety</strong> protects pointers (references) themselves.
+This includes <em>integrity</em> (corrupted pointers cannot be dereferenced)
+and <em>provenance validity</em> (only pointers derived from valid pointers
+via valid manipulations can be dereferenced).</p>
+<p>When pointers are implemented using architectural capabilities, CHERI's
+capability tags and provenance validity naturally provide this protection.</p>
+</li>
+<li>
+<p><strong>Spatial safety</strong> ensures that pointers may be used only to access memory
+within bounds of their associated allocation; dually, manipulating an
+out-of-bounds pointer will not grant access to another allocation.</p>
+<p>This is accomplished by adapting various memory allocators, including the run-time
+linker for global variables, the stack allocator, and the heap allocator,
+to set the bounds on the capability implementing a pointer before returning
+it to the caller.
+Due to precision constraints on capability bounds, bounds on returned
+pointers may include additional padding, but will still not permit access to any
+other allocations (see <a href="cheri-ccpp/../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to
+compression</a>).
+Monotonicity ensures that callers cannot later broaden the bounds to cover
+other allocations.</p>
+</li>
+</ul>
+<p>Referential safety and spatial safety are implemented in CheriBSD's
+pure-capability CheriABI execution environment and for bare-metal in
+CheriFreeRTOS and CHERI-RTEMS.</p>
+<ul>
+<li>
+<p><strong>Temporal safety</strong> prevents a pointer retained after the release of its
+underlying allocation from being used to access its memory if that memory
+has been reused for a fresh allocation (e.g., after a fresh pointer to that
+memory has been returned by a further call to <code>malloc</code> after the
+current pointer passed to <code>free</code>).</p>
+<p>Heap temporal safety is accomplished by preventing new pointers being
+returned to a previously allocated region of memory while any prior pointers
+to that memory persist in application-accessible memory.
+Memory will be held in <em>quarantine</em> until any prior pointers have
+been revoked; then the memory may be reallocated.
+Architectural capability tags and virtual memory allow intermittent
+<em>revocation sweeps</em> to accurately and efficiently locate and
+overwrite any capabilities implementing stale pointers.
+Spatial safety ensures that pointers cannot be used to reference other
+memory, including other freed memory.</p>
+</li>
+</ul>
+<p>Temporal safety is the object of ongoing experiments.
+A prototype that guards <em>heap</em> allocations has been developed for
+CheriABI on CheriBSD, but is not yet integrated with the main development
+branch.
+We currently have no plans to develop support for temporal memory safety in
+CheriFreeRTOS and CHERI-RTEMS, both due to the complexity of the temporal
+safety runtime, and also because of CHERI temporal safety's dependence on an
+MMU for performance.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="impact-on-the-cc-programming-model"><a class="header" href="#impact-on-the-cc-programming-model">Impact on the C/C++ programming model</a></h1>
+<p>Several kinds of changes may be required by programmers; the extent to which
+these changes impact a particular library or application will depend
+significantly on its idiomatic use of C.
+Our experience suggests that low-level system components such as run-time
+linkers, debuggers, memory allocators, and language runtimes require a modest
+but non-trivial porting effort.
+Similarly, support classes that include, for example, custom synchronization
+features, may also require moderate adaptation.
+Other applications may compile with few or no changes — especially if they
+are already portable across 32-bit and 64-bit platforms and are written in a contemporary C or C++ dialect.
+In the following sections, we consider various kinds of programmer-visible
+changes required in the CHERI C/C++ programming environment.
+In many cases, compiler warnings and errors can be used to identify potential
+issues compiling code as CHERI C/C++ (see <a href="impact/../compiler">CHERI compiler warnings and errors</a>).</p>
+<!--
+\rwnote{Alex: Can we use the word "most" instead of "many"?}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="capability-related-faults"><a class="header" href="#capability-related-faults">Capability-related faults</a></h1>
+<!--
+\label{sec:faults}
+-->
+<p>When architectural capability properties are violated, such as by an attempt
+to dereference an invalid capability, access memory outside the bounds of a
+capability, or perform accesses not authorized by the permissions on a
+capability, this typically leads to a hardware exception (trap).
+Operating-system kernels are able to catch this exception via a trap handler,
+optionally delivering it to the run-time environment via OS-specific
+mechanisms.</p>
+<p>However, the language-level behavior of CHERI C/C++ is considerably more
+subtle: existing undefined behavior semantics in C are retained.
+The compiler is free to assume that loads and stores will not trap (i.e., that
+any program is free of undefined behavior), and may optimize under this
+assumption, including reordering code.
+Architectural traps occur when dynamic loads and stores are attempted, and
+reordering could lead to potential confusing behavior for programmers.</p>
+<p>In the CheriABI process environment, the operating system catches the hardware
+exception and delivers a <code>SIGPROT</code> signal to the user process;
+further information may be found in <a href="impact/../cheriabi">CheriABI</a>.
+In other environments, such as bare metal or under an embedded OS, behavior is
+specific to those environments, as it will depend both on how architectural
+exceptions are handled, and how those events are delivered to the C-language
+stack.
+Fail stop may be appropriate behavior in some environments, and is in fact the
+default behavior in CheriABI when <code>SIGPROT</code> is not handled.</p>
+<!--
+\rwnote{We've opted to use the term "hardware exception" throughout, and
+  mention "traps" only here.  This could cause confusion with respect to C++
+  exceptions .. but perhaps less so than if we used the word "exception"
+  unadorned.}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pointer-provenance-validity"><a class="header" href="#pointer-provenance-validity">Pointer provenance validity</a></h1>
+<!--
+\label{sec:pointer_provenance_validity}
+-->
+<p>CHERI C/C++ implement pointers using architectural
+capabilities, rather than using conventional 32-bit or 64-bit integers.
+This allows the provenance validity of language-level pointers to be
+protected by the provenance properties of CHERI architectural capabilities:
+only pointers implemented using valid capabilities can be dereferenced.
+Other types that contain pointers, <code>uintptr_t</code> and <code>intptr_t</code>,
+are similarly implemented
+using architectural capabilities, so that casts through these types
+can retain capability properties.
+When a dereference is attempted on a capability without a valid tag —
+including load, store, and instruction fetch — a hardware exception fires
+(see <a href="impact/capability-faults.html">Capability-related faults</a>).</p>
+<!--
+%\psnote{It would be better to exhaustively list them (is it just intptr\_t and uintptr\_t?) rather than this vague "such as"}
+%\arnote{There are also cases such as C++11 strongly typed enums that use uintcap\_t as the underlying type, but we really don't need to mention this here. And I'm also not sure if we want to keep allowing that since enums should really be integer values only}
+-->
+<p>On the whole, the effects of pointer provenance validity are non-disruptive to
+C/C++ source code.
+However, a number of cases exist in language runtimes and other
+(typically less portable) C code that conflate integers and pointers that can
+disrupt provenance validity.
+In general, generated code will propagate provenance validity in only two
+situations:</p>
+<ul>
+<li>
+<p><strong>Pointer types</strong> The compiler will generate suitable code to propagate
+the provenance validity of pointers by using capability load and store
+instructions.
+This occurs when using a pointer type (e.g., <code>void *</code>) or an
+integer type defined as being able to hold a pointer (e.g.,
+<code>intptr_t</code>).
+As with attempting to store 64-bit pointers in 32-bit integers on 64-bit
+architectures, passing a pointer through an inappropriate type will lead to
+truncation of metadata (e.g., the validity tag and bounds).
+It is therefore important that a suitable type be used to hold pointers.</p>
+<p>This pattern often occurs where an opaque field exists in a data structure
+— e.g., a <code>long_t</code> argument to a callback in older C code — that
+needs to be changed to use a capability-oblivious type such as <code>intptr_t</code>.</p>
+</li>
+</ul>
+<!--
+\psnote{I'm not sure this document has explained the ISA behavior concretely enough for this stuff to really make sense &mdash; the previous description was quite high-level.  Maybe somewhere it should be explicit that registers have tags, that load and store instructions must be via a capability, and that there are both capability and non-capability load and store instructions, with the former preserving tags (both ways) and the latter clearing them?}
+-->
+<ul>
+<li>
+<p><strong>Capability-oblivious code</strong> In some portions of the C/C++ runtime and
+compiler-generated code, it may not be possible to know whether memory is
+intended to contain a pointer or not — and yet preserving pointers is
+desirable.
+In those cases, memory accesses must be performed in a way that preserves
+pointer provenance.
+In the C runtime itself, this includes <code>memcpy</code>, which must use
+capability load and store instructions to transparently propagate capability
+metadata and tags.</p>
+<p>A useful example of potentially surprising code requiring modification for
+CHERI C/C++ is <code>qsort</code>.
+Some C programs assume that <code>qsort</code> on an array of data structures
+containing pointers will preserve the usability of those pointers.
+As a result, <code>qsort</code> must be modified to perform memory copies using
+pointer-based types, such as <code>intptr_t</code>, when size and alignment
+require it.</p>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="recommended-use-of-c-language-types"><a class="header" href="#recommended-use-of-c-language-types">Recommended use of C-language types</a></h1>
+<!--
+\label{sec:recommended-c-types}
+-->
+<p>As confusion frequently arises about the most appropriate types to use for
+integers, pointers, and pointer-related values, we make the following
+recommendations:</p>
+<ul>
+<li>
+<p><code>int_t</code>, <code>int32_t</code>, <code>long_t</code>, <code>int64_t</code>, ...: These pure integer types
+should be used to hold integer values
+that will never be cast to a pointer type without first combining them with
+another pointer value — e.g., by using them as an array offset.
+Most integers in a C/C++-language program will be of these types.</p>
+</li>
+<li>
+<p><code>ptraddr_t</code>: This is a new integer type introduced by CHERI C and should be
+used to hold addresses.
+<code>ptraddr_t</code> should not be directly cast to a pointer type for
+dereference; instead, it must be combined with an existing valid capability
+to the address space to generate a dereferenceable pointer.
+Typically, this is done using the <code>cheri_address_set(c, x)</code> function.</p>
+</li>
+<li>
+<p><code>size_t</code>, <code>ssize_t</code> These integer types should be used
+to hold the unsigned or signed lengths of regions of address space.</p>
+</li>
+</ul>
+<!--
+  \arnote{\sizet not necessary the same as unsigned `ptrdiff_t`.}
+-->
+<ul>
+<li>
+<p><code>ptrdiff_t</code>: This integer type describes the difference of indices
+between two pointers to elements of the same array, and should not be used
+for any other purpose.
+It can be added to a pointer to obtain a new pointer, but the result will
+be dereferenceable only if the address lies within the bounds of the
+pointer from which it was derived.</p>
+<!--
+\note{Isn't that last sentence true of any combination?}{nwf}
+-->
+<p>Less standards-compliant code sometimes uses <code>ptrdiff_t</code> when the
+programmer more likely meant <code>intptr_t</code> or (less commonly)
+<code>size_t</code>.
+When porting code, it is worthwhile to audit use of <code>ptrdiff_t</code>.</p>
+<!--
+\note{Should we recommend that \sizet be used to hold lengths of
+allocations and \ptrdifft be used to talk about spans of
+address space (e.g., the offsets between two subobjects of an allocation)?  I feel
+like the recommendations here are not as concrete as I'd like.}{nwf}
+-->
+</li>
+<li>
+<p><code>intptr_t</code>, <code>uintptr_t</code>: These integer types should be
+used to hold values that may be valid pointers if cast back to a pointer
+type.
+When an <code>intptr_t</code> is assigned an integer value — e.g., due to
+constant initialization to an integer in the source — and the result is
+cast to a pointer type, the pointer will be invalid and hence
+non-dereferenceable.
+These types will be used in two cases: (1) Where there is uncertainty as to
+whether the value to be held will be an integer or a pointer — e.g., for an
+opaque argument to a callback function; or (2) Where it is more convenient
+to place a pointer value in an integer type for the purposes of arithmetic
+(which takes place on the capability's address and in units of bytes, as if
+the pointer had been cast to <code>char *</code>).</p>
+<p>The observable, integer range of a <code>uintptr_t</code> is the same as
+that of a <code>ptraddr_t</code> (or <code>ptrdiff_t</code> for <code>intptr_t</code>), despite the increased
+<em>alignment</em> and <em>storage</em> requirements.</p>
+</li>
+<li>
+<p><code>intmax_t</code>, <code>uintmax_t</code>: According to the C standard, <!--
+  \arnote{7.20.1.5 Greatest-width integer types}
+  -->
+these integer types should be <em>capable of representing any value of any (unsigned) integer type</em>.
+In CHERI C/C++, they are not provenance-carrying and can represent the integer <em>range</em> of <code>uintptr_t</code>/<code>intptr_t</code>, but not the capability metadata or tag bit.
+As the observable value of <code>intptr_t</code>/<code>intptr_t</code> is the pointer address
+range, we believe this choice to be compatible with the C standard.</p>
+<p>Additionally, due to ABI constraints, it would be extremely difficult to change the width of these types from 64 to 129 bits.
+This is also true for other architectures such as x86: despite Clang and GCC supporting an <code>__int128</code> type, <code>intmax_t</code> remains 64 bits wide.</p>
+<p>We generally do not recommend use of these types in CHERI C/C++.
+However, the types may be useful in <code>printf</code> calls (using the <code>%j</code> format string width modifier) as the <code>inttypes.h</code> <code>PRI*</code> macros can be rather verbose.</p>
+</li>
+<li>
+<p><code>maxalign_t</code>: This type is defined in C as <em>an object type whose alignment is the greatest fundamental alignment</em>
+and this includes capability types for CHERI C/C++.  <!--
+  \arnote{C2x \S{}7.19.2} 
+  % and in C++ as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
+  -->
+We found that some custom allocators use <code>sizeof(long double)</code> or <code>sizeof(uint64_t)</code> to align their return values.
+While this appears to work on most architectures, in CHERI C/C++ this must be changed to <code>alignof(maxalign_t)</code>.<sup class="footnote-reference"><a href="#1">1</a></sup></p>
+</li>
+<li>
+<p><code>char *</code>, ...: These pointer types are suitable for
+dereference, but in general <!--
+  \psnote{that "in general" makes me wonder about the exceptions?}
+  \arnote{The only exception I can think of is requiring `void *` due to bad API design (callback parameters, etc).}
+  -->
+should not be cast to or from arbitrary integer
+values.
+Valid pointers are always derived from other valid pointers (including those cast to <code>intptr_t</code> or <code>uintptr_t</code>), and cannot be
+constructed using arbitrary integer arithmetic.</p>
+</li>
+</ul>
+<p>It is important to note that <code>uintptr_t</code> is no longer the same size as
+<code>size_t</code>. This difference may require making some changes to
+existing code to use the correct type depending on whether the variable
+needs to be able store a pointer type. In cases where this is not obvious
+(such as for a callback argument), we recommend the use of <code>uintptr_t</code>.
+This ensures that provenance is maintained.</p>
+<!--
+\pgnnote{The above section begs questions relating to what is the
+  responsibility of programmers and what can be aided or managed by
+  compilers.  Ideally, the latter would be preferable to requiring
+  programmers to understand things are possibly beyond their so-called
+  experience.}
+-->
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>It is important to use <code>alignof</code> instead of <code>sizeof</code> since many
+common implementations, such as GCC and FreeBSD, define <code>maxalign_t</code> as a
+<code>struct</code> and not a <code>union</code>.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="capability-alignment-in-memory"><a class="header" href="#capability-alignment-in-memory">Capability alignment in memory</a></h1>
+<p>Because tags apply only to memory locations that are capability-aligned
+and capability-sized,
+unaligned storage of pointers will either generate a run-time
+hardware exception (if a capability-aware load or store is performed), or discard the
+tag (if a capability-oblivious memory copy is performed — e.g., using
+<code>memcpy</code> to copy from an aligned location to an unaligned one).
+One example of this is Berkeley DB (BDB) when used as an in-memory
+implementation rather than as an on-disk database format.
+Even when patched to use <code>memcpy</code> to copy objects stored as data, it
+does not ensure sufficient alignment in its internal storage to preserve tags.
+We therefore recommend against using BDB for this purpose.
+While unaligned pointer use is uncommon in C programs, as data-structure
+layouts are normally designed to keep them strongly aligned for performance
+and atomicity reasons, any code depending on unaligned pointers will need
+to be changed.</p>
+<!--
+\amnote{Should we mention code that assumes that it is ok to go out of bounds
+for optimization purposes? E.g., strcmp loading a word at a time?}
+\psnote{yes}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="single-origin-provenance"><a class="header" href="#single-origin-provenance">Single-origin provenance</a></h1>
+<!--
+\label{sec:ambiguous-provenance}
+-->
+<p>In the CHERI memory protection model, capabilities are derived from a single other
+capability.
+However, in C code, expressions may construct a new <code>intptr_t</code> value from more
+than one provenance-carrying parent <code>intptr_t</code> — for example, by casting both a
+pointer and a literal value to <code>intptr_t</code>-s, and then adding them. <!--
+\psnote{That literal value wouldn't have a non-empty provenance, so this isn't the best example.   Maybe better to have something like \texttt{p+(q1-q2)} ?}
+\psnote{More generally, there is a bit of a mismatch between this and our C provenance treatment of \cintptrt, which there is a plain integer type with no provenance &mdash; but which regains provenance in some cases when cast back to a pointer.  To ponder...}
+-->
+In that case, the compiler must decide which input capability provides the
+capability metadata (bounds, permissions, ...) to be used in the output
+value.
+Consider for example the following code:</p>
+<pre><code>void *c1 = (void *)((uintptr_t)input_ptr + 1);
+void *c2 = (void *)(1 + (uintptr_t)input_ptr);
+uintptr_t offset = 1;
+void *c3 = (void *)(offset + (uintptr_t)input_ptr);
+</code></pre>
+<p>In C with integer pointers, the values of <code>c1</code>, <code>c2</code>, and <code>c3</code> might be expected to have the
+same value as <code>input_ptr</code>, except with the address incremented by one.
+In CHERI C, each expression includes an arithmetic operation between provenance-carrying types.
+While not visible in the source code, the constant <code>1</code> is promoted to a capability type, <code>uintptr_t</code>.
+In the current implementation, the compiler will return the expected provenance-carrying result for cases <code>c1</code> and <code>c2</code> but not <code>c3</code>.<sup class="footnote-reference"><a href="#2">1</a></sup></p>
+<p>For <code>c1</code> and <code>c2</code>, the compiler sees that one of the sides is a non-provenance-carrying integer type that was promoted to <code>uintptr_t</code> and therefore selects the other operand as the provenance source.
+It is not feasible to infer the correct provenance source for the third case, so the compiler will emit a warning.<sup class="footnote-reference"><a href="#3">2</a></sup></p>
+<p>The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.</p>
+<p>The recommended approach to resolve such ambiguous cases is to change the type of one operand to a non-provenance-carrying type such as <code>size_t</code>.
+Alternatively, if the variable declaration cannot be changed, it is also possible to use a cast in the expression itself.</p>
+<pre><code>size_t offset_size_t = 1;
+void *c3_good1 = (void *)(offset_size_t + (uintptr_t)input_ptr);
+
+uintptr_t offset_uintptr_t = 1;
+void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
+</code></pre>
+<p>We also provide a new attribute <code>cheri_no_provenance</code> that can be used to annotate variables or fields of type <code>intptr_t</code>/<code>uintptr_t</code> where the underlying type cannot be changed:</p>
+<pre><code>struct S {
+    uintptr_t maybe_tagged;
+    uintptr_t never_tagged __attribute__((cheri_no_provenance));
+}
+void test(struct S s, uintptr_t ptr) {
+    void *x1 = (void *)(s.maybe_tagged + ptr); // ambiguous, currently uses LHS
+    void *x2 = (void *)(s.never_tagged + ptr); // not ambiguous, uses RHS
+}
+</code></pre>
+<!--
+\psnote{This doesn't really explain what `cheri_no_provenance` does?  And what it means when applied to other types?}\arnote{compiler error if it's not \cuintptrt. Will try to improve example later.}
+-->
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">1</sup>
+<p>Historically, the CHERI compiler would select the left-hand-most pointer in the expression as the provenance source.
+While this model follows a single consistent rule, it can lead to surprising behavior if an expression places the provenance-carrying value to the right-hand-side.
+In the example above, the value of <code>c1</code> would be a valid capability, but <code>c2</code> and <code>c3</code> would hold an untagged value (albeit with the expected address).</p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">2</sup>
+<p>We could add a data-flow-sensitive analysis to determine whether values are the result of promotion from a non-provenance-carrying type.
+However, this would add significant complexity to the compiler and we have not seen many cases where this would have avoided changes to the source code.</p>
+</div>
+<!--
+\psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
+\arnote{I agree. Even the current behavior is quite ugly, but at least it has measurable compatibility benefits.}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds"><a class="header" href="#bounds">Bounds</a></h1>
+<p>CHERI C/C++ pointers are implemented using capabilities that enforce lower and
+upper bounds on access.
+In the pure-capability run-time environment, those bounds are normally set to
+the range of the memory allocation into which the pointer is intended to
+point.
+Because of capability compression, increased alignment requirements may apply
+to larger allocations (see <a href="impact/../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to compression</a>).</p>
+<p>Bounds may be set on pointers returned by multiple system components including
+the OS kernel, the run-time linker, compiler-generated code, system libraries,
+and other utility functions.
+As with violations of provenance validity, out-of-bounds accesses — including
+load, store, and instruction fetch — trigger a hardware exception (see
+<a href="impact/capability-faults.html">Capability-related faults</a>).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds-from-the-compiler-and-linker"><a class="header" href="#bounds-from-the-compiler-and-linker">Bounds from the compiler and linker</a></h1>
+<p>The compiler will arrange that language-level pointers to stack allocations have suitable
+bounds, and that the run-time linker will return bounded pointers to global
+variables.
+Bounds will typically be set based on an explicitly requested allocation size
+(e.g., via the size passed to <code>alloca</code> or, for compiler-generated
+code or linker-allocated memory, by the C type mechanism (e.g.,
+<code>sizeof(foo)</code>), adjusted for precision requirements arising from
+capability compression.
+In some cases, such as with global variables allocated in multiple object
+files, the actual size of the allocation may not be resolved until run time,
+by the run-time linker.
+These bounds will typically not cause observable changes in behavior — other than hardware exceptions when (accidentally) performing an out-of-bounds access.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds-from-the-heap-allocator"><a class="header" href="#bounds-from-the-heap-allocator">Bounds from the heap allocator</a></h1>
+<p><code>malloc</code> will set bounds on pointers to new heap allocations.
+In typical C use, this is not a problem, as programmers expect to access
+addresses only within an allocation.</p>
+<p>However, in some uses of C, there may be an expectation that memory access can
+occur outside the allocation bounds of the pointer via which memory access
+takes place.
+For example, if an integer pointer difference <code>D</code> is taken between
+pointers to two different allocations (<code>B</code> and <code>A</code>), and later
+added to pointer <code>A</code>, the new pointer will have an address
+within <code>B</code>, but permit access only to <code>A</code>.
+This idiom is mostly likely to be found with non-trivial uses of <code>realloc</code> (e.g., cases where multiple pointers into a buffer allocated or reallocated by <code>realloc</code> need to be updated).
+We note that the subtraction of two pointers from different
+allocations is undefined behavior in ISO C, and risks mis-optimization from
+breaking compiler alias analysis assumptions.
+Further, <em>any</em> operation on the pointer passed to <code>realloc</code> is undefined upon
+return.  Instead, we suggest that the programmer measure a pointer <code>P</code>'s
+offset into an object <code>A</code> <em>prior to</em> <code>realloc</code> and derive new pointers
+from the <code>realloc</code> result <code>B</code> and these offsets. (i.e., compute
+<em><code>B + (P - A)</code></em> rather than
+<em><code>P + (B - A)</code></em>).<sup class="footnote-reference"><a href="#4">1</a></sup></p>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">1</sup>
+<p>While it may seem that <code>A</code> remains available after <code>realloc</code>, our
+revocation sweeps which enforce temporal safety may have atomically replaced
+this with a non-pointer value.  The scalar value
+<em><code>D = P - A</code></em> will naturally be preserved by revocation.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="subobject-bounds"><a class="header" href="#subobject-bounds">Subobject bounds</a></h1>
+<p>CHERI C/C++ also supports automatically restricting the
+bounds when a pointer is taken to a subobject — for example, an array
+embedded within another structure that itself has been heap allocated.
+This will prevent an overflow on that array from affecting the remainder of
+the structure, improving spatial safety.
+Subobject bounds are not enabled by default as they may require additional source code changes
+for compatibility, but can be enabled using the <code>-Xclang -cheri-bounds=subobject-safe</code> compiler flag.</p>
+<p>One example of C code that requires changes for subobject bounds is the <code>containerof</code>
+pattern, in which pointer arithmetic on a pointer to a subobject is used to
+recover a pointer to the container object — for example, as seen in the
+widely used BSD <code>queue.h</code> linked-list macros or the generic C
+hash-table implementation, <code>uthash.h</code>.</p>
+<p>In these cases, an opt-out annotation can be applied to a given type, field or variable
+that instructs the compiler to not tighten bounds when creating pointers to subobjects.
+We currently define three opt-out annotations that can be used to allow
+existing code to disable use of subobject bounds:</p>
+<p><strong>Completely disable subobject bounds</strong>: It is possible to annotate a typedef,
+record member, or variable declaration with:</p>
+<pre><code>__attribute__((cheri_no_subobject_bounds))
+</code></pre>
+<p>to indicate that the compiler should not tighten bounds when taking the address or a C++ reference. In C++11/C20 mode this can also be spelled as <code>[[cheri::no_subobject_bounds]]</code>.</p>
+<pre><code>struct str {
+    /*
+     * Nul-terminated string array -- pointers taken to this subobject will
+     * use the array's bounds, not those of the container structure.
+     */
+    char               str_array[128];
+
+    /*
+     * Linked-list entry element -- because of the additional attribute,
+     * pointers taken to this subobject will use the container structure's
+     * bounds, not those of the specific field.
+     */
+    struct list_entry  str_le __attribute__((cheri_no_subobject_bounds));
+} str_instance;
+
+void
+fn(void)
+{
+    /* Struct pointer gets bounds of str_instance. */
+    struct str *strp = &amp;str_instance;
+
+    /* Character pointer gets bounds of the subobject, not str_instance. */
+    char *c = str_instance.str_array;
+
+    /* Struct pointer gets bounds of str_instance, not the subobject. */
+    struct list_entry *lep = &amp;str_instance.str_le;
+}
+</code></pre>
+<p><strong>Disable subobject bounds in specific expressions</strong>:
+It is also possible to opt out of bounds-tightening on a per-expression
+granularity by casting to an annotated type:</p>
+<pre><code>char *foo(struct str *strp) {
+    return (&amp;((__attribute__((cheri_no_subobject_bounds))struct str *)
+        strp)-&gt;str_array);
+}
+</code></pre>
+<p><strong>Use remaining allocation size</strong>:
+In certain cases, the size of the subobject is not known, but we still know that data
+before the field member will not be accessed (e.g., variable size array members
+inside structs).
+Pre-C99 code will declare such members as fixed-size arrays, which will cause
+a hardware exception if the allocation does not grant access to that many bytes.
+<sup class="footnote-reference"><a href="#5">1</a></sup>
+To use the remaining allocation size instead of completely disabling bounds
+(and thus protecting against buffer underflows) the annotation:</p>
+<pre><code>__attribute__((cheri_subobject_bounds_use_remaining_size))
+</code></pre>
+<p>can be used.
+When targeting C++11/C20:</p>
+<pre><code>[[cheri::subobject_bounds_use_remaining_size]]
+</code></pre>
+<p>is also supported.
+Examples of this pattern include FreeBSD's <code>struct dirent</code>, which uses
+<code>char d_name[255]</code> for an array that is actually of variable size, with
+the containing allocation (e.g., of the heap) being sized to allow additional
+space for array entries regardless of size in the type definition.
+For example:</p>
+<pre><code>struct message {
+    int     m_type;
+
+    /*
+     * Variable-length character array -- because of the additional
+     * attribute, pointers taken to this subobject will have a lower bound
+     * at the first address of the array, but retain an upper bound of the
+     * allocation containing the array, rather than 252 bytes higher.
+     */
+    char    m_data[252]
+                 __attribute__((cheri_subobject_bounds_use_remaining_size));
+};
+</code></pre>
+<p>The use of subobject bounds imposes additional compatibility constraints on
+existing C and C++ code.
+While we have not encountered many issues related to subobject bounds in
+existing code, it does slightly increase the porting effort.</p>
+<!--
+%\nwfnote{Already said above:}
+%Therefore, this feature is currently not enabled by default and requires a
+%compiler flag to be enabled.
+-->
+<!--
+\psnote{that seems excessively bold to me}
+\psnote{what flag?}
+\psnote{curious: what has to change before you think it'd be a good default?}
+-->
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">1</sup>
+<p>If flexible arrays members are declared using the C99 syntax with empty
+square brackets, the compiler will automatically use the remaining allocation
+size.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="other-sources-of-bounds"><a class="header" href="#other-sources-of-bounds">Other sources of bounds</a></h1>
+<p>Bounds may also be set by other parts of the implementation.
+For example, the kernel may set bounds on pointers to new memory mappings (see
+<a href="impact/../cheriabi">The CheriABI POSIX process environment</a>),
+and the system library may set bounds on pointers
+into returned buffers from APIs — e.g., <code>fgetln</code>.
+More detailed information on how C/C++ code can set bounds can be found in
+<a href="impact/../apis">C APIs to get and set capability properties</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="out-of-bounds-pointers"><a class="header" href="#out-of-bounds-pointers">Out-of-bounds pointers</a></h1>
+<!--
+\label{sec:oob}
+-->
+<!--
+\note{I feel like this section wants a reference to CHERI Concentrate?}{nwf}
+-->
+<p>ISO C permits pointers to go only one byte beyond their original
+allocation, but widely used code sometimes constructs transient pointer
+values that are further out of bounds.
+For example, <code>for</code> loops iterating over an array may increment a pointer
+into the array by the array entry size before performing an overflow check
+that terminates the loop.
+This temporarily constructs an out-of-bounds pointer without an out-of-bounds
+dereference taking place.</p>
+<!--
+\nwfnote{In the straightforward case, tho, that still results in the pointer
+being only one past the end of its allocation, doesn't it?}
+-->
+<p>To support this behavior, capabilities
+can hold a range of out-of-bounds addresses while retaining a valid
+tag, and CHERI-enabled hardware performs bounds checks only on pointer
+use (i.e., dereference), not on pointer manipulation.  Dereferencing
+an out-of-bounds pointer will raise a hardware exception (see
+<a href="impact/capability-faults.html">Capability-related faults</a>).
+However, an out-of-bounds pointer can be
+dereferenced once it has been brought back in bounds, by adjusting the
+address or supplying a suitable offset in the dereference.</p>
+<p>There is, however, a limit to the range of out-of-bounds addresses a capability can hold.
+The capability compression model exploits redundancy between the pointer's address and
+its bounds to reduce memory overhead (see <a href="impact/../background/cheri-capabilities.html">CHERI
+capabilities</a>).
+However, when a pointer goes out of bounds, this redundancy is reduced, and at
+some point the bounds can no longer be represented within the capability.
+The architecture prohibits manipulations that would produce such
+a capability.
+Depending on the architecture and context, this may lead to the
+tag being cleared, resulting in an invalid capability, or in an immediate
+hardware exception being thrown.
+Attempting to dereference the invalid capability will fail in the same
+manner as a loss of pointer provenance validity (see <a href="impact/pointer-provenance-validity.html">Pointer provenance
+validity</a>).<!--
+\psnote{Comment on whether that should immediately trap instead?} -->
+The range of out-of-bounds addresses permitted for a capability is
+a function of the length of the bounded region and the number of bits used for bounds in the capability representation.
+With 27 bits of the capability used for bounds, 64-bit
+CHERI-RISC-V provide the following guarantees:</p>
+<ul>
+<li>
+<p>A pointer is able to travel at least 1/4 the size of the object, or
+2 KiB (2<sup><em>floor</em>(<em>bounds_bits</em>/2)-2</sup>), whichever is greater,
+above its upper bound.</p>
+</li>
+<li>
+<p>It is able to travel at least 1/8 the size of the object, or 1 KiB
+(2<sup><em>floor</em>(<em>bounds_bits</em>/2)-3</sup>), whichever is greater, below
+its lower bound.</p>
+</li>
+</ul>
+<p>In general, programmers should not rely on support for arbitrary out-of-bounds
+pointers.  Nevertheless, in practice, we have found that the CHERI capability
+compression scheme supports almost all in-the-field out-of-bounds behavior in
+widely used software such as FreeBSD, PostgreSQL, and WebKit.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="pointer-comparison"><a class="header" href="#pointer-comparison">Pointer comparison</a></h1>
+<p>In CHERI C/C++, pointer comparison considers only the
+integer address part of a capability.
+This means that differences in tag validity, bounds, permissions, and so on,
+will not be considered when by C operators such as <code>==</code>, <code>&lt;</code>, and <code>&lt;=</code>.
+On the whole, this leads to intuitive behavior in systems software, where,
+for example, <code>malloc</code> adjusts bounds on a pointer before returning it to
+a caller, and then expects an address-wise comparison to succeed when the
+pointer is later returned via a call to <code>free</code>.  <!--
+\nwfnote{I don't think I particularly like that example, since the thing `free`
+is nominally comparing against is the bounded return from `malloc`.}
+-->
+However, this behavior could also lead to potentially confusing results; for
+example:</p>
+<ul>
+<li>
+<p>If a tag on a pointer is lost due to non-provenance-preserving
+<code>memcpy</code> (e.g., a <code>for</code> loop copying a sequence of bytes), the
+source and destination pointers will compare as equal even though the
+destination will not be dereferenceable.</p>
+</li>
+<li>
+<p>If a <code>realloc</code> implementation returns a pointer to the same
+address, but with different bounds, a caller check to see if the passed and
+returned pointers are equal will return <code>true</code> even though an access
+might be permitted via one pointer but not the other.</p>
+</li>
+</ul>
+<!--
+\psnote{I'm curious about the impact on compiler optimisation, where in the scope of \texttt{if (p==q)} compilers will often assume the two are interchangeable.  Comment on that?
+ }
+ \arnote{The choice between exact vs non-exact equals is made extremely late in code generation, it just chooses between emitting CEq and CExEq.
+ Compiler analyses use a stricter definition of equality.
+ In clang that should include some cases of taking provenance into account for alias information.}
+-->
+<p>However, practical experience has suggested that the current semantics produce fewer
+subtle bugs, and require fewer changes, than having comparison operators take
+the tag or other metadata into account.<sup class="footnote-reference"><a href="#6">1</a></sup></p>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">1</sup>
+<p>The CHERI Clang compiler supports an experimental flag <code>-cheri-comparison=exact</code> that causes capability equality comparisons to also include capability metadata and the tag bit.</p>
+</div>
+<!--
+\arnote{default behavior=\texttt{-cheri-comparison=address}}
+}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="implications-of-capability-revocation-for-temporal-safety"><a class="header" href="#implications-of-capability-revocation-for-temporal-safety">Implications of capability revocation for temporal safety</a></h1>
+<p>Heap temporal safety utilizes revocation sweeps, which, after some quarantine
+period, replace in-register and in-memory capabilities to freed memory with
+non-dereferenceable values.
+For performance reasons, that replacement may be substantially deferred, or,
+if there is little demand for fresh allocations, may never occur.
+Pointer value replacement may also permit some instances of
+a pointer to continue to be usable for longer than others, but the referenced
+memory will not be reallocated or otherwise reused until all instances have been rendered unusable.
+This model does permit non-exploitable <em>use-after-free</em> of heap memory,
+but prohibits exploitable memory aliasing by disallowing <em>use-after-reallocation</em>.</p>
+<p>A pointer's value after <code>free</code> is undefined, and so dereference is
+an undefined behavior.
+In practice, however, the value of a <code>free</code>-d pointer may still be
+observed in a number of situations, including in lockless algorithms, which
+may compare an allocated pointer to a freed one.</p>
+<p>Our systems have a choice of replacement values for revoked pointers; all that
+is required for correct temporal safety is that the replacement not authorize
+access to memory.
+Our prototype implementation clears the tag when replacing, as this
+certainly removes authority and possibly simplifies debugging and
+non-dereferencing operations, as the original capability bits are left behind.
+For example, pointer equality checks that compare only the addresses of the two
+pointers (and not their tag values) will continue to work as expected.  With
+revocation performed this way, software making explicit use of tags must be
+designed to tolerate capability tag clearing by revocation.</p>
+<p>Unfortunately, tag-clearing risks type confusion if programmers intend to use
+the capability tag to distinguish between integers and pointers in tagged
+unions (we have so far generally discouraged this idea, but understand why it
+may remain attractive).  Therefore, we have considered other options for
+revocation, including tag-preserving <em>permission</em>-zeroing (but tag
+preservation) and wholesale replacement with <code>NULL</code> (i.e., the untagged
+all zero value).  These options may be more attractive for some software, and
+would have different implications for the C/C++ programming model.</p>
+<p>We anticipate that revocation will remain a tag-clearing operation by default,
+as tag-clearing removes any risk of needlessly re-examining the capability in
+later revocations.  However, it may be possible to allow coarse control over
+revocation behavior either per process or by region of the address space.  In
+the latter case, <code>mmap</code> may gain flags specifying which revocation
+behavior is desirable for capabilities pointing <em>into</em> the mapped region
+and/or <code>madvise</code> may gain flags controlling the revocation behavior of
+capabilities <em>within</em> a target region.  Which of these or similar
+mechanisms provide utility to software and can be offered at reasonable
+performance remains an open question.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="bitwise-operations-on-capability-types"><a class="header" href="#bitwise-operations-on-capability-types">Bitwise operations on capability types</a></h2>
+<p>In most cases bitwise operations — such as those used to store or clear flags
+in the lower bits of pointers to well-aligned allocations — will result in the expected <code>uintptr_t</code> value being created.
+However, there are some corner cases where the result may be a tagged (but out-of-bounds)
+capability when an integer value is expected. <!--
+\arnote{TODO: add an example. Maybe the mutex example checking low pointer bits + some alignment checks?}
+-->
+Dually, bitwise operations may also result in the loss of tags if intermediate results become unrepresentable (recall <a href="impact/out-of-bounds-pointers.html">Out-of-bounds pointers</a>).<sup class="footnote-reference"><a href="#7">1</a></sup></p>
+<p>Most bitwise operations on <code>uintptr_t</code> fall into one of three categories for which we provide
+higher-level abstractions.</p>
+<p><strong>Aligning pointer values</strong>:
+If the C code is attempting to align a pointer or check the alignment of pointers,
+the following compiler builtins should be used instead:</p>
+<ul>
+<li><code>T __builtin_align_down(T ptr, size_t alignment)</code>:
+This builtin returns <code>ptr</code> rounded down to the next multiple of <code>alignment</code>.</li>
+<li><code>T __builtin_align_up(T ptr, size_t alignment)</code>:
+This builtin returns <code>ptr</code> rounded up to the next multiple of <code>alignment</code>.</li>
+<li><code>_Bool __builtin_is_aligned(T ptr, size_t alignment)</code>:
+This builtin returns <code>true</code> if <code>ptr</code> is aligned to at least <code>alignment</code> bytes.</li>
+</ul>
+<!--
+\rwnote{It would be nice if we had, and could document here, `cheri_` versions
+  of these macros.}
+\arnote{Probably best to use the `__builtin` versions since that also works for upstream clang.}
+-->
+<p>One advantage of these builtins compared to <code>intptr_t</code> arithmetic is that they preserve the
+type of the argument and can therefore remove the need for intermediate casts to <code>uintptr_t</code>.
+Moreover, using these builtins allows for improved compiler diagnostics and can result in better code-generation compared to hand-written functions or macros.
+We have submitted these builtins as part of the upstream Clang 10.0 release, so they can also be used for code that does not depend on CHERI.</p>
+<!--
+\arnote{Should I include some of the documentation I wrote for upstream LLVM? (\url{https://clang.llvm.org/docs/LanguageExtensions.html\#alignment-builtins})}
+-->
+<p><strong>Storing additional data in pointers</strong>: <!--
+\label{sec:low-pointer-bits}
+-->
+In many cases the minimum alignment of pointer values is known and therefore
+programmers assume that the low bits (which will always be zero) can be
+used to store additional data.<sup class="footnote-reference"><a href="#8">2</a></sup>
+Unused high pointer bits cannot be used for additional metadata since toggling them causes a large change to the address field, and capabilities that are significantly far out-of-bounds cannot be represented (see
+<a href="impact/out-of-bounds-pointers.html">Out-of-bounds pointers</a>).</p>
+<p>The compiler-provided header <code>&lt;cheri.h&gt;</code> provides explicit macros for this
+use of bitwise arithmetic on pointers.
+The use of these macros is currently optional,<sup class="footnote-reference"><a href="#9">3</a></sup>
+but we believe that they can improve readability compared to hand-written bitwise operations.
+Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying <code>uintptr_t</code>) and to check bits (which should return an integer value).
+In complex nested expressions, these macros can avoid ambiguous provenance sources (see <a href="impact/../compiler/ambiguous-provenance.html">Ambiguous provenance</a>) since it shows the compiler which intermediate results can carry provenance.</p>
+<ul>
+<li><code>uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)</code>:
+This function clears the low bits of <code>ptr</code> in the same way as <code>ptr &amp; ~mask</code>.
+It returns a new <code>uintptr_t</code> value that can be used for memory accesses when cast to a pointer.
+<code>mask</code> should be a bitwise-AND mask less than <code>_Alignof(ptr)</code>.</li>
+<li><code>ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)</code>:
+This function returns the low bits of <code>ptr</code> in the same way as <code>ptr &amp; mask</code>.
+It should be used instead of the raw bitwise operation since it can never return
+an unexpectedly tagged value.
+<code>mask</code> should be a bitwise-AND mask less than <code>_Alignof(ptr)</code>.</li>
+<li><code>uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)</code>:
+This function performs a bitwise-OR of <code>ptr</code> with <code>bits</code>.
+In order to retain compatibility with a non-CHERI architecture, <code>bits</code> should be less than the known alignment of <code>ptr</code>.</li>
+<li><code>uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)</code>:
+This function sets the low bits of <code>ptr</code> to <code>bits</code> by clearing the low bits in  <code>mask</code> first.</li>
+</ul>
+<p><strong>Computing hash values</strong>:
+The compiler will also warn when operators such as modulus or shifts are used on
+<code>uintptr_t</code>. This usually indicates that the pointer is being used as the input to a hash
+function or similar computations.
+In this case, the programmer should not be using <code>uintptr_t</code> but instead cast the pointer
+to <code>ptraddr_t</code> and perform the arithmetic on this type instead.</p>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">1</sup>
+<p>Previous versions of the compiler used the capability offset (address
+minus base) instead of the address for arithmetic on <code>uintptr_t</code>.
+This often resulted in unexpected results and therefore we switched to using
+the address in <code>uintptr_t</code> arithmetic instead.
+The old offset-based mode may be interesting for garbage collected C where
+addresses are less useful and therefore it can still be enabled by
+passing <code>-cheri-uintcap=offset</code>.
+However, this may result in significantly reduced compatibility with legacy C code.</p>
+</div>
+<div class="footnote-definition" id="8"><sup class="footnote-definition-label">2</sup>
+<p>CHERI actually provides many more usable bits than a conventional architecture.
+In the current implementation of 128-bit CHERI, any bit between<!--
+\psnote{inclusive?} --> the least
+significant and the 9th least significant bit may be toggled without causing
+the tag to be cleared in pointers that point to the beginning of an allocation (i.e., whose <em>offset</em> is zero).  <!--
+\psnote{This is confusing &mdash; not clearing the tag isn't the same as not destroying part of the pointer data...} -->
+If the pointer is strongly aligned, further bits may be toggled without clearing the tag.</p>
+</div>
+<!--
+\nwfnote{But the macros only permit the use of the bottom 5.  We should say that somewhere.}
+-->
+<div class="footnote-definition" id="9"><sup class="footnote-definition-label">3</sup>
+<p>Until recently, not using these macros could result in subtle bugs at run time since pointer equality comparisons included the tag bit in addition to the address.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="function-prototypes-and-calling-conventions"><a class="header" href="#function-prototypes-and-calling-conventions">Function prototypes and calling conventions</a></h1>
+<p>CHERI C/C++ distinguishes between integer and pointer types at an
+architectural level, which can lead to compatibility problems with older C
+programming styles that fail to unambiguously differentiate these types:</p>
+<ul>
+<li>
+<p><strong>Unprototyped (<em>K&amp;R</em>) functions</strong>: Because pointers can no longer
+be loaded and stored without using capability-aware instructions, the
+compiler must know whenever a load or store might operate on a pointer
+value.
+The C-language default of using an integer type for function arguments when
+there is not an appropriate function prototype will cause pointer values to
+be handled improperly; this is also true on LP64 ABIs (e.g., most 64-bit
+POSIX systems).<sup class="footnote-reference"><a href="#10">1</a></sup></p>
+<p>To avoid these problems, the CHERI Clang compiler emits a warning (<code>-Wcheri-prototypes</code>) by default when a function without a declared prototype is called.
+This warning is less strict than <code>-Wstrict-prototypes</code> and can be
+used to convert <em>K&amp;R</em> functions that may cause problems.<sup class="footnote-reference"><a href="#11">2</a></sup>
+This should not be an issue for C code written in the last 20 years, but
+many core operating-system components can be significantly older.</p>
+</li>
+<li>
+<p><strong>Variadic arguments</strong>: The calling convention for variadic functions
+passes all variadic arguments via the stack and accesses them via an
+appropriately bounded capability.
+This provides memory-protection benefits, but means that vararg functions
+must be declared and called via a correct prototype.</p>
+<p>Some C code assumes that the calling convention of variadic and non-variadic
+functions is sufficiently similar that they may be used interchangeably.
+Historically, this included the FreeBSD kernel's implementation of
+<code>open</code>, <code>fcntl</code>, and <code>syscall</code>.</p>
+</li>
+</ul>
+<!--
+  \rwnote{I wonder if we need to be more specific with an example here.}\arnote{TODO: Add example such as missing open() mode arguments?}
+-->
+<div class="footnote-definition" id="10"><sup class="footnote-definition-label">1</sup>
+<p>The forthcoming ISO C2x standard makes function declarations with an
+empty parameter list equivalent to a parameter list consisting of a single
+<code>void</code>.</p>
+</div>
+<div class="footnote-definition" id="11"><sup class="footnote-definition-label">2</sup>
+<p>If the <em>K&amp;R</em> function is defined within the same file, the compiler can
+determine the correct calling convention and will not emit a warning.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="data-structure-and-memory-allocation-alignment"><a class="header" href="#data-structure-and-memory-allocation-alignment">Data-structure and memory-allocation alignment</a></h1>
+<p>CHERI C/C++ have stronger alignment requirements than C/C++ on conventional
+architectures.
+These requirements arise from two sources: that capabilities themselves must
+be aligned at twice the integer architectural pointer width, and that
+capability compression constrains the addresses that can be used for bounds
+on larger objects.</p>
+<!--
+\amnote{Is is worth mentioning compiler flags to warn on excessive padding?
+  In particular, it seems that it is often the case that the ordering of
+  struct elements that was devised for 32bit and 64bit architectures does
+  not help much to avoid extra padding with capabilities. It more or less
+  depends on how much the pointers are scattered in the struct definition.}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="restrictions-in-capability-locations-in-memory"><a class="header" href="#restrictions-in-capability-locations-in-memory">Restrictions in capability locations in memory</a></h1>
+<!--
+\label{sec:restricted-capability-locations}
+-->
+<p>CHERI C/C++ constrain how and where pointers can be stored in memory in two
+ways:</p>
+<ul>
+<li>
+<p><strong>Alignment</strong>: CHERI's tags are associated with capability-aligned,
+capability-sized locations in physical memory.
+Because of this, all valid pointers must be stored at such locations,
+potentially disrupting code that may use other alignments.</p>
+<p>On the whole, for performance and atomicity reasons, pointers are strongly
+aligned even on non-tagged architectures — however, when C constructs such
+as <code>__packed</code> are used, unaligned pointers can arise, and will not
+work with CHERI.
+While the compiler and native allocators (stack, heap, ...) will
+provide sufficient alignment for capability-based pointers, custom
+allocators may align allocations to <code>sizeof(intmax_t)</code> rather than
+<code>alignof(maxalign_t)</code>.</p>
+</li>
+<li>
+<p><strong>Size</strong>: CHERI capabilities are twice the size of an integer able to
+describe the full address space.
+On 64-bit systems, this means that CHERI pointers will have a width of 128
+bits — while maintaining the arithmetic properties of a 64-bit integer
+address.
+C code historically embeds assumptions about pointer size in a number of forms,
+all of which will need to be addressed when porting to CHERI,
+including:</p>
+<ul>
+<li>Assuming that a pointer will fit into the largest integer type.</li>
+<li>Assuming that the number of bits in a pointer type is the same
+as the number of bits indexing the address space it can refer to.</li>
+<li>Assuming that the number of bits in a pointer type is the same as the
+number of bits suitable for use in performing bit-wise manipulations of
+pointer values.</li>
+<li>Assuming that pointers must either be 32 or 64 bits.</li>
+<li>Assuming that aligning to <code>sizeof(double)</code> is sufficient to store any type.</li>
+<li>Assuming that high bits of the pointer address can be used for
+additional metadata. This is not true on CHERI since toggling high bits of a
+pointer can cause it to be so far out of bounds that it is no longer representable
+due to the compression of pointer bounds. However, it is still possible to use
+the low bits for additional metadata (see <a href="impact/bitwise-operations.html">Bitwise operations on capability types</a>).</li>
+</ul>
+</li>
+</ul>
+<!--
+  \rwnote{Should there be more things in this list?}
+-->
+<p>These portability problems will typically be found due to hardware exceptions
+thrown on attempted unaligned accesses of capability values
+(see <a href="impact/capability-faults.html">Capability-related faults</a>).
+However, they can also arise in the form of stripped tag bits, leading to
+invalid capabilities that cannot be dereferenced, if, for example, pointer
+values are copied into inappropriately aligned allocations.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="the-cheriabi-posix-process-environment"><a class="header" href="#the-cheriabi-posix-process-environment">The CheriABI POSIX process environment</a></h1>
+<p>The CheriABI process environment implements a standard POSIX/UNIX API, but in
+some areas there are changes to API semantics (e.g., in the handling of tagged
+pointer values and I/O) or new functionality (such as relates to handling
+capability-related faults).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="posix-api-changes"><a class="header" href="#posix-api-changes">POSIX API changes</a></h1>
+<ul>
+<li>
+<p><strong>Writing and reading pointers via files</strong>: In the CheriABI process
+environment, only untagged data (not tagged pointers) may be written to or
+read from files.
+If a region of memory containing valid pointers is written to a file, and
+then read back, the pointers in that region will no longer be valid.
+If a file is memory mapped, then pages mapped copy-on-write
+(<code>MAP_PRIVATE</code>) are able to hold tagged pointers, since they are
+swap-backed rather than file-backed, but pages mapped directly from the
+buffer cache (<code>MAP_SHARED</code>) are not.</p>
+</li>
+<li>
+<p><strong>Passing pointers via IPC</strong>: In the CheriABI process environment, only
+untagged data, not tagged pointers, may be passed via various forms of
+message-passing Inter-Process Communication (IPC).
+Some existing software takes advantage of a shared address-space layout
+(via <code>fork</code>) to pass pointers to elements of shared data structures
+(e.g., entries in dispatch tables).
+This code must be converted to use indexes into tables or other lookup
+mechanisms rather than passing pointers via IPC.</p>
+</li>
+<li>
+<p><strong><code>mmap</code> bounds</strong>: In CheriABI, the <code>mmap</code> system
+call returns a bounded capability to the allocated address space.
+To ensure the capability does not overlap other allocations,
+lengths that would otherwise be unrepresentable are rounded up
+and padded with a new type of guard pages.
+These guard pages fault on access and may not be mapped over.
+They are unmapped when the rest of the mapping is unmapped.</p>
+</li>
+<li>
+<p><strong><code>mmap</code> permissions</strong>: The permissions of the capability
+returned by <code>mmap</code> are determined by a combination of the
+requested page protections and the capability passed as an address hint
+(or fixed address with <code>MAP_FIXED</code>).
+When using the pattern of requesting a mapping with <code>PROT_NONE</code>
+and then filling in sections (as is done in run-time linkers, VM host
+environments, etc), it is necessary to ensure that the initial
+capability has the right permissions.
+The <code>prot</code> argument has been extended to accept additional
+flags indicating the maximum permission the page can have so that a
+linker might request a reservation for a library with the permissions
+<code>(PROT_MAX(PROT_READ|PROT_WRITE|PROT_EXEC) | PROT_NONE)</code>, which
+would return a capability permitting loads, stores, and instruction
+fetch while mapping the pages with no (MMU) permissions.</p>
+</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="handling-capability-related-signals"><a class="header" href="#handling-capability-related-signals">Handling capability-related signals</a></h1>
+<p>When a capability hardware exception fires, the operating system will map it
+into the UNIX <code>SIGPROT</code> signal.
+By default, this signal terminates the process, but the signal can be caught
+by registering a <code>SIGPROT</code> handler.
+When the signal handler fires, <code>siginfo.si_code</code> will be set to
+describe the cause of the fault; available values, defined in
+<code>signal.h</code>, include:</p>
+<ul>
+<li><code>PROT_CHERI_BOUNDS</code>: Capability bounds fault — an out-of-bounds access was
+attempted.</li>
+<li><code>PROT_CHERI_PERM</code>: Capability permission fault — the attempted access
+exceeded the permissions granted by a capability.</li>
+<li><code>PROT_CHERI_SEALED</code>: Capability sealed fault — dereferencing a sealed
+capability was attempted.</li>
+<li><code>PROT_CHERI_TAG</code>: Capability tag fault — dereferencing an invalid
+capability was attempted.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-compiler-warnings-and-errors"><a class="header" href="#cheri-compiler-warnings-and-errors">CHERI compiler warnings and errors</a></h1>
+<p>The CHERI Clang compiler includes many diagnostic warnings to identify code
+that is incompatible with CHERI C/C++ or may result in behavioral
+differences.
+In many cases, a successful compilation that does not emit any CHERI-specific
+warnings will result in a functional spatially-safe program.
+However, some incompatibilities (e.g., memory allocators returning
+insufficiently aligned pointers) cannot yet be diagnosed statically.
+This section describes some of the more-commonly seen compiler warnings and
+provides suggestions on how to change the source code to be compatible with
+CHERI C/C++.
+All these warnings are enabled when the <code>-Wall</code> compiler flag is
+set.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="loss-of-provenance"><a class="header" href="#loss-of-provenance">Loss of provenance</a></h1>
+<!--
+%\begin{compilerwarning}
+%cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
+%\end{compilerwarning}
+-->
+<p>This common compiler warning<!--
+\arnote{that should be an error by default?}
+-->
+is triggered when casting a non-capability type (e.g., <code>long</code>) to a pointer.
+As mentioned in <a href="compiler/../impact/pointer-provenance-validity.html">Pointer provenance
+validity</a>, the result of this cast is a <code>NULL</code>-derived capability with the address set to the integer value.
+As any <code>NULL</code>-derived capability is untagged, any attempt to dereference it will trap.</p>
+<p>Usually, this warning is caused by programmers incorrectly assuming that <code>long</code> is able to store pointers.
+The fix for this problem is to change the type of the cast source to a provenance-carrying type such as <code>intptr_t</code> or <code>uintptr_t</code> (see <a href="compiler/../impact/recommended-use-c-types.html">Recommended use of
+C-language types</a>):</p>
+<!--
+Need to use html formatting here to get the highlight colors in the code examples.
+-->
+<pre><code>char *example_bad(<mark style="background-color: #EE918D">long</mark> ptr_or_int) {
+    return strdup((const char *)ptr_or_int);
+}
+char *example_good(<mark style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
+  return strdup((const char *)ptr_or_int);
+}
+</code></pre>
+<pre><code>&lt;source&gt;:2:17: warning: cast from provenance-free integer type to pointer type
+will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+  return strdup((const char *)ptr_or_int);
+                ^
+1 warning generated.
+</code></pre>
+<p>In some cases, this warning can be a false positive.
+For example, it is common for C callback APIs take a <code>void *</code> data argument that is passed to the callback.
+If this value is in fact an integer constant, the warning can be silenced by casting to <code>uintptr_t</code> first:</p>
+<!--
+Need to use html formatting here to get the highlight colors in the code examples.
+-->
+<pre><code>void invoke_cb(void (*cb)(void *), void *);
+void callback(void *arg);
+void false_positive_example(int callback_data) {
+    invoke_cb(&callback, (void *)callback_data); // warning
+    invoke_cb(&callback, (void *)<mark style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
+}
+</code></pre>
+<pre><code>&lt;source&gt;:4:24: warning: cast from provenance-free integer type to pointer type
+will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
+  invoke_cb(&amp;callback, (void *)callback_data); // warning
+                       ^
+&lt;source&gt;:15:24: warning: cast to 'void *' from smaller integer type 'int'
+[-Wint-to-void-pointer-cast]
+  invoke_cb(&amp;callback, (void *)callback_data); // warning
+                       ^
+2 warnings generated.
+</code></pre>
+<!--
+\nwfnote{The ``:15:24'' above should also be ``:4:24''?}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="ambiguous-provenance"><a class="header" href="#ambiguous-provenance">Ambiguous provenance</a></h1>
+<p>For arithmetic and bitwise binary operations between <code>uintptr_t</code>/<code>intptr_t</code>, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
+However, as noted in <a href="compiler/../impact/single-origin-provenance.html">Single-origin provenance</a>, there are cases that are ambiguous as far as the compiler is concerned.</p>
+<p>Consider for example a structure that holds a pointer and a small number of flags.
+In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:</p>
+<pre><code>typedef struct { uintptr_t data; } pointer_and_flags;
+void set_ptr(pointer_and_flags *p, void *value) {
+    p-&gt;data = (p-&gt;data &amp; (uintptr_t)7) | (uintptr_t)(value);
+}
+void set_flags(pointer_and_flags *p, unsigned flags) {
+    p-&gt;data = p-&gt;data | (flags &amp; 7);
+}
+</code></pre>
+<pre><code>&lt;source&gt;:3:40: warning: binary expression on capability types '__uintcap_t'
+and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as
+the source of provenance; currently provenance is inherited from the left-hand
+side [-Wcheri-provenance]
+    p-&gt;data = (p-&gt;data &amp; (uintptr_t)7) | (uintptr_t)(value);
+              ~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~~~~~~~~~~~~~~~~~~
+1 warning generated.
+</code></pre>
+<p>Unlike the compiler, the programmer knows that inside <code>set_ptr</code> capability metadata should always be taken from the <code>value</code> argument.
+The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:</p>
+<pre><code>void set_ptr(pointer_and_flags *p, void *value) {
+    p->data = <mark style="background-color: #77DD77">(size_t)</mark>(p->data & (uintptr_t)7) | (uintptr_t)(value);
+}
+</code></pre>
+<!--
+\nwfnote{Not use cheri\_low\_bits\_set()?}
+-->
+<!--
+\arnote{TODO: this section should have more examples.}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="underaligned-capabilities"><a class="header" href="#underaligned-capabilities">Underaligned capabilities</a></h1>
+<!--
+%\begin{compilerwarning}
+%alignment (<N>) of '<type>' is less than the required capability alignment
+%\end{compilerwarning}
+-->
+<p>This warning is triggered when packed structures contain pointers.
+As mentioned in <a href="compiler/../impact/restrictions-in-capability-locations.html">Restrictions in capability locations in memory</a>, pointers must always be aligned to the size of a CHERI capability (16 bytes for a 64-bit architecture).
+This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:</p>
+<pre><code>struct AtLeast8ByteAlignedBad {
+    void *data;
+} __attribute__((packed, <mark style="background-color: #EE918D">aligned(8)</mark>));
+</code></pre>
+<pre><code>&lt;source&gt;:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is
+less than the required capability alignment (16) [-Wcheri-capability-misuse]
+struct AtLeast8ByteAlignedBad {
+       ^
+&lt;source&gt;:1:8: note: If you are certain that this is correct you can silence
+the warning by adding __attribute__((annotate("underaligned_capability")))
+1 warning generated.
+</code></pre>
+<p>The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include <code>alignof(void *)</code>:</p>
+<pre><code><mark style="background-color: #77DD77">#include &lt;stdalign.h&gt;</mark>
+struct AtLeast8ByteAlignedGood {
+    void *data;
+} __attribute__((packed,aligned(<mark style="background-color: #77DD77">alignof(void *) > 8 ? alignof(void *) : 8</mark>)));
+</code></pre>
+<p>In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a <code>annotate("underaligned_capability")</code> attribute:</p>
+<pre><code>struct UnderalignPointerIgnoreWarning {
+    void *data;
+} __attribute__((packed, aligned(4), <mark style="background-color: #77DD77">annotate("underaligned_capability")</mark>));
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="c-apis-to-get-and-set-capability-properties"><a class="header" href="#c-apis-to-get-and-set-capability-properties">C APIs to get and set capability properties</a></h1>
+<!--
+\label{sec:cheri-apis}
+-->
+<!--
+\rwnote{I wonder if we should talk more about permissions?  Perhaps not in
+  this document, in which case possibly we should talk about them less?}
+\amnote{If this is intended as a document to guide porting efforts perhaps
+  we should mention them only as background info? If this becomes a summary
+  of CHERI programming patterns then we probably want a section that talks
+  about permissions as well.}
+-->
+<p>CHERI C/C++ supports a number of new APIs to get and set capability
+properties given a pointer argument.
+Although most software does not need to directly manage capability properties,
+there are some cases when application code needs to further constrain
+permissions or limit bounds associated with pointers.
+For example, high-performance applications may contain custom memory
+allocators and wish to narrow bounds and permissions on returned pointers
+to prevent overflows between its own allocations.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-related-header-files"><a class="header" href="#cheri-related-header-files">CHERI-related header files</a></h1>
+<p>A set of compiler built-in functions provide access to capability properties
+of pointers.
+Two new header files (distributed as part of the CHERI Clang compiler)
+provide access to further CHERI-related programming
+interfaces including more human-friendly macro wrappers around the compiler
+builtins, and also definitions of key CHERI constants:</p>
+<ul>
+<li>
+<p><code>cheriintrin.h</code>: defines interfaces to access and
+modify capability properties.
+It also defines constants for capability permissions that are portable
+across all implementations of CHERI.</p>
+</li>
+<li>
+<p><code>cheri.h</code>: provides macros for slightly higher-level operations
+such as the manipulation of low pointer bits (see
+<a href="apis/../impact/bitwise-operations.html">Bitwise operations on capability types</a>).</p>
+</li>
+</ul>
+<p>When compiling for CheriBSD, the following header provides additional
+constants relating to OS use of capabilities — for example, software-defined
+permission bits:</p>
+<ul>
+<li><code>cheri/cheri.h</code>: defines constants such as those used in the
+capability permission mask.</li>
+</ul>
+<!--
+%`cheri/cheric.h`: defines interfaces to access and
+%  modify capability properties.
+
+\rwnote{This section may need updating once we've converged OS and compiler
+  versions of cheri.h, and done any necessary header refactoring.}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="retrieving-capability-properties"><a class="header" href="#retrieving-capability-properties">Retrieving capability properties</a></h1>
+<p>The following APIs allow capability properties to be retrieved from pointers:</p>
+<ul>
+<li>
+<p><code>ptraddr_t cheri_address_get(void *c)</code>: Return the address of the capability <code>c</code>.</p>
+</li>
+<li>
+<p><code>ptraddr_t cheri_base_get(void *c)</code>: Return the lower bound of capability <code>c</code>.</p>
+</li>
+<li>
+<p><code>size_t cheri_length_get(void *c)</code>: Return the length of the bounds for the capability <code>c</code>.
+The base plus the length gives the upper bound on <code>c</code>'s address.</p>
+</li>
+<li>
+<p><code>size_t cheri_offset_get(void *c)</code>: Return the difference between the address and the lower bound of the capability <code>c</code>.</p>
+</li>
+<li>
+<p><code>size_t cheri_perms_get(void *c)</code>: Return the permissions of capability <code>c</code>.
+(See <a href="apis/capability-permissions.html">Capability permissions</a>.)</p>
+</li>
+<li>
+<p><code>_Bool cheri_tag_get(void *c)</code>: Return whether capability <code>c</code> has its
+validity tag set.</p>
+</li>
+</ul>
+<!--
+  \arnote{This returns the raw tag value, cheriintrin.h may also provide `cheri_is_valid` and `cheri_is_invalid`}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="modifying-or-restricting-capability-properties"><a class="header" href="#modifying-or-restricting-capability-properties">Modifying or restricting capability properties</a></h1>
+<p>The following APIs allow capability properties to be refined on pointers:</p>
+<ul>
+<li>
+<p><code>void *cheri_address_set(void *c, ptraddr_t a)</code>: Return a new capability with the same permissions and bounds as <code>c</code> with the address set to <code>a</code>.
+This can be useful to re-derive a valid pointer from an address.</p>
+<p><code>cheri_address_set</code> is able to set an address <code>a</code> that is
+outside of the current bounds of <code>c</code>.  The resulting capability
+is treated as an out-of-bounds pointer as described in <a href="apis/../impact/out-of-bounds-pointers.html">Out-of-bounds
+pointers</a>.
+However, if the address <code>a</code> is not representable in the current
+bounds of <code>c</code> due to capability compression,
+<code>cheri_address_set</code> returns a capability without the tag bit set.</p>
+</li>
+</ul>
+<!--
+  %  This macro wraps the compiler built-in
+  %  `__builtin_cheri_address_set`.
+-->
+<ul>
+<li>
+<p><code>void *cheri_bounds_set(void *c, size_t x)</code>: Narrow the bounds of capability
+<code>c</code> so that the lower bound is the current address (which may
+have been increased relative to <code>c</code>'s original lower bound), and its
+upper bound is suitable for a length of <code>x</code>.</p>
+<p>Note that the effective bounds of the returned capability may be
+wider than the range [<code>cheri_address_get(c)</code>,
+<code>cheri_address_get(c) + x</code>) due to capability compression (see
+<a href="apis/../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to
+compression</a>),
+but they will always be a subset of
+the original bounds. <!--% of `c`.--></p>
+</li>
+<li>
+<p><code>void *cheri_bounds_set_exact(void *c, size_t x)</code>: Narrow the bounds of capability
+<code>c</code> so that the lower bound is the current address, and its
+upper bound is <code>cheri_address_get(c) + x</code>.
+This is similar to <code>cheri_bounds_set</code> but will raise a hardware exception if the resulting capability is not precisely representable instead of rounding the bounds.</p>
+</li>
+</ul>
+<!--
+\nwfnote{No mention of cheri\_bounds\_set\_exact?}
+-->
+<ul>
+<li><code>void *cheri_perms_and(void *c, size_t x)</code>: Perform a bitwise-AND of capability
+<code>c</code>'s permissions and the value <code>x</code>, returning the new
+capability (see <a href="apis/capability-permissions.html">Capability permissions</a>).</li>
+</ul>
+<!--
+  %  This macro wraps the compiler built-in
+  %  `__builtin_cheri_perms_and`.
+-->
+<ul>
+<li><code>void *cheri_tag_clear(void *c)</code>: Clear the tag on <code>c</code>, returning the
+new capability.</li>
+</ul>
+<!--
+  % \note{Are the references to the `__builtin_` forms useful?  Do we
+  % want to encourage their use or the `cheric.h` macros?}{nwf}
+-->
+<div style="break-before: page; page-break-before: always;"></div><h1 id="capability-permissions"><a class="header" href="#capability-permissions">Capability permissions</a></h1>
+<!--
+\label{sec:capability_permissions}
+-->
+<p>A number of capability permissions are available for use; only those relating
+to CHERI memory protection are enumerated here:</p>
+<ul>
+<li>
+<p><code>CHERI_PERM_EXECUTE</code>: Authorize instruction fetch via this
+capability.</p>
+</li>
+<li>
+<p><code>CHERI_PERM_LOAD</code>: Authorize data load via this capability.</p>
+</li>
+<li>
+<p><code>CHERI_PERM_LOAD_CAP</code>: Authorize capability load via this capability.
+If the permission is not present, the tag on the loaded value
+will be silently cleared.</p>
+</li>
+<li>
+<p><code>CHERI_PERM_STORE</code>: Authorize data store via this capability.</p>
+</li>
+<li>
+<p><code>CHERI_PERM_STORE_CAP</code>: Authorize capability store via this capability.
+If the permission is not present, and the tag on the stored capability is
+valid, then a hardware exception will be thrown.</p>
+</li>
+</ul>
+<p>In addition to architectural permissions, CHERI capabilities have
+software-defined permissions.
+CheriBSD defines the following additional memory-protection-related
+permission:</p>
+<ul>
+<li><code>CHERI_PERM_CHERIABI_VMMAP</code>: A CheriABI-specific user
+permission that the kernel uses to authorize modifications to
+virtual-memory mappings.
+If the permission is not present, system calls that alter the contents
+or the presentation of memory mappings will reject the request.
+As this is a CheriBSD-specific permission, it is not defined in
+<code>cheriintrin.h</code> and requires inclusion of <code>cheri/cheri.h</code>.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds-alignment-due-to-compression"><a class="header" href="#bounds-alignment-due-to-compression">Bounds alignment due to compression</a></h1>
+<!--
+\label{sec:bounds_alignment}
+-->
+<p>Bounds imprecisions may require a memory allocator to increase the alignment
+of an allocation, or increase padding on an allocation, to prevent bounds from
+spanning more than one object.
+When the length of an object exceeds 2<sup><em>floor</em>(<em>bounds_bits</em>/2)-1</sup> (i.e., 4 KiB for 64-bit CHERI-RISC-V), additional alignment requirements
+apply to the lower and upper bounds.
+The alignment required for allocations exceeding the minimum representable range (4 KiB for 64-bit CHERI-RISC-V) is 2<sup><em>E</em>+3</sup> bytes, where
+<em>E</em> is determined from the length, <em>l</em>, by
+<em>E</em> = 52 - CountLeadingZeros(<em>l</em>[64: <em>floor</em>(<em>bounds_bits</em>/2)]).</p>
+<!--
+\arnote{Is this too much detail?}
+-->
+<!--
+%\jrtcnote{Do we want to clarify that this is a 65-bit length? One would naively
+%expect it to be 64-bit and thus be off by one in all calculations. We should
+%probably also steer people towards CRRL/CRAM regardless (and add cheri\_foo
+%APIs for them).}
+%\arnote{65-bit length is probably too much detail. But CRRL/CRAM now documented}
+-->
+<p>Correctly computing the rounded size and minimum alignment for a given
+allocation is non-trivial and may require many instructions to compute,
+especially in the context of fast allocators such as the stack allocator.
+Moreover, the architectural constants used for bounds precision differ across
+architectures or their variations, and so alignment constraints also vary.
+For example, the number of bits available for bounds differs between 32-bit and
+64-bit CHERI-RISC-V, and also between 64-bit CHERI-RISC-V and Morello.</p>
+<p>To avoid overly specific software knowledge of alignment requirements, and also to allow efficient calculation of alignment constraints during (for example) stack allocation, the CHERI ISA provides instructions that allow determining precisely representable allocations.
+These instructions can be generated using compiler builtins that are provided by <code>cheriintrin.h</code>:</p>
+<ul>
+<li>
+<p><code>size_t cheri_representable_length(size_t len)</code>: returns the length that a capability would have after using <code>cheri_bounds_set</code> to set the length to <code>len</code> (assuming appropriate alignment of the base).</p>
+</li>
+<li>
+<p><code>size_t cheri_representable_alignment_mask(size_t len)</code>: returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.</p>
+</li>
+</ul>
+<p>The precisely representable base address can be computed using:</p>
+<pre><code>base = base &amp; cheri_representable_alignment_mask(len);
+</code></pre>
+<p>When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
+This can be done with the following code:</p>
+<pre><code>size_t required_alignment(size_t len) {
+    return ~cheri_representable_alignment_mask(len) + 1;
+}
+struct Buffer {
+    void *data;
+    size_t allocated;
+};
+void *allocate_next(struct Buffer *buf, size_t len) {
+    char *result = buf-&gt;data + buf-&gt;allocated;
+    result = __builtin_align_up(result, required_alignment(len));
+    size_t rounded_len = cheri_representable_length(len);
+    buf-&gt;allocated = (result + rounded_len) - (char *)buf-&gt;data;
+    return cheri_bounds_set_exact(result, rounded_len);
+}
+</code></pre>
+<p>Software written to use these compiler builtins, rather than encoding alignment
+requirements directly, is more likely to be portable between
+CHERI-RISC-V and Morello.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="implications-for-memory-allocator-design"><a class="header" href="#implications-for-memory-allocator-design">Implications for memory-allocator design</a></h1>
+<p>One use case of these APIs is high-performance applications that contain custom memory
+allocators and wish to narrow the bounds of returned pointers.
+Two kinds of modifications are typically required:</p>
+<ul>
+<li><strong>Changes to alignment to allow for capabilities and bounds</strong>:
+Changes relating to alignment fall into two categories.
+First, those required to allow pointers to be stored within allocations,
+which requires that allocations be aligned to the pointer width (128 bits).
+Second, further alignment changes will be required to ensure that bounds can
+be represented precisely.
+This requires suitably aligning both the bottom and top bounds to exclude
+any other live allocations, as described in <a href="apis/bounds-alignment-due-to-compression.html">Bounds alignment due to
+compression</a>.</li>
+</ul>
+<!--
+\arnote{May want to switch order of sections?}
+-->
+<ul>
+<li><strong>Reaching allocation metadata on <code>free</code></strong>:
+It is often the case that allocators utilize the value of the pointer passed
+to their custom <code>free</code> function to locate corresponding metadata —
+for example, by always placing that metadata immediately before the
+allocation, which would be outside of the allocation's bounds.
+Therefore, some additional work may be required to derive a pointer to the
+allocation's metadata via another global capability, rather than the one
+that has been passed to <code>free</code>.</li>
+</ul>
+<p>These two concerns may interact: When a custom allocator places metadata at
+the beginning of the allocation, care must be taken that the resulting pointer
+is still strongly aligned.
+While porting programs to run on CHERI, we found multiple sub-allocators
+that used 8 bytes of metadata after the result from <code>malloc</code>.
+This causes the resulting pointer to no longer be sufficiently aligned to
+store capabilities without faulting or stripping tag bits.</p>
+<!--
+\nwfnote{Does CHERI ISAv7 still fault in any of these scenarios?}
+-->
+<p>Note that it is also possible to use the above APIs to validate inputs to
+<code>free</code>, which is useful when the consumer of <code>free</code> is, for example,
+an untrusted compartment or a component of a web browser that might be
+influenced by an attacker. In such cases, <code>free</code> should validate that the
+passed-in capability is tagged, is in-bounds, and points to a legitimate,
+still-allocated allocation.  For allocators engaged in revocation for temporal
+safety, concurrent revocation opens the door to TOCTTOU races within
+<code>free</code>; additional care must be taken to prevent a double-<code>free</code>
+using a stale pointer from freeing an object allocated after revocation.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="further-reading"><a class="header" href="#further-reading">Further reading</a></h1>
+<h2 id="the-cheri-isa"><a class="header" href="#the-cheri-isa">The CHERI ISA</a></h2>
+<p>The primary reference for the CHERI Instruction-Set Architecture (ISA) is the
+ISA specification; at the time of writing, the most recent version is
+<a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-927.pdf">Capability Hardware Enhanced RISC Instructions: CHERI Instruction-Set
+Architecture (Version
+7)</a><sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+<h2 id="an-introduction-to-cheri"><a class="header" href="#an-introduction-to-cheri">An Introduction to CHERI</a></h2>
+<p>Our technical report, <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf">An Introduction to
+CHERI</a>, provides a
+high-level overview of the CHERI architecture, ISA modeling, hardware
+implementations, and software stack<sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
+<h2 id="cc-memory-safety"><a class="header" href="#cc-memory-safety">C/C++ Memory Safety</a></h2>
+<p>Published at ASPLOS 2015, <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201503-asplos2015-cheri-cmachine.pdf">Beyond the PDP-11: Architectural support for a
+memory-safe C abstract
+machine</a>
+describes idiomatic C and spatial memory protection<sup class="footnote-reference"><a href="#3">3</a></sup>.</p>
+<p>We published a paper on our memory-safe OS userspace and application suite,
+<a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201904-asplos-cheriabi.pdf">CheriABI: Enforcing Valid Pointer Provenance and Minimizing Pointer Privilege
+in the POSIX C Run-time
+Environment</a>,
+at ASPLOS 2019<sup class="footnote-reference"><a href="#4">4</a></sup>.
+We also released an <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-932.pdf">extended technical-report version of this
+paper</a> that includes
+greater implementation detail<sup class="footnote-reference"><a href="#5">5</a></sup>.</p>
+<p>We published <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/2020oakland-cornucopia.pdf">Cornucopia: Temporal Safety for CHERI
+Heaps</a> at Oakland 2020, explaining how to implement "sweeping revocation"
+using virtual-memory acceleration<sup class="footnote-reference"><a href="#6">6</a></sup>.</p>
+<p>We published our paper, <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201901-popl-cerberus.pdf">Exploring C Semantics and Pointer
+Provenance</a>,
+and the implications for software design, at POPL 2019; CHERI C was a case
+study in the practical enforcement of capability provenance-validity
+enforcement<sup class="footnote-reference"><a href="#7">7</a></sup>.</p>
+<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
+<p>Robert N. M. Watson, Peter G. Neumann, Jonathan Woodruff, Michael Roe,
+Hesham Almatary, Jonathan Anderson, John Baldwin, David Chisnall,
+Brooks Davis, Nathaniel Wesley Filardo, Alexandre Joannou, Ben Laurie,
+A. Theodore Markettos, Simon W. Moore, Steven J. Murdoch, Kyndylan Nienhuis,
+Robert Norton, Alex Richardson, Peter Rugg, Peter Sewell, Stacey Son,
+Hongyan Xia. <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-927.pdf">Capability Hardware Enhanced RISC Instructions: CHERI
+Instruction-Set Architecture (Version
+7)</a>, Technical Report
+UCAM-CL-TR-927, Computer Laboratory, June 2019.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>Robert N. M. Watson, Simon W. Moore, Peter Sewell, and Peter G. Neumann.
+<a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf">An Introduction to
+CHERI</a>, Technical
+Report UCAM-CL-TR-941, Computer Laboratory, September 2019.</p>
+</div>
+<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
+<p>David Chisnall, Colin Rothwell, Robert N.M. Watson, Jonathan Woodruff,
+Munraj Vadera, Simon W. Moore, Michael Roe, Brooks Davis, and
+Peter G. Neumann. <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201503-asplos2015-cheri-cmachine.pdf">Beyond the PDP-11: Architectural support for a memory-safe
+C abstract machine</a>,
+Proceedings of the Twentieth International Conference on Architectural Support
+for Programming Languages and Operating Systems (ASPLOS 2015), Istanbul,
+Turkey, March 2015.</p>
+</div>
+<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
+<p>Brooks Davis, Robert N. M. Watson, Alexander Richardson,
+Peter G. Neumann, Simon W. Moore, John Baldwin, David Chisnall,
+Jessica Clarke, Nathaniel Wesley Filardo, Khilan Gudka, Alexandre Joannou,
+Ben Laurie, A. Theodore Markettos, J. Edward Maste, Alfredo Mazzinghi,
+Edward Tomasz Napierala, Robert M. Norton, Michael Roe, Peter Sewell,
+Stacey Son, and Jonathan Woodruff. <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201904-asplos-cheriabi.pdf">CheriABI: Enforcing Valid Pointer
+Provenance and Minimizing Pointer Privilege in the POSIX C Run-time
+Environment</a>.
+In Proceedings of 2019 Architectural Support for Programming Languages and
+Operating Systems (ASPLOS’19). Providence, RI, USA, April 13-17, 2019.</p>
+</div>
+<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
+<p>Brooks Davis, Robert N. M. Watson, Alexander Richardson,
+Peter G. Neumann, Simon W. Moore, John Baldwin, David Chisnall,
+Jessica Clarke, Nathaniel Wesley Filardo, Khilan Gudka, Alexandre Joannou,
+Ben Laurie, A. Theodore Markettos, J. Edward Maste, Alfredo Mazzinghi,
+Edward Tomasz Napierala, Robert M. Norton, Michael Roe, Peter Sewell,
+Stacey Son, and Jonathan Woodruff. <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-932.pdf">CheriABI: Enforcing valid pointer
+provenance and minimizing pointer privilege in the POSIX C run-time
+environment</a>,
+Technical Report UCAM-CL-TR-932, Computer Laboratory, January 2019.</p>
+</div>
+<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
+<p>Nathaniel Wesley Filardo, Brett F. Gutstein, Jonathan Woodruff,
+Sam Ainsworth, Lucian Paul-Trifu, Brooks Davis, Hongyan Xia,
+Edward Tomasz Napierala, Alexander Richardson, John Baldwin, David Chisnall,
+Jessica Clarke, Khilan Gudka, Alexandre Joannou, A. Theodore Markettos,
+Alfredo Mazzinghi, Robert M. Norton, Michael Roe, Peter Sewell, Stacey Son,
+Timothy M. Jones, Simon W. Moore, Peter G. Neumann, and Robert N. M. Watson.
+<a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/2020oakland-cornucopia.pdf">Cornucopia: Temporal Safety for CHERI
+Heaps</a>.
+In Proceedings of the 41st IEEE Symposium on Security and Privacy (Oakland
+2020). San Jose, CA, USA, May 18-20, 2020.</p>
+</div>
+<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
+<p>Kayvan Memarian, Victor B. F. Gomes, Brooks Davis, Stephen Kell,
+Alexander Richardson, Robert N. M. Watson, and Peter Sewell. <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201901-popl-cerberus.pdf">Exploring C
+Semantics and Pointer
+Provenance</a>.
+In Proceedings of the 46th ACM SIGPLAN Symposium on Principles of Programming
+Languages (POPL), Cascais, Portugal, 13-19 January, 2019.</p>
+</div>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="acknowledgements"><a class="header" href="#acknowledgements">Acknowledgements</a></h1>
+<p>We gratefully acknowledge the helpful feedback from our colleagues, including
+Hesham Almatary, Ruben Ayrapetyan, Silviu Baranga, Jacob Bramley, Rod Chapman,
+Paul Gotch, Al Grant, Brett Gutstein, Alfredo Mazzinghi, Alan Mycroft, and Lee
+Smith.</p>
+<p>This work was supported by the Defense Advanced Research Projects Agency
+(DARPA) and the Air Force Research Laboratory (AFRL), under contracts
+FA8750-10-C-0237 ("CTSRD") and HR0011-18-C-0016 ("ECATS").
+The views, opinions, and/or findings contained in this report are those of the
+authors and should not be interpreted as representing the official views or
+policies of the Department of Defense or the U.S. Government.</p>
+<p>This work was supported in part by the Innovate UK project Digital Security by
+Design (DSbD) Technology Platform Prototype, 105694.</p>
+<p>This project has received funding from the European Research Council (ERC)
+under the European Union’s Horizon 2020 research and innovation programme
+(grant agreement No 789108), ERC Advanced Grant ELVER.</p>
+<p>We also acknowledge the EPSRC REMS Programme Grant (EP/K008528/1), Arm
+Limited, HP Enterprise, and Google, Inc.
+Approved for Public Release, Distribution Unlimited.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>
