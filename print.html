@@ -243,7 +243,7 @@ This guidance is based on our experience adapting the FreeBSD operating-system
 userspace, and applications such as PostgreSQL and WebKit, to run in a
 CHERI C/C++ capability-based programming environment.
 We conclude by recommending further reading.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="definitions"><a class="header" href="#definitions">Definitions</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <p>CHERI Clang/LLVM and LLD implement the following new language,
 code-generation, and linkage models:</p>
 <ul>
@@ -303,7 +303,7 @@ implementations, and software stack<sup class="footnote-reference"><a href="#1">
 CHERI</a>, Technical
 Report UCAM-CL-TR-941, Computer Laboratory, September 2019.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-capabilities"><a class="header" href="#cheri-capabilities">CHERI capabilities</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="cheri-capabilities"><a class="header" href="#cheri-capabilities">CHERI capabilities</a></h2>
 <!--
 \begin{figure}[b]
 \hspace{2.5cm}
@@ -397,7 +397,7 @@ well aligned.
 The compression scheme uses a floating-point representation, allowing high-precision bounds for small
 objects, but requiring stronger alignment and padding for larger allocations
 (see <a href="background/../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to compression</a>).</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="architectural-rules-for-capability-use"><a class="header" href="#architectural-rules-for-capability-use">Architectural rules for capability use</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="architectural-rules-for-capability-use"><a class="header" href="#architectural-rules-for-capability-use">Architectural rules for capability use</a></h2>
 <p>The architecture enforces several important security properties on changes to
 this metadata:</p>
 <ul>
@@ -460,7 +460,7 @@ This allows the architecture to imbue pointers with protection by virtue of
 architectural provenance validity, bounds checking, and permission checking,
 protecting pointers from corruption and providing strong spatial memory
 safety.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="the-cheri-cc-run-time-environment"><a class="header" href="#the-cheri-cc-run-time-environment">The CHERI C/C++ run-time environment</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="the-cheri-cc-run-time-environment"><a class="header" href="#the-cheri-cc-run-time-environment">The CHERI C/C++ run-time environment</a></h2>
 <p>CHERI C code executes within a capability-aware run-time environment
 — whether "bare metal" with a suitable runtime, or in a richer, OS-based
 process environment such as CheriABI (see <a href="cheri-ccpp/../cheriabi">CheriABI</a>),
@@ -486,7 +486,7 @@ embedded operating systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS
 <p>Outside of the OS and language runtime themselves, CHERI C/C++ require
 relatively few source-code-level changes to C/C++-language software.
 We explore those changes in the remainder of this document.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="referential-spatial-and-temporal-safety"><a class="header" href="#referential-spatial-and-temporal-safety">Referential, spatial, and temporal safety</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="referential-spatial-and-temporal-safety"><a class="header" href="#referential-spatial-and-temporal-safety">Referential, spatial, and temporal safety</a></h2>
 <p>Pure-capability C/C++ introduces a number of new types of protection not
 present in compilation to conventional architectures:</p>
 <ul>
@@ -562,7 +562,7 @@ issues compiling code as CHERI C/C++ (see <a href="impact/../compiler">CHERI com
 <!--
 \rwnote{Alex: Can we use the word "most" instead of "many"?}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="capability-related-faults"><a class="header" href="#capability-related-faults">Capability-related faults</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="capability-related-faults"><a class="header" href="#capability-related-faults">Capability-related faults</a></h2>
 <!--
 \label{sec:faults}
 -->
@@ -595,7 +595,7 @@ default behavior in CheriABI when <code>SIGPROT</code> is not handled.</p>
   exceptions .. but perhaps less so than if we used the word "exception"
   unadorned.}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="pointer-provenance-validity"><a class="header" href="#pointer-provenance-validity">Pointer provenance validity</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="pointer-provenance-validity"><a class="header" href="#pointer-provenance-validity">Pointer provenance validity</a></h2>
 <!--
 \label{sec:pointer_provenance_validity}
 -->
@@ -662,7 +662,7 @@ pointer-based types, such as <code>intptr_t</code>, when size and alignment
 require it.</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="recommended-use-of-c-language-types"><a class="header" href="#recommended-use-of-c-language-types">Recommended use of C-language types</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="recommended-use-of-c-language-types"><a class="header" href="#recommended-use-of-c-language-types">Recommended use of C-language types</a></h3>
 <!--
 \label{sec:recommended-c-types}
 -->
@@ -785,7 +785,7 @@ This ensures that provenance is maintained.</p>
 common implementations, such as GCC and FreeBSD, define <code>maxalign_t</code> as a
 <code>struct</code> and not a <code>union</code>.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="capability-alignment-in-memory"><a class="header" href="#capability-alignment-in-memory">Capability alignment in memory</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="capability-alignment-in-memory"><a class="header" href="#capability-alignment-in-memory">Capability alignment in memory</a></h3>
 <p>Because tags apply only to memory locations that are capability-aligned
 and capability-sized,
 unaligned storage of pointers will either generate a run-time
@@ -806,7 +806,7 @@ to be changed.</p>
 for optimization purposes? E.g., strcmp loading a word at a time?}
 \psnote{yes}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="single-origin-provenance"><a class="header" href="#single-origin-provenance">Single-origin provenance</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="single-origin-provenance"><a class="header" href="#single-origin-provenance">Single-origin provenance</a></h3>
 <!--
 \label{sec:ambiguous-provenance}
 -->
@@ -869,7 +869,7 @@ However, this would add significant complexity to the compiler and we have not s
 \psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
 \arnote{I agree. Even the current behavior is quite ugly, but at least it has measurable compatibility benefits.}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds"><a class="header" href="#bounds">Bounds</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="bounds"><a class="header" href="#bounds">Bounds</a></h2>
 <p>CHERI C/C++ pointers are implemented using capabilities that enforce lower and
 upper bounds on access.
 In the pure-capability run-time environment, those bounds are normally set to
@@ -883,7 +883,7 @@ and other utility functions.
 As with violations of provenance validity, out-of-bounds accesses — including
 load, store, and instruction fetch — trigger a hardware exception (see
 <a href="impact/capability-faults.html">Capability-related faults</a>).</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds-from-the-compiler-and-linker"><a class="header" href="#bounds-from-the-compiler-and-linker">Bounds from the compiler and linker</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="bounds-from-the-compiler-and-linker"><a class="header" href="#bounds-from-the-compiler-and-linker">Bounds from the compiler and linker</a></h3>
 <p>The compiler will arrange that language-level pointers to stack allocations have suitable
 bounds, and that the run-time linker will return bounded pointers to global
 variables.
@@ -896,7 +896,7 @@ In some cases, such as with global variables allocated in multiple object
 files, the actual size of the allocation may not be resolved until run time,
 by the run-time linker.
 These bounds will typically not cause observable changes in behavior — other than hardware exceptions when (accidentally) performing an out-of-bounds access.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds-from-the-heap-allocator"><a class="header" href="#bounds-from-the-heap-allocator">Bounds from the heap allocator</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="bounds-from-the-heap-allocator"><a class="header" href="#bounds-from-the-heap-allocator">Bounds from the heap allocator</a></h3>
 <p><code>malloc</code> will set bounds on pointers to new heap allocations.
 In typical C use, this is not a problem, as programmers expect to access
 addresses only within an allocation.</p>
@@ -923,7 +923,7 @@ revocation sweeps which enforce temporal safety may have atomically replaced
 this with a non-pointer value.  The scalar value
 <em><code>D = P - A</code></em> will naturally be preserved by revocation.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="subobject-bounds"><a class="header" href="#subobject-bounds">Subobject bounds</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="subobject-bounds"><a class="header" href="#subobject-bounds">Subobject bounds</a></h3>
 <p>CHERI C/C++ also supports automatically restricting the
 bounds when a pointer is taken to a subobject — for example, an array
 embedded within another structure that itself has been heap allocated.
@@ -1034,7 +1034,7 @@ existing code, it does slightly increase the porting effort.</p>
 square brackets, the compiler will automatically use the remaining allocation
 size.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="other-sources-of-bounds"><a class="header" href="#other-sources-of-bounds">Other sources of bounds</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="other-sources-of-bounds"><a class="header" href="#other-sources-of-bounds">Other sources of bounds</a></h3>
 <p>Bounds may also be set by other parts of the implementation.
 For example, the kernel may set bounds on pointers to new memory mappings (see
 <a href="impact/../cheriabi">The CheriABI POSIX process environment</a>),
@@ -1042,7 +1042,7 @@ and the system library may set bounds on pointers
 into returned buffers from APIs — e.g., <code>fgetln</code>.
 More detailed information on how C/C++ code can set bounds can be found in
 <a href="impact/../apis">C APIs to get and set capability properties</a>.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="out-of-bounds-pointers"><a class="header" href="#out-of-bounds-pointers">Out-of-bounds pointers</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="out-of-bounds-pointers"><a class="header" href="#out-of-bounds-pointers">Out-of-bounds pointers</a></h3>
 <!--
 \label{sec:oob}
 -->
@@ -1105,7 +1105,7 @@ its lower bound.</p>
 pointers.  Nevertheless, in practice, we have found that the CHERI capability
 compression scheme supports almost all in-the-field out-of-bounds behavior in
 widely used software such as FreeBSD, PostgreSQL, and WebKit.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="pointer-comparison"><a class="header" href="#pointer-comparison">Pointer comparison</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="pointer-comparison"><a class="header" href="#pointer-comparison">Pointer comparison</a></h2>
 <p>In CHERI C/C++, pointer comparison considers only the
 integer address part of a capability.
 This means that differences in tag validity, bounds, permissions, and so on,
@@ -1150,7 +1150,7 @@ the tag or other metadata into account.<sup class="footnote-reference"><a href="
 \arnote{default behavior=\texttt{-cheri-comparison=address}}
 }
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="implications-of-capability-revocation-for-temporal-safety"><a class="header" href="#implications-of-capability-revocation-for-temporal-safety">Implications of capability revocation for temporal safety</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="implications-of-capability-revocation-for-temporal-safety"><a class="header" href="#implications-of-capability-revocation-for-temporal-safety">Implications of capability revocation for temporal safety</a></h2>
 <p>Heap temporal safety utilizes revocation sweeps, which, after some quarantine
 period, replace in-register and in-memory capabilities to freed memory with
 non-dereferenceable values.
@@ -1288,7 +1288,7 @@ If the pointer is strongly aligned, further bits may be toggled without clearing
 <div class="footnote-definition" id="9"><sup class="footnote-definition-label">3</sup>
 <p>Until recently, not using these macros could result in subtle bugs at run time since pointer equality comparisons included the tag bit in addition to the address.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="function-prototypes-and-calling-conventions"><a class="header" href="#function-prototypes-and-calling-conventions">Function prototypes and calling conventions</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="function-prototypes-and-calling-conventions"><a class="header" href="#function-prototypes-and-calling-conventions">Function prototypes and calling conventions</a></h2>
 <p>CHERI C/C++ distinguishes between integer and pointer types at an
 architectural level, which can lead to compatibility problems with older C
 programming styles that fail to unambiguously differentiate these types:</p>
@@ -1332,7 +1332,7 @@ empty parameter list equivalent to a parameter list consisting of a single
 <p>If the <em>K&amp;R</em> function is defined within the same file, the compiler can
 determine the correct calling convention and will not emit a warning.</p>
 </div>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="data-structure-and-memory-allocation-alignment"><a class="header" href="#data-structure-and-memory-allocation-alignment">Data-structure and memory-allocation alignment</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="data-structure-and-memory-allocation-alignment"><a class="header" href="#data-structure-and-memory-allocation-alignment">Data-structure and memory-allocation alignment</a></h2>
 <p>CHERI C/C++ have stronger alignment requirements than C/C++ on conventional
 architectures.
 These requirements arise from two sources: that capabilities themselves must
@@ -1346,7 +1346,7 @@ on larger objects.</p>
   not help much to avoid extra padding with capabilities. It more or less
   depends on how much the pointers are scattered in the struct definition.}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="restrictions-in-capability-locations-in-memory"><a class="header" href="#restrictions-in-capability-locations-in-memory">Restrictions in capability locations in memory</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="restrictions-in-capability-locations-in-memory"><a class="header" href="#restrictions-in-capability-locations-in-memory">Restrictions in capability locations in memory</a></h3>
 <!--
 \label{sec:restricted-capability-locations}
 -->
@@ -1407,7 +1407,7 @@ values are copied into inappropriately aligned allocations.</p>
 some areas there are changes to API semantics (e.g., in the handling of tagged
 pointer values and I/O) or new functionality (such as relates to handling
 capability-related faults).</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="posix-api-changes"><a class="header" href="#posix-api-changes">POSIX API changes</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="posix-api-changes"><a class="header" href="#posix-api-changes">POSIX API changes</a></h2>
 <ul>
 <li>
 <p><strong>Writing and reading pointers via files</strong>: In the CheriABI process
@@ -1456,7 +1456,7 @@ would return a capability permitting loads, stores, and instruction
 fetch while mapping the pages with no (MMU) permissions.</p>
 </li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="handling-capability-related-signals"><a class="header" href="#handling-capability-related-signals">Handling capability-related signals</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="handling-capability-related-signals"><a class="header" href="#handling-capability-related-signals">Handling capability-related signals</a></h2>
 <p>When a capability hardware exception fires, the operating system will map it
 into the UNIX <code>SIGPROT</code> signal.
 By default, this signal terminates the process, but the signal can be caught
@@ -1487,7 +1487,7 @@ provides suggestions on how to change the source code to be compatible with
 CHERI C/C++.
 All these warnings are enabled when the <code>-Wall</code> compiler flag is
 set.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="loss-of-provenance"><a class="header" href="#loss-of-provenance">Loss of provenance</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="loss-of-provenance"><a class="header" href="#loss-of-provenance">Loss of provenance</a></h2>
 <!--
 %\begin{compilerwarning}
 %cast from provenance-free integer type to pointer type will give pointer that can not be dereferenced
@@ -1545,7 +1545,7 @@ will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
 <!--
 \nwfnote{The ``:15:24'' above should also be ``:4:24''?}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="ambiguous-provenance"><a class="header" href="#ambiguous-provenance">Ambiguous provenance</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="ambiguous-provenance"><a class="header" href="#ambiguous-provenance">Ambiguous provenance</a></h2>
 <p>For arithmetic and bitwise binary operations between <code>uintptr_t</code>/<code>intptr_t</code>, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
 However, as noted in <a href="compiler/../impact/single-origin-provenance.html">Single-origin provenance</a>, there are cases that are ambiguous as far as the compiler is concerned.</p>
 <p>Consider for example a structure that holds a pointer and a small number of flags.
@@ -1578,7 +1578,7 @@ The suggested fix for this problem is fix is to cast the non-pointer argument to
 <!--
 \arnote{TODO: this section should have more examples.}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="underaligned-capabilities"><a class="header" href="#underaligned-capabilities">Underaligned capabilities</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="underaligned-capabilities"><a class="header" href="#underaligned-capabilities">Underaligned capabilities</a></h2>
 <!--
 %\begin{compilerwarning}
 %alignment (<N>) of '<type>' is less than the required capability alignment
@@ -1630,7 +1630,7 @@ permissions or limit bounds associated with pointers.
 For example, high-performance applications may contain custom memory
 allocators and wish to narrow bounds and permissions on returned pointers
 to prevent overflows between its own allocations.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-related-header-files"><a class="header" href="#cheri-related-header-files">CHERI-related header files</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="cheri-related-header-files"><a class="header" href="#cheri-related-header-files">CHERI-related header files</a></h2>
 <p>A set of compiler built-in functions provide access to capability properties
 of pointers.
 Two new header files (distributed as part of the CHERI Clang compiler)
@@ -1664,7 +1664,7 @@ capability permission mask.</li>
 \rwnote{This section may need updating once we've converged OS and compiler
   versions of cheri.h, and done any necessary header refactoring.}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="retrieving-capability-properties"><a class="header" href="#retrieving-capability-properties">Retrieving capability properties</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="retrieving-capability-properties"><a class="header" href="#retrieving-capability-properties">Retrieving capability properties</a></h2>
 <p>The following APIs allow capability properties to be retrieved from pointers:</p>
 <ul>
 <li>
@@ -1692,7 +1692,7 @@ validity tag set.</p>
 <!--
   \arnote{This returns the raw tag value, cheriintrin.h may also provide `cheri_is_valid` and `cheri_is_invalid`}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="modifying-or-restricting-capability-properties"><a class="header" href="#modifying-or-restricting-capability-properties">Modifying or restricting capability properties</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="modifying-or-restricting-capability-properties"><a class="header" href="#modifying-or-restricting-capability-properties">Modifying or restricting capability properties</a></h2>
 <p>The following APIs allow capability properties to be refined on pointers:</p>
 <ul>
 <li>
@@ -1752,7 +1752,7 @@ new capability.</li>
   % \note{Are the references to the `__builtin_` forms useful?  Do we
   % want to encourage their use or the `cheric.h` macros?}{nwf}
 -->
-<div style="break-before: page; page-break-before: always;"></div><h1 id="capability-permissions"><a class="header" href="#capability-permissions">Capability permissions</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="capability-permissions"><a class="header" href="#capability-permissions">Capability permissions</a></h2>
 <!--
 \label{sec:capability_permissions}
 -->
@@ -1793,7 +1793,7 @@ or the presentation of memory mappings will reject the request.
 As this is a CheriBSD-specific permission, it is not defined in
 <code>cheriintrin.h</code> and requires inclusion of <code>cheri/cheri.h</code>.</li>
 </ul>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="bounds-alignment-due-to-compression"><a class="header" href="#bounds-alignment-due-to-compression">Bounds alignment due to compression</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="bounds-alignment-due-to-compression"><a class="header" href="#bounds-alignment-due-to-compression">Bounds alignment due to compression</a></h2>
 <!--
 \label{sec:bounds_alignment}
 -->
@@ -1855,7 +1855,7 @@ void *allocate_next(struct Buffer *buf, size_t len) {
 <p>Software written to use these compiler builtins, rather than encoding alignment
 requirements directly, is more likely to be portable between
 CHERI-RISC-V and Morello.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="implications-for-memory-allocator-design"><a class="header" href="#implications-for-memory-allocator-design">Implications for memory-allocator design</a></h1>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="implications-for-memory-allocator-design"><a class="header" href="#implications-for-memory-allocator-design">Implications for memory-allocator design</a></h2>
 <p>One use case of these APIs is high-performance applications that contain custom memory
 allocators and wish to narrow the bounds of returned pointers.
 Two kinds of modifications are typically required:</p>
