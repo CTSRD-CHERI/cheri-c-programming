@@ -1,4 +1,4 @@
-# Implications of capability revocation for temporal safety
+## Implications of capability revocation for temporal safety
 
 Heap temporal safety utilizes revocation sweeps, which, after some quarantine
 period, replace in-register and in-memory capabilities to freed memory with

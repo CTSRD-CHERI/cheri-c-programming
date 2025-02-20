@@ -1,4 +1,4 @@
-# Bounds from the compiler and linker
+### Bounds from the compiler and linker
 
 The compiler will arrange that language-level pointers to stack allocations have suitable
 bounds, and that the run-time linker will return bounded pointers to global

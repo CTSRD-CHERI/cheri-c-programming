@@ -1,4 +1,4 @@
-# Pointer provenance validity
+## Pointer provenance validity
 <!--
 \label{sec:pointer_provenance_validity}
 -->

@@ -1,4 +1,4 @@
-# Ambiguous provenance
+## Ambiguous provenance
 
 For arithmetic and bitwise binary operations between `uintptr_t`/`intptr_t`, the compiler can generally infer which side of the expression should be used as the provenance (and bounds) source.
 However, as noted in [Single-origin provenance](../impact/single-origin-provenance.html), there are cases that are ambiguous as far as the compiler is concerned.

@@ -1,4 +1,4 @@
-# Other sources of bounds
+### Other sources of bounds
 
 Bounds may also be set by other parts of the implementation.
 For example, the kernel may set bounds on pointers to new memory mappings (see

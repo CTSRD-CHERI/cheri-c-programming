@@ -1,4 +1,4 @@
-# Capability-related faults
+## Capability-related faults
 <!--
 \label{sec:faults}
 -->

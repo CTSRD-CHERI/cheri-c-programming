@@ -1,4 +1,4 @@
-# Referential, spatial, and temporal safety
+## Referential, spatial, and temporal safety
 
 Pure-capability C/C++ introduces a number of new types of protection not
 present in compilation to conventional architectures:

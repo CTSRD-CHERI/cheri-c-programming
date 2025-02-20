@@ -1,4 +1,4 @@
-# Restrictions in capability locations in memory
+### Restrictions in capability locations in memory
 <!--
 \label{sec:restricted-capability-locations}
 -->

@@ -1,4 +1,4 @@
-# CHERI capabilities
+## CHERI capabilities
 
 <!--
 \begin{figure}[b]

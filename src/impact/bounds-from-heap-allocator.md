@@ -1,4 +1,4 @@
-# Bounds from the heap allocator
+### Bounds from the heap allocator
 
 `malloc` will set bounds on pointers to new heap allocations.
 In typical C use, this is not a problem, as programmers expect to access

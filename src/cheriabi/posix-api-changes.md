@@ -1,4 +1,4 @@
-# POSIX API changes
+## POSIX API changes
 
 * **Writing and reading pointers via files**: In the CheriABI process
   environment, only untagged data (not tagged pointers) may be written to or

@@ -1,4 +1,4 @@
-# Modifying or restricting capability properties
+## Modifying or restricting capability properties
 
 The following APIs allow capability properties to be refined on pointers:
 

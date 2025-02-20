@@ -1,4 +1,4 @@
-# Subobject bounds
+### Subobject bounds
 
 CHERI C/C++ also supports automatically restricting the
 bounds when a pointer is taken to a subobject &mdash; for example, an array

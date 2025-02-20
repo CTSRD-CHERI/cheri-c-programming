@@ -1,4 +1,4 @@
-# Out-of-bounds pointers
+### Out-of-bounds pointers
 <!--
 \label{sec:oob}
 -->

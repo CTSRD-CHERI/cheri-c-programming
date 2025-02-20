@@ -1,4 +1,4 @@
-# Implications for memory-allocator design
+## Implications for memory-allocator design
 
 One use case of these APIs is high-performance applications that contain custom memory
 allocators and wish to narrow the bounds of returned pointers.

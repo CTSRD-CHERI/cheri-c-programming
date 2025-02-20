@@ -1,4 +1,4 @@
-# Bounds
+## Bounds
 
 CHERI C/C++ pointers are implemented using capabilities that enforce lower and
 upper bounds on access.

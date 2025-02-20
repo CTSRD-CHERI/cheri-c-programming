@@ -1,4 +1,4 @@
-# Single-origin provenance
+### Single-origin provenance
 <!--
 \label{sec:ambiguous-provenance}
 -->

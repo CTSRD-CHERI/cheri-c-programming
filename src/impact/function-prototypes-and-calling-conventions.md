@@ -1,4 +1,4 @@
-# Function prototypes and calling conventions
+## Function prototypes and calling conventions
 
 CHERI C/C++ distinguishes between integer and pointer types at an
 architectural level, which can lead to compatibility problems with older C

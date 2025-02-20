@@ -1,4 +1,4 @@
-# Definitions
+## Definitions
 
 CHERI Clang/LLVM and LLD implement the following new language,
 code-generation, and linkage models:

@@ -1,4 +1,4 @@
-# Architectural rules for capability use
+## Architectural rules for capability use
 
 The architecture enforces several important security properties on changes to
 this metadata:

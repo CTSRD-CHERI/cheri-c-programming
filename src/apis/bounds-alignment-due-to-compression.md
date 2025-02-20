@@ -1,4 +1,4 @@
-# Bounds alignment due to compression
+## Bounds alignment due to compression
 
 <!--
 \label{sec:bounds_alignment}

@@ -1,4 +1,4 @@
-# Pointer comparison
+## Pointer comparison
 
 In CHERI C/C++, pointer comparison considers only the
 integer address part of a capability.

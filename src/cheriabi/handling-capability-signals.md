@@ -1,4 +1,4 @@
-# Handling capability-related signals
+## Handling capability-related signals
 
 When a capability hardware exception fires, the operating system will map it
 into the UNIX `SIGPROT` signal.

@@ -1,4 +1,4 @@
-# The CHERI C/C++ run-time environment
+## The CHERI C/C++ run-time environment
 
 CHERI C code executes within a capability-aware run-time environment
 &mdash; whether "bare metal" with a suitable runtime, or in a richer, OS-based

@@ -1,4 +1,4 @@
-# CHERI-related header files
+## CHERI-related header files
 
 A set of compiler built-in functions provide access to capability properties
 of pointers.

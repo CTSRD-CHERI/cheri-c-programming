@@ -1,4 +1,4 @@
-# Loss of provenance
+## Loss of provenance
 
 <!--
 %\begin{compilerwarning}

@@ -1,4 +1,4 @@
-# Recommended use of C-language types
+### Recommended use of C-language types
 <!--
 \label{sec:recommended-c-types}
 -->

@@ -1,4 +1,4 @@
-# Retrieving capability properties
+## Retrieving capability properties
 
 The following APIs allow capability properties to be retrieved from pointers:
 

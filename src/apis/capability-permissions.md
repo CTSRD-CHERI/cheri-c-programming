@@ -1,4 +1,4 @@
-# Capability permissions
+## Capability permissions
 
 <!--
 \label{sec:capability_permissions}

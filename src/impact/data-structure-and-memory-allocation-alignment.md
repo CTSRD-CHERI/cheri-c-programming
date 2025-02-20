@@ -1,4 +1,4 @@
-# Data-structure and memory-allocation alignment
+## Data-structure and memory-allocation alignment
 
 CHERI C/C++ have stronger alignment requirements than C/C++ on conventional
 architectures.

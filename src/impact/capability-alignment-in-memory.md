@@ -1,4 +1,4 @@
-# Capability alignment in memory
+### Capability alignment in memory
 
 Because tags apply only to memory locations that are capability-aligned
 and capability-sized,

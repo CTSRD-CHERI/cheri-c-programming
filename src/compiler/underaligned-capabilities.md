@@ -1,4 +1,4 @@
-# Underaligned capabilities
+## Underaligned capabilities
 
 <!--
 %\begin{compilerwarning}
