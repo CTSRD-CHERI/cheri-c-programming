@@ -1,0 +1,145 @@
+\documentclass[12pt,twoside,openright,a4paper]{article}
+\usepackage[inner=25mm,outer=25mm,top=20mm,bottom=20mm]{geometry}
+
+\usepackage[headings]{fullpage}
+\usepackage[hidelinks]{hyperref}
+
+\usepackage[font={footnotesize,it}]{caption}
+\usepackage{comment}
+\def\tightlist{} % Ignore some Pandoc LaTeX formatting
+
+\usepackage{bytefield}
+\usepackage{color}
+\usepackage[scaled=0.8]{DejaVuSansMono}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\usepackage{mdframed} % To avoid linebreaks in lstlistings
+\lstnewenvironment{clisting}[1][]{\endgraf\noindent\minipage{\linewidth}\lstset{language={C}}}{\endminipage\endgraf}
+\lstnewenvironment{numberedclisting}[1][]{\endgraf\noindent\minipage{\linewidth}\lstset{language={C},numbers=left,breaklines=true,frame=L,#1}}{\endminipage\endgraf}
+\lstnewenvironment{compilerwarning}[1][]{\endgraf\noindent\minipage{\linewidth}\lstset{language={},breaklines=true,basicstyle=\scriptsize\ttfamily\bfseries,frame=L,#1}}{\endminipage\endgraf}
+
+\usepackage{subcaption}
+\usepackage{times}
+\usepackage{url}
+\usepackage[svgnames]{xcolor}
+\definecolor{lightgray}{gray}{0.8}
+\usepackage{xspace}
+\usepackage{xfrac}
+
+% drawing over lstlistings (code stolen from nwf)
+\usepackage{tikz}
+   \usetikzlibrary{decorations.pathreplacing}
+   \usetikzlibrary{fit}
+   \usetikzlibrary{tikzmark}
+   \usetikzlibrary{calc}
+   \usetikzlibrary{patterns}
+\newcommand*{\vcpgfmark}[1]{\ensuremath{\vcenter{\hbox{\pgfmark{#1}}}}}
+% GBP symbol should be safe since it's easy to enter (at least on a UK keyboard) and won't be in any valid lstlistings
+\lstset{escapechar=£} % Note: ensure this doesn't occur in any of the code
+\newcommand{\TikzListingHighlight}[3][]{\tikz[overlay,remember picture]{\draw[\ifstrempty{#1}{yellow}{#1}, line width=10pt,opacity=0.3](#2) -- (#3);}}
+\newcommand*{\TikzListingHighlightStartEnd}[2][]{\tikz[overlay,remember picture]{\draw[\ifstrempty{#1}{yellow}{#1}, line width=10pt,opacity=0.3](pic cs:Start#2) -- (pic cs:End#2);}}
+
+
+\renewcommand{\UrlFont}{\ttfamily\small}
+
+\newcommand{\baselineboxformatting}[1]{%
+  % Measure size of contents
+  \sbox0{#1}%
+  % Use the difference between the contents' height and the bitbox's height,
+  % clamped to [-.44\baselineskip, 0], as our minimum depth.
+  \setlength{\skip0}{\ht0 - \height}%
+  \ifdim\skip0>0pt%
+    \setlength{\skip0}{0}%
+  \else%
+    \ifdim\skip0<-.44\baselineskip%
+      \setlength{\skip0}{-.44\baselineskip}%
+    \fi%
+  \fi%
+  \centering\rule[\skip0]{0pt}{\height}#1}
+\bytefieldsetup{boxformatting=\baselineboxformatting}
+
+\lstset{basicstyle=\footnotesize\ttfamily}
+%\newcommand{\ccode}[1]{\lstinline[language={C}]{#1}}
+%\newcommand{\cxxcode}[1]{\lstinline[language={C++}]{#1}}
+\newcommand{\ccode}[1]{{\small\ttfamily{#1}}}
+\newcommand{\cxxcode}[1]{{\ccode{#1}}}
+\newcommand{\cconst}[1]{{\ccode{#1}}}
+\newcommand{\cfunc}[1]{{\ccode{#1()}}}
+\newcommand{\cvar}[1]{{\ccode{#1}}}
+\newcommand{\pathname}[1]{{\ccode{#1}}}
+\newcommand{\commandline}[1]{{\ccode{#1}}}
+
+\newcommand{\ptrdifft}{{\ccode{ptrdiff\_t}}\xspace}
+\newcommand{\maxalignt}{{\ccode{max\_align\_t}}\xspace}
+\newcommand{\sizet}{{\ccode{size\_t}}\xspace}
+\newcommand{\ssizet}{{\ccode{ssize\_t}}\xspace}
+\newcommand{\ptraddrt}{{\ccode{ptraddr\_t}}\xspace}
+\newcommand{\cuintptrt}{{\ccode{uintptr\_t}}\xspace}
+\newcommand{\cintptrt}{{\ccode{intptr\_t}}\xspace}
+\newcommand{\ccharstar}{{\ccode{char *}}\xspace}
+\newcommand{\cvoidstar}{{\ccode{void *}}\xspace}
+\newcommand{\clongt}{{\ccode{long}}\xspace}
+\newcommand{\cintt}{{\ccode{int}}\xspace}
+\newcommand{\cintttt}{{\ccode{int32\_t}}\xspace}
+\newcommand{\cintsft}{{\ccode{int64\_t}}\xspace}
+
+\newcommand{\SIGPROT}{{\ccode{SIGPROT}}\xspace}
+
+
+% typeset C++ sensibly
+\usepackage{relsize}
+\newcommand*{\cpp}[1][]{C\textsmaller[2]{\nolinebreak[4]\hspace{-.05em}\raisebox{.45ex}{\textbf{++}}}}
+% And another macro sensible PDF metadata:
+\newcommand*{\cppInHeader}[1][]{\texorpdfstring{\cpp{}}{C++}}
+\newcommand*{\purecapCOrCpp}[1]{CHERI C/\cpp{}}
+
+\hyphenation{Free-BSD}
+\hyphenation{Free-RTOS}
+\hyphenation{Cheri-BSD}
+\hyphenation{Cheri-Free-RTOS}
+\hyphenation{Cheri-ABI}
+\hyphenation{Web-Kit}
+\hyphenation{Postgre-SQL}
+
+\title{CHERI C/\cppInHeader{} Programming Guide}
+\author{Robert N. M. Watson$^*$, Alexander Richardson$^*$,
+  Brooks Davis$^\dagger$, \\
+  John Baldwin$^\ddagger$, David Chisnall$^\S$, Jessica Clarke$^*$,
+  Nathaniel Filardo$^*$, \\
+  Simon W. Moore$^*$,  Edward Napierala$^*$, Peter Sewell$^*$, and \\
+  Peter G. Neumann$^\dagger$ \\
+  \\
+  $^*$University of Cambridge, $^\dagger$SRI International, \\
+  $^\ddagger$Ararat River Consulting, LLC and $^\S$Microsoft Research}
+
+
+\begin{document}
+\sloppy
+
+%% CL tech-report format provides its own cover page.  Comment for final
+%% version.
+\maketitle
+
+%% CL tech-report format requires page numbering to start at 3.  Uncomment for
+%% final version.
+%\setcounter{page}{3}
+%%
+
+%
+% Keep Abstract in sync with the Introduction.
+%
+\newpage
+\begin{abstract}
+\input{latex/abstract}
+\end{abstract}
+
+\newpage
+\setcounter{tocdepth}{2}
+\tableofcontents
+
+\newpage
+
+
+\input{latex/sections}
+
+\end{document}
