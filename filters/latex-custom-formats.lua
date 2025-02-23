@@ -18,25 +18,37 @@ if FORMAT:match 'latex' then
       -- C/C++ examples) are added to the Markdown source files as
       -- embedded HTML, so we need a filter to convert these to LaTeX.
       if (block.text:find('^<pre><code>') ~= nil) then
+        local highlights = ""
         
         -- Remove the HTML wrapper tags
         local listing = block.text:gsub("<pre><code>", "")
         listing = listing:gsub("</code></pre>", "")
 
+        -- Define Tikz code listing highlights from HTML mark tags.
+	-- In LaTeX, each highlight must have a unique name, so we use
+        -- the HTML "id" attribute from the mark tag.
+        for id, color in listing:gmatch('<mark id="(%w+)" style="background%-color: #?(%w+)">') do
+          if color == "77DD77" then
+            color = "green"
+          elseif color == "EE918D" then
+            color = "red"
+          end
+          hltag = {"\\TikzListingHighlightStartEnd[", color, "]{", id, "}\n"}
+          highlights = highlights .. table.concat(hltag, "")
+        end
+
+        -- Replace HTML format text highlights with LaTeX
+        listing = listing:gsub(
+            '<mark id="(%w+)" style="background%-color: #?%w+">([^<]+)</mark>',
+            "£\\vcpgfmark{Start%1}£%2£\\vcpgfmark{End%1}£")
+
         -- Clean up inline HTML escaping
         listing = listing:gsub("&lt;", "<")
         listing = listing:gsub("&gt;", ">")
 
-        -- Remove HTML text highlights
-        listing = listing:gsub('<mark style="background%-color: #[%a%d]+">', "")
-        listing = listing:gsub("</mark>", "")
-
-        -- Remove HTML comment wrappers from LaTeX text highlights
-        listing = listing:gsub("<!%-%-{=latex}", "")
-        listing = listing:gsub("%-%->", "")
-
         -- Wrap the code block in a LaTeX code listing environment
         listing = latex_code_listing(listing, true)
+        listing = highlights .. listing
 
         return pandoc.RawBlock('latex', listing)
 
