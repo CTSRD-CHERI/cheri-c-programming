@@ -15,5 +15,7 @@
 *.out
 /cheri-c-programming.pdf
 /cheri-c-programming-draft.pdf
-/build
-/build-draft
+/latex/build
+/book
+/latex/sections.tex
+/latex/abstract.tex
