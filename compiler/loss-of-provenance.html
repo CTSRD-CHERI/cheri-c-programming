@@ -172,16 +172,19 @@ As any <code>NULL</code>-derived capability is untagged, any attempt to derefere
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as <code>intptr_t</code> or <code>uintptr_t</code> (see <a href="../impact/recommended-use-c-types.html">Recommended use of
 C-language types</a>):</p>
 <!--
-Need to use html formatting here to get the highlight colors in the code examples.
+Need to use HTML formatting here for mdBook to get the highlight
+colors in the code examples. The "id" attribute is required, because
+we use that unique identifier in Pandoc to generate LaTeX highlight
+formatting.
 -->
-<pre><code>char *example_bad(<mark style="background-color: #EE918D">long</mark> ptr_or_int) {
+<pre><code>char *example_bad(<mark id="BadParamTy" style="background-color: #EE918D">long</mark> ptr_or_int) {
     return strdup((const char *)ptr_or_int);
 }
-char *example_good(<mark style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
+char *example_good(<mark id="GoodParamTy" style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
   return strdup((const char *)ptr_or_int);
 }
 </code></pre>
-<pre><code>&lt;source&gt;:2:17: warning: cast from provenance-free integer type to pointer type
+<pre><code class="language-{.compilerwarning}">&lt;source&gt;:2:17: warning: cast from provenance-free integer type to pointer type
 will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   return strdup((const char *)ptr_or_int);
                 ^
@@ -191,16 +194,19 @@ will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
 For example, it is common for C callback APIs take a <code>void *</code> data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to <code>uintptr_t</code> first:</p>
 <!--
-Need to use html formatting here to get the highlight colors in the code examples.
+Need to use HTML formatting here for mdBook to get the highlight
+colors in the code examples. The "id" attribute is required, because
+we use that unique identifier in Pandoc to generate LaTeX highlight
+formatting.
 -->
 <pre><code>void invoke_cb(void (*cb)(void *), void *);
 void callback(void *arg);
 void false_positive_example(int callback_data) {
     invoke_cb(&callback, (void *)callback_data); // warning
-    invoke_cb(&callback, (void *)<mark style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
+    invoke_cb(&callback, (void *)<mark id="SilenceProv" style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
 }
 </code></pre>
-<pre><code>&lt;source&gt;:4:24: warning: cast from provenance-free integer type to pointer type
+<pre><code class="language-{.compilerwarning}">&lt;source&gt;:4:24: warning: cast from provenance-free integer type to pointer type
 will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   invoke_cb(&amp;callback, (void *)callback_data); // warning
                        ^

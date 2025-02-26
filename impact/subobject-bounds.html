@@ -174,10 +174,10 @@ We currently define three opt-out annotations that can be used to allow
 existing code to disable use of subobject bounds:</p>
 <p><strong>Completely disable subobject bounds</strong>: It is possible to annotate a typedef,
 record member, or variable declaration with:</p>
-<pre><code>__attribute__((cheri_no_subobject_bounds))
+<pre><code class="language-{.clisting}">__attribute__((cheri_no_subobject_bounds))
 </code></pre>
 <p>to indicate that the compiler should not tighten bounds when taking the address or a C++ reference. In C++11/C20 mode this can also be spelled as <code>[[cheri::no_subobject_bounds]]</code>.</p>
-<pre><code>struct str {
+<pre><code class="language-{.clisting}">struct str {
     /*
      * Nul-terminated string array -- pointers taken to this subobject will
      * use the array's bounds, not those of the container structure.
@@ -208,7 +208,7 @@ fn(void)
 <p><strong>Disable subobject bounds in specific expressions</strong>:
 It is also possible to opt out of bounds-tightening on a per-expression
 granularity by casting to an annotated type:</p>
-<pre><code>char *foo(struct str *strp) {
+<pre><code class="language-{.clisting}">char *foo(struct str *strp) {
     return (&amp;((__attribute__((cheri_no_subobject_bounds))struct str *)
         strp)-&gt;str_array);
 }
@@ -222,11 +222,11 @@ a hardware exception if the allocation does not grant access to that many bytes.
 <sup class="footnote-reference"><a href="#5">1</a></sup>
 To use the remaining allocation size instead of completely disabling bounds
 (and thus protecting against buffer underflows) the annotation:</p>
-<pre><code>__attribute__((cheri_subobject_bounds_use_remaining_size))
+<pre><code class="language-{.clisting}">__attribute__((cheri_subobject_bounds_use_remaining_size))
 </code></pre>
 <p>can be used.
 When targeting C++11/C20:</p>
-<pre><code>[[cheri::subobject_bounds_use_remaining_size]]
+<pre><code class="language-{.clisting}">[[cheri::subobject_bounds_use_remaining_size]]
 </code></pre>
 <p>is also supported.
 Examples of this pattern include FreeBSD's <code>struct dirent</code>, which uses
@@ -234,7 +234,7 @@ Examples of this pattern include FreeBSD's <code>struct dirent</code>, which use
 the containing allocation (e.g., of the heap) being sized to allow additional
 space for array entries regardless of size in the type definition.
 For example:</p>
-<pre><code>struct message {
+<pre><code class="language-{.clisting}">struct message {
     int     m_type;
 
     /*

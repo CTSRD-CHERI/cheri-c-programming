@@ -169,11 +169,11 @@ higher-level abstractions.</p>
 If the C code is attempting to align a pointer or check the alignment of pointers,
 the following compiler builtins should be used instead:</p>
 <ul>
-<li><code>T __builtin_align_down(T ptr, size_t alignment)</code>:
+<li><strong><code>T __builtin_align_down(T ptr, size_t alignment)</code></strong>:
 This builtin returns <code>ptr</code> rounded down to the next multiple of <code>alignment</code>.</li>
-<li><code>T __builtin_align_up(T ptr, size_t alignment)</code>:
+<li><strong><code>T __builtin_align_up(T ptr, size_t alignment)</code></strong>:
 This builtin returns <code>ptr</code> rounded up to the next multiple of <code>alignment</code>.</li>
-<li><code>_Bool __builtin_is_aligned(T ptr, size_t alignment)</code>:
+<li><strong><code>_Bool __builtin_is_aligned(T ptr, size_t alignment)</code></strong>:
 This builtin returns <code>true</code> if <code>ptr</code> is aligned to at least <code>alignment</code> bytes.</li>
 </ul>
 <!--
@@ -203,19 +203,19 @@ but we believe that they can improve readability compared to hand-written bitwis
 Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying <code>uintptr_t</code>) and to check bits (which should return an integer value).
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see <a href="../compiler/ambiguous-provenance.html">Ambiguous provenance</a>) since it shows the compiler which intermediate results can carry provenance.</p>
 <ul>
-<li><code>uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)</code>:
+<li><strong><code>uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)</code></strong>:
 This function clears the low bits of <code>ptr</code> in the same way as <code>ptr &amp; ~mask</code>.
 It returns a new <code>uintptr_t</code> value that can be used for memory accesses when cast to a pointer.
 <code>mask</code> should be a bitwise-AND mask less than <code>_Alignof(ptr)</code>.</li>
-<li><code>ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)</code>:
+<li><strong><code>ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)</code></strong>:
 This function returns the low bits of <code>ptr</code> in the same way as <code>ptr &amp; mask</code>.
 It should be used instead of the raw bitwise operation since it can never return
 an unexpectedly tagged value.
 <code>mask</code> should be a bitwise-AND mask less than <code>_Alignof(ptr)</code>.</li>
-<li><code>uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)</code>:
+<li><strong><code>uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)</code></strong>:
 This function performs a bitwise-OR of <code>ptr</code> with <code>bits</code>.
 In order to retain compatibility with a non-CHERI architecture, <code>bits</code> should be less than the known alignment of <code>ptr</code>.</li>
-<li><code>uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)</code>:
+<li><strong><code>uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)</code></strong>:
 This function sets the low bits of <code>ptr</code> to <code>bits</code> by clearing the low bits in  <code>mask</code> first.</li>
 </ul>
 <p><strong>Computing hash values</strong>:

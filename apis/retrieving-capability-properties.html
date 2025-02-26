@@ -159,24 +159,24 @@
 <p>The following APIs allow capability properties to be retrieved from pointers:</p>
 <ul>
 <li>
-<p><code>ptraddr_t cheri_address_get(void *c)</code>: Return the address of the capability <code>c</code>.</p>
+<p><strong><code>ptraddr_t cheri_address_get(void *c)</code></strong>: Return the address of the capability <code>c</code>.</p>
 </li>
 <li>
-<p><code>ptraddr_t cheri_base_get(void *c)</code>: Return the lower bound of capability <code>c</code>.</p>
+<p><strong><code>ptraddr_t cheri_base_get(void *c)</code></strong>: Return the lower bound of capability <code>c</code>.</p>
 </li>
 <li>
-<p><code>size_t cheri_length_get(void *c)</code>: Return the length of the bounds for the capability <code>c</code>.
+<p><strong><code>size_t cheri_length_get(void *c)</code></strong>: Return the length of the bounds for the capability <code>c</code>.
 The base plus the length gives the upper bound on <code>c</code>'s address.</p>
 </li>
 <li>
-<p><code>size_t cheri_offset_get(void *c)</code>: Return the difference between the address and the lower bound of the capability <code>c</code>.</p>
+<p><strong><code>size_t cheri_offset_get(void *c)</code></strong>: Return the difference between the address and the lower bound of the capability <code>c</code>.</p>
 </li>
 <li>
-<p><code>size_t cheri_perms_get(void *c)</code>: Return the permissions of capability <code>c</code>.
+<p><strong><code>size_t cheri_perms_get(void *c)</code></strong>: Return the permissions of capability <code>c</code>.
 (See <a href="capability-permissions.html">Capability permissions</a>.)</p>
 </li>
 <li>
-<p><code>_Bool cheri_tag_get(void *c)</code>: Return whether capability <code>c</code> has its
+<p><strong><code>_Bool cheri_tag_get(void *c)</code></strong>: Return whether capability <code>c</code> has its
 validity tag set.</p>
 </li>
 </ul>

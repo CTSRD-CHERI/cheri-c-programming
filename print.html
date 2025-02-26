@@ -304,7 +304,26 @@ CHERI</a>, Technical
 Report UCAM-CL-TR-941, Computer Laboratory, September 2019.</p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="cheri-capabilities"><a class="header" href="#cheri-capabilities">CHERI capabilities</a></h2>
-<!--
+<p>CHERI capabilities are twice the width of the native integer pointer type of
+the baseline architecture: there are 128-bit capabilities on 64-bit platforms,
+and 64-bit capabilities on 32-bit platforms.
+Each capability consists of an integer (virtual) address of the natural size for
+the architecture (e.g., 32 or 64 bit), and also additional metadata that is
+compressed in order to fit in the remaining 32 or 64 bits of the capability
+(see Figure 1 for an example; details
+vary across underlying architectures and word sizes).
+In addition, they are associated with a 1-bit validity "tag" whose value is
+maintained in registers and memory by the architecture, but not part of
+addressable memory.</p>
+<!--{=latex}\begin{comment}
+In LaTeX, we want to use the bitbox figure below instead of the jpeg
+image file, so we comment it out.
+-->
+<p><img src="background/capability-format.jpg" alt="CHERI capability format illustration" />
+<em>Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.</em></p>
+<!--{=latex}
+\end{comment}
+
 \begin{figure}[b]
 \hspace{2.5cm}
 % Tag
@@ -332,19 +351,6 @@ Report UCAM-CL-TR-941, Computer Laboratory, September 2019.</p>
 \label{figure:cheri-capability-representation}
 \end{figure}
 -->
-<p>CHERI capabilities are twice the width of the native integer pointer type of
-the baseline architecture: there are 128-bit capabilities on 64-bit platforms,
-and 64-bit capabilities on 32-bit platforms.
-Each capability consists of an integer (virtual) address of the natural size for
-the architecture (e.g., 32 or 64 bit), and also additional metadata that is
-compressed in order to fit in the remaining 32 or 64 bits of the capability
-(see Figure 1 for an example; details
-vary across underlying architectures and word sizes).
-In addition, they are associated with a 1-bit validity "tag" whose value is
-maintained in registers and memory by the architecture, but not part of
-addressable memory.</p>
-<p><img src="background/capability-format.jpg" alt="CHERI capability format illustration" />
-<em>Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.</em></p>
 <p>Each element of the additional metadata and tag of the capability contributes
 to the protection model:</p>
 <ul>
@@ -671,14 +677,14 @@ integers, pointers, and pointer-related values, we make the following
 recommendations:</p>
 <ul>
 <li>
-<p><code>int_t</code>, <code>int32_t</code>, <code>long_t</code>, <code>int64_t</code>, ...: These pure integer types
+<p><strong><code>int_t</code>, <code>int32_t</code>, <code>long_t</code>, <code>int64_t</code>, ...</strong>: These pure integer types
 should be used to hold integer values
 that will never be cast to a pointer type without first combining them with
 another pointer value — e.g., by using them as an array offset.
 Most integers in a C/C++-language program will be of these types.</p>
 </li>
 <li>
-<p><code>ptraddr_t</code>: This is a new integer type introduced by CHERI C and should be
+<p><strong><code>ptraddr_t</code></strong>: This is a new integer type introduced by CHERI C and should be
 used to hold addresses.
 <code>ptraddr_t</code> should not be directly cast to a pointer type for
 dereference; instead, it must be combined with an existing valid capability
@@ -686,7 +692,7 @@ to the address space to generate a dereferenceable pointer.
 Typically, this is done using the <code>cheri_address_set(c, x)</code> function.</p>
 </li>
 <li>
-<p><code>size_t</code>, <code>ssize_t</code> These integer types should be used
+<p><strong><code>size_t</code>, <code>ssize_t</code></strong>: These integer types should be used
 to hold the unsigned or signed lengths of regions of address space.</p>
 </li>
 </ul>
@@ -695,7 +701,7 @@ to hold the unsigned or signed lengths of regions of address space.</p>
 -->
 <ul>
 <li>
-<p><code>ptrdiff_t</code>: This integer type describes the difference of indices
+<p><strong><code>ptrdiff_t</code></strong>: This integer type describes the difference of indices
 between two pointers to elements of the same array, and should not be used
 for any other purpose.
 It can be added to a pointer to obtain a new pointer, but the result will
@@ -716,7 +722,7 @@ like the recommendations here are not as concrete as I'd like.}{nwf}
 -->
 </li>
 <li>
-<p><code>intptr_t</code>, <code>uintptr_t</code>: These integer types should be
+<p><strong><code>intptr_t</code>, <code>uintptr_t</code></strong>: These integer types should be
 used to hold values that may be valid pointers if cast back to a pointer
 type.
 When an <code>intptr_t</code> is assigned an integer value — e.g., due to
@@ -734,7 +740,7 @@ that of a <code>ptraddr_t</code> (or <code>ptrdiff_t</code> for <code>intptr_t</
 <em>alignment</em> and <em>storage</em> requirements.</p>
 </li>
 <li>
-<p><code>intmax_t</code>, <code>uintmax_t</code>: According to the C standard, <!--
+<p><strong><code>intmax_t</code>, <code>uintmax_t</code></strong>: According to the C standard, <!--
   \arnote{7.20.1.5 Greatest-width integer types}
   -->
 these integer types should be <em>capable of representing any value of any (unsigned) integer type</em>.
@@ -747,7 +753,7 @@ This is also true for other architectures such as x86: despite Clang and GCC sup
 However, the types may be useful in <code>printf</code> calls (using the <code>%j</code> format string width modifier) as the <code>inttypes.h</code> <code>PRI*</code> macros can be rather verbose.</p>
 </li>
 <li>
-<p><code>maxalign_t</code>: This type is defined in C as <em>an object type whose alignment is the greatest fundamental alignment</em>
+<p><strong><code>maxalign_t</code></strong>: This type is defined in C as <em>an object type whose alignment is the greatest fundamental alignment</em>
 and this includes capability types for CHERI C/C++.  <!--
   \arnote{C2x \S{}7.19.2} 
   % and in C++ as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
@@ -756,7 +762,7 @@ We found that some custom allocators use <code>sizeof(long double)</code> or <co
 While this appears to work on most architectures, in CHERI C/C++ this must be changed to <code>alignof(maxalign_t)</code>.<sup class="footnote-reference"><a href="#1">1</a></sup></p>
 </li>
 <li>
-<p><code>char *</code>, ...: These pointer types are suitable for
+<p><strong><code>char *</code>, ...</strong>: These pointer types are suitable for
 dereference, but in general <!--
   \psnote{that "in general" makes me wonder about the exceptions?}
   \arnote{The only exception I can think of is requiring `void *` due to bad API design (callback parameters, etc).}
@@ -822,7 +828,7 @@ In that case, the compiler must decide which input capability provides the
 capability metadata (bounds, permissions, ...) to be used in the output
 value.
 Consider for example the following code:</p>
-<pre><code>void *c1 = (void *)((uintptr_t)input_ptr + 1);
+<pre><code class="language-{.clisting}">void *c1 = (void *)((uintptr_t)input_ptr + 1);
 void *c2 = (void *)(1 + (uintptr_t)input_ptr);
 uintptr_t offset = 1;
 void *c3 = (void *)(offset + (uintptr_t)input_ptr);
@@ -837,14 +843,14 @@ It is not feasible to infer the correct provenance source for the third case, so
 <p>The current behavior for such ambiguous cases is to select the left-hand-side as the provenance source, but we are considering making this an error in the future.</p>
 <p>The recommended approach to resolve such ambiguous cases is to change the type of one operand to a non-provenance-carrying type such as <code>size_t</code>.
 Alternatively, if the variable declaration cannot be changed, it is also possible to use a cast in the expression itself.</p>
-<pre><code>size_t offset_size_t = 1;
+<pre><code class="language-{.clisting}">size_t offset_size_t = 1;
 void *c3_good1 = (void *)(offset_size_t + (uintptr_t)input_ptr);
 
 uintptr_t offset_uintptr_t = 1;
 void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
 </code></pre>
 <p>We also provide a new attribute <code>cheri_no_provenance</code> that can be used to annotate variables or fields of type <code>intptr_t</code>/<code>uintptr_t</code> where the underlying type cannot be changed:</p>
-<pre><code>struct S {
+<pre><code class="language-{.clisting}">struct S {
     uintptr_t maybe_tagged;
     uintptr_t never_tagged __attribute__((cheri_no_provenance));
 }
@@ -942,10 +948,10 @@ We currently define three opt-out annotations that can be used to allow
 existing code to disable use of subobject bounds:</p>
 <p><strong>Completely disable subobject bounds</strong>: It is possible to annotate a typedef,
 record member, or variable declaration with:</p>
-<pre><code>__attribute__((cheri_no_subobject_bounds))
+<pre><code class="language-{.clisting}">__attribute__((cheri_no_subobject_bounds))
 </code></pre>
 <p>to indicate that the compiler should not tighten bounds when taking the address or a C++ reference. In C++11/C20 mode this can also be spelled as <code>[[cheri::no_subobject_bounds]]</code>.</p>
-<pre><code>struct str {
+<pre><code class="language-{.clisting}">struct str {
     /*
      * Nul-terminated string array -- pointers taken to this subobject will
      * use the array's bounds, not those of the container structure.
@@ -976,7 +982,7 @@ fn(void)
 <p><strong>Disable subobject bounds in specific expressions</strong>:
 It is also possible to opt out of bounds-tightening on a per-expression
 granularity by casting to an annotated type:</p>
-<pre><code>char *foo(struct str *strp) {
+<pre><code class="language-{.clisting}">char *foo(struct str *strp) {
     return (&amp;((__attribute__((cheri_no_subobject_bounds))struct str *)
         strp)-&gt;str_array);
 }
@@ -990,11 +996,11 @@ a hardware exception if the allocation does not grant access to that many bytes.
 <sup class="footnote-reference"><a href="#5">1</a></sup>
 To use the remaining allocation size instead of completely disabling bounds
 (and thus protecting against buffer underflows) the annotation:</p>
-<pre><code>__attribute__((cheri_subobject_bounds_use_remaining_size))
+<pre><code class="language-{.clisting}">__attribute__((cheri_subobject_bounds_use_remaining_size))
 </code></pre>
 <p>can be used.
 When targeting C++11/C20:</p>
-<pre><code>[[cheri::subobject_bounds_use_remaining_size]]
+<pre><code class="language-{.clisting}">[[cheri::subobject_bounds_use_remaining_size]]
 </code></pre>
 <p>is also supported.
 Examples of this pattern include FreeBSD's <code>struct dirent</code>, which uses
@@ -1002,7 +1008,7 @@ Examples of this pattern include FreeBSD's <code>struct dirent</code>, which use
 the containing allocation (e.g., of the heap) being sized to allow additional
 space for array entries regardless of size in the type definition.
 For example:</p>
-<pre><code>struct message {
+<pre><code class="language-{.clisting}">struct message {
     int     m_type;
 
     /*
@@ -1208,11 +1214,11 @@ higher-level abstractions.</p>
 If the C code is attempting to align a pointer or check the alignment of pointers,
 the following compiler builtins should be used instead:</p>
 <ul>
-<li><code>T __builtin_align_down(T ptr, size_t alignment)</code>:
+<li><strong><code>T __builtin_align_down(T ptr, size_t alignment)</code></strong>:
 This builtin returns <code>ptr</code> rounded down to the next multiple of <code>alignment</code>.</li>
-<li><code>T __builtin_align_up(T ptr, size_t alignment)</code>:
+<li><strong><code>T __builtin_align_up(T ptr, size_t alignment)</code></strong>:
 This builtin returns <code>ptr</code> rounded up to the next multiple of <code>alignment</code>.</li>
-<li><code>_Bool __builtin_is_aligned(T ptr, size_t alignment)</code>:
+<li><strong><code>_Bool __builtin_is_aligned(T ptr, size_t alignment)</code></strong>:
 This builtin returns <code>true</code> if <code>ptr</code> is aligned to at least <code>alignment</code> bytes.</li>
 </ul>
 <!--
@@ -1242,19 +1248,19 @@ but we believe that they can improve readability compared to hand-written bitwis
 Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying <code>uintptr_t</code>) and to check bits (which should return an integer value).
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see <a href="impact/../compiler/ambiguous-provenance.html">Ambiguous provenance</a>) since it shows the compiler which intermediate results can carry provenance.</p>
 <ul>
-<li><code>uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)</code>:
+<li><strong><code>uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)</code></strong>:
 This function clears the low bits of <code>ptr</code> in the same way as <code>ptr &amp; ~mask</code>.
 It returns a new <code>uintptr_t</code> value that can be used for memory accesses when cast to a pointer.
 <code>mask</code> should be a bitwise-AND mask less than <code>_Alignof(ptr)</code>.</li>
-<li><code>ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)</code>:
+<li><strong><code>ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)</code></strong>:
 This function returns the low bits of <code>ptr</code> in the same way as <code>ptr &amp; mask</code>.
 It should be used instead of the raw bitwise operation since it can never return
 an unexpectedly tagged value.
 <code>mask</code> should be a bitwise-AND mask less than <code>_Alignof(ptr)</code>.</li>
-<li><code>uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)</code>:
+<li><strong><code>uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)</code></strong>:
 This function performs a bitwise-OR of <code>ptr</code> with <code>bits</code>.
 In order to retain compatibility with a non-CHERI architecture, <code>bits</code> should be less than the known alignment of <code>ptr</code>.</li>
-<li><code>uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)</code>:
+<li><strong><code>uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)</code></strong>:
 This function sets the low bits of <code>ptr</code> to <code>bits</code> by clearing the low bits in  <code>mask</code> first.</li>
 </ul>
 <p><strong>Computing hash values</strong>:
@@ -1465,13 +1471,13 @@ When the signal handler fires, <code>siginfo.si_code</code> will be set to
 describe the cause of the fault; available values, defined in
 <code>signal.h</code>, include:</p>
 <ul>
-<li><code>PROT_CHERI_BOUNDS</code>: Capability bounds fault — an out-of-bounds access was
+<li><strong><code>PROT_CHERI_BOUNDS</code></strong>: Capability bounds fault — an out-of-bounds access was
 attempted.</li>
-<li><code>PROT_CHERI_PERM</code>: Capability permission fault — the attempted access
+<li><strong><code>PROT_CHERI_PERM</code></strong>: Capability permission fault — the attempted access
 exceeded the permissions granted by a capability.</li>
-<li><code>PROT_CHERI_SEALED</code>: Capability sealed fault — dereferencing a sealed
+<li><strong><code>PROT_CHERI_SEALED</code></strong>: Capability sealed fault — dereferencing a sealed
 capability was attempted.</li>
-<li><code>PROT_CHERI_TAG</code>: Capability tag fault — dereferencing an invalid
+<li><strong><code>PROT_CHERI_TAG</code></strong>: Capability tag fault — dereferencing an invalid
 capability was attempted.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-compiler-warnings-and-errors"><a class="header" href="#cheri-compiler-warnings-and-errors">CHERI compiler warnings and errors</a></h1>
@@ -1504,16 +1510,19 @@ As any <code>NULL</code>-derived capability is untagged, any attempt to derefere
 The fix for this problem is to change the type of the cast source to a provenance-carrying type such as <code>intptr_t</code> or <code>uintptr_t</code> (see <a href="compiler/../impact/recommended-use-c-types.html">Recommended use of
 C-language types</a>):</p>
 <!--
-Need to use html formatting here to get the highlight colors in the code examples.
+Need to use HTML formatting here for mdBook to get the highlight
+colors in the code examples. The "id" attribute is required, because
+we use that unique identifier in Pandoc to generate LaTeX highlight
+formatting.
 -->
-<pre><code>char *example_bad(<mark style="background-color: #EE918D">long</mark> ptr_or_int) {
+<pre><code>char *example_bad(<mark id="BadParamTy" style="background-color: #EE918D">long</mark> ptr_or_int) {
     return strdup((const char *)ptr_or_int);
 }
-char *example_good(<mark style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
+char *example_good(<mark id="GoodParamTy" style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
   return strdup((const char *)ptr_or_int);
 }
 </code></pre>
-<pre><code>&lt;source&gt;:2:17: warning: cast from provenance-free integer type to pointer type
+<pre><code class="language-{.compilerwarning}">&lt;source&gt;:2:17: warning: cast from provenance-free integer type to pointer type
 will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   return strdup((const char *)ptr_or_int);
                 ^
@@ -1523,16 +1532,19 @@ will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
 For example, it is common for C callback APIs take a <code>void *</code> data argument that is passed to the callback.
 If this value is in fact an integer constant, the warning can be silenced by casting to <code>uintptr_t</code> first:</p>
 <!--
-Need to use html formatting here to get the highlight colors in the code examples.
+Need to use HTML formatting here for mdBook to get the highlight
+colors in the code examples. The "id" attribute is required, because
+we use that unique identifier in Pandoc to generate LaTeX highlight
+formatting.
 -->
 <pre><code>void invoke_cb(void (*cb)(void *), void *);
 void callback(void *arg);
 void false_positive_example(int callback_data) {
     invoke_cb(&callback, (void *)callback_data); // warning
-    invoke_cb(&callback, (void *)<mark style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
+    invoke_cb(&callback, (void *)<mark id="SilenceProv" style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
 }
 </code></pre>
-<pre><code>&lt;source&gt;:4:24: warning: cast from provenance-free integer type to pointer type
+<pre><code class="language-{.compilerwarning}">&lt;source&gt;:4:24: warning: cast from provenance-free integer type to pointer type
 will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   invoke_cb(&amp;callback, (void *)callback_data); // warning
                        ^
@@ -1550,7 +1562,7 @@ will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
 However, as noted in <a href="compiler/../impact/single-origin-provenance.html">Single-origin provenance</a>, there are cases that are ambiguous as far as the compiler is concerned.</p>
 <p>Consider for example a structure that holds a pointer and a small number of flags.
 In this case the pointer is known to be aligned to at least 8 bytes, so the programmer uses the lowest 3 bits to store additional data:</p>
-<pre><code>typedef struct { uintptr_t data; } pointer_and_flags;
+<pre><code class="language-{.clisting}">typedef struct { uintptr_t data; } pointer_and_flags;
 void set_ptr(pointer_and_flags *p, void *value) {
     p-&gt;data = (p-&gt;data &amp; (uintptr_t)7) | (uintptr_t)(value);
 }
@@ -1558,7 +1570,7 @@ void set_flags(pointer_and_flags *p, unsigned flags) {
     p-&gt;data = p-&gt;data | (flags &amp; 7);
 }
 </code></pre>
-<pre><code>&lt;source&gt;:3:40: warning: binary expression on capability types '__uintcap_t'
+<pre><code class="language-{.compilerwarning}">&lt;source&gt;:3:40: warning: binary expression on capability types '__uintcap_t'
 and 'uintptr_t' (aka '__uintcap_t'); it is not clear which should be used as
 the source of provenance; currently provenance is inherited from the left-hand
 side [-Wcheri-provenance]
@@ -1569,7 +1581,7 @@ side [-Wcheri-provenance]
 <p>Unlike the compiler, the programmer knows that inside <code>set_ptr</code> capability metadata should always be taken from the <code>value</code> argument.
 The suggested fix for this problem is fix is to cast the non-pointer argument to an integer type:</p>
 <pre><code>void set_ptr(pointer_and_flags *p, void *value) {
-    p->data = <mark style="background-color: #77DD77">(size_t)</mark>(p->data & (uintptr_t)7) | (uintptr_t)(value);
+    p->data = <mark id="FixAmbig" style="background-color: #77DD77">(size_t)</mark>(p->data & (uintptr_t)7) | (uintptr_t)(value);
 }
 </code></pre>
 <!--
@@ -1589,9 +1601,9 @@ As mentioned in <a href="compiler/../impact/restrictions-in-capability-locations
 This warning can be triggered by code that attempts to align pointers to at least 8 bytes (e.g., for compatibility between 32- and 64-bit architectures). For example:</p>
 <pre><code>struct AtLeast8ByteAlignedBad {
     void *data;
-} __attribute__((packed, <mark style="background-color: #EE918D">aligned(8)</mark>));
+} __attribute__((packed, <mark id="BadAlignPacked" style="background-color: #EE918D">aligned(8)</mark>));
 </code></pre>
-<pre><code>&lt;source&gt;:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is
+<pre><code class="language-{.compilerwarning}">&lt;source&gt;:1:8: warning: alignment (8) of 'struct AtLeast8ByteAlignedBad' is
 less than the required capability alignment (16) [-Wcheri-capability-misuse]
 struct AtLeast8ByteAlignedBad {
        ^
@@ -1600,15 +1612,15 @@ the warning by adding __attribute__((annotate("underaligned_capability")))
 1 warning generated.
 </code></pre>
 <p>The simplest fix for this issue is to either increase alignment to be CHERI-compatible, or use a ternary expression to include <code>alignof(void *)</code>:</p>
-<pre><code><mark style="background-color: #77DD77">#include &lt;stdalign.h&gt;</mark>
+<pre><code><mark id="FixAlign1" style="background-color: #77DD77">#include &lt;stdalign.h&gt;</mark>
 struct AtLeast8ByteAlignedGood {
     void *data;
-} __attribute__((packed,aligned(<mark style="background-color: #77DD77">alignof(void *) > 8 ? alignof(void *) : 8</mark>)));
+} __attribute__((packed,aligned(<mark id="FixAlign2" style="background-color: #77DD77">alignof(void *) > 8 ? alignof(void *) : 8</mark>)));
 </code></pre>
 <p>In the rare case that creating a potentially underaligned pointer is actually intended, the warning can be silence by adding a <code>annotate("underaligned_capability")</code> attribute:</p>
 <pre><code>struct UnderalignPointerIgnoreWarning {
     void *data;
-} __attribute__((packed, aligned(4), <mark style="background-color: #77DD77">annotate("underaligned_capability")</mark>));
+} __attribute__((packed, aligned(4), <mark id="SilenceAlign" style="background-color: #77DD77">annotate("underaligned_capability")</mark>));
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="c-apis-to-get-and-set-capability-properties"><a class="header" href="#c-apis-to-get-and-set-capability-properties">C APIs to get and set capability properties</a></h1>
 <!--
@@ -1639,13 +1651,13 @@ interfaces including more human-friendly macro wrappers around the compiler
 builtins, and also definitions of key CHERI constants:</p>
 <ul>
 <li>
-<p><code>cheriintrin.h</code>: defines interfaces to access and
+<p><strong><code>cheriintrin.h</code></strong>: defines interfaces to access and
 modify capability properties.
 It also defines constants for capability permissions that are portable
 across all implementations of CHERI.</p>
 </li>
 <li>
-<p><code>cheri.h</code>: provides macros for slightly higher-level operations
+<p><strong><code>cheri.h</code></strong>: provides macros for slightly higher-level operations
 such as the manipulation of low pointer bits (see
 <a href="apis/../impact/bitwise-operations.html">Bitwise operations on capability types</a>).</p>
 </li>
@@ -1654,7 +1666,7 @@ such as the manipulation of low pointer bits (see
 constants relating to OS use of capabilities — for example, software-defined
 permission bits:</p>
 <ul>
-<li><code>cheri/cheri.h</code>: defines constants such as those used in the
+<li><strong><code>cheri/cheri.h</code></strong>: defines constants such as those used in the
 capability permission mask.</li>
 </ul>
 <!--
@@ -1668,24 +1680,24 @@ capability permission mask.</li>
 <p>The following APIs allow capability properties to be retrieved from pointers:</p>
 <ul>
 <li>
-<p><code>ptraddr_t cheri_address_get(void *c)</code>: Return the address of the capability <code>c</code>.</p>
+<p><strong><code>ptraddr_t cheri_address_get(void *c)</code></strong>: Return the address of the capability <code>c</code>.</p>
 </li>
 <li>
-<p><code>ptraddr_t cheri_base_get(void *c)</code>: Return the lower bound of capability <code>c</code>.</p>
+<p><strong><code>ptraddr_t cheri_base_get(void *c)</code></strong>: Return the lower bound of capability <code>c</code>.</p>
 </li>
 <li>
-<p><code>size_t cheri_length_get(void *c)</code>: Return the length of the bounds for the capability <code>c</code>.
+<p><strong><code>size_t cheri_length_get(void *c)</code></strong>: Return the length of the bounds for the capability <code>c</code>.
 The base plus the length gives the upper bound on <code>c</code>'s address.</p>
 </li>
 <li>
-<p><code>size_t cheri_offset_get(void *c)</code>: Return the difference between the address and the lower bound of the capability <code>c</code>.</p>
+<p><strong><code>size_t cheri_offset_get(void *c)</code></strong>: Return the difference between the address and the lower bound of the capability <code>c</code>.</p>
 </li>
 <li>
-<p><code>size_t cheri_perms_get(void *c)</code>: Return the permissions of capability <code>c</code>.
+<p><strong><code>size_t cheri_perms_get(void *c)</code></strong>: Return the permissions of capability <code>c</code>.
 (See <a href="apis/capability-permissions.html">Capability permissions</a>.)</p>
 </li>
 <li>
-<p><code>_Bool cheri_tag_get(void *c)</code>: Return whether capability <code>c</code> has its
+<p><strong><code>_Bool cheri_tag_get(void *c)</code></strong>: Return whether capability <code>c</code> has its
 validity tag set.</p>
 </li>
 </ul>
@@ -1696,7 +1708,7 @@ validity tag set.</p>
 <p>The following APIs allow capability properties to be refined on pointers:</p>
 <ul>
 <li>
-<p><code>void *cheri_address_set(void *c, ptraddr_t a)</code>: Return a new capability with the same permissions and bounds as <code>c</code> with the address set to <code>a</code>.
+<p><strong><code>void *cheri_address_set(void *c, ptraddr_t a)</code></strong>: Return a new capability with the same permissions and bounds as <code>c</code> with the address set to <code>a</code>.
 This can be useful to re-derive a valid pointer from an address.</p>
 <p><code>cheri_address_set</code> is able to set an address <code>a</code> that is
 outside of the current bounds of <code>c</code>.  The resulting capability
@@ -1713,7 +1725,7 @@ bounds of <code>c</code> due to capability compression,
 -->
 <ul>
 <li>
-<p><code>void *cheri_bounds_set(void *c, size_t x)</code>: Narrow the bounds of capability
+<p><strong><code>void *cheri_bounds_set(void *c, size_t x)</code></strong>: Narrow the bounds of capability
 <code>c</code> so that the lower bound is the current address (which may
 have been increased relative to <code>c</code>'s original lower bound), and its
 upper bound is suitable for a length of <code>x</code>.</p>
@@ -1726,7 +1738,7 @@ but they will always be a subset of
 the original bounds. <!--% of `c`.--></p>
 </li>
 <li>
-<p><code>void *cheri_bounds_set_exact(void *c, size_t x)</code>: Narrow the bounds of capability
+<p><strong><code>void *cheri_bounds_set_exact(void *c, size_t x)</code></strong>: Narrow the bounds of capability
 <code>c</code> so that the lower bound is the current address, and its
 upper bound is <code>cheri_address_get(c) + x</code>.
 This is similar to <code>cheri_bounds_set</code> but will raise a hardware exception if the resulting capability is not precisely representable instead of rounding the bounds.</p>
@@ -1736,7 +1748,7 @@ This is similar to <code>cheri_bounds_set</code> but will raise a hardware excep
 \nwfnote{No mention of cheri\_bounds\_set\_exact?}
 -->
 <ul>
-<li><code>void *cheri_perms_and(void *c, size_t x)</code>: Perform a bitwise-AND of capability
+<li><strong><code>void *cheri_perms_and(void *c, size_t x)</code></strong>: Perform a bitwise-AND of capability
 <code>c</code>'s permissions and the value <code>x</code>, returning the new
 capability (see <a href="apis/capability-permissions.html">Capability permissions</a>).</li>
 </ul>
@@ -1745,7 +1757,7 @@ capability (see <a href="apis/capability-permissions.html">Capability permission
   %  `__builtin_cheri_perms_and`.
 -->
 <ul>
-<li><code>void *cheri_tag_clear(void *c)</code>: Clear the tag on <code>c</code>, returning the
+<li><strong><code>void *cheri_tag_clear(void *c)</code></strong>: Clear the tag on <code>c</code>, returning the
 new capability.</li>
 </ul>
 <!--
@@ -1760,22 +1772,22 @@ new capability.</li>
 to CHERI memory protection are enumerated here:</p>
 <ul>
 <li>
-<p><code>CHERI_PERM_EXECUTE</code>: Authorize instruction fetch via this
+<p><strong><code>CHERI_PERM_EXECUTE</code></strong>: Authorize instruction fetch via this
 capability.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_LOAD</code>: Authorize data load via this capability.</p>
+<p><strong><code>CHERI_PERM_LOAD</code></strong>: Authorize data load via this capability.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_LOAD_CAP</code>: Authorize capability load via this capability.
+<p><strong><code>CHERI_PERM_LOAD_CAP</code></strong>: Authorize capability load via this capability.
 If the permission is not present, the tag on the loaded value
 will be silently cleared.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_STORE</code>: Authorize data store via this capability.</p>
+<p><strong><code>CHERI_PERM_STORE</code></strong>: Authorize data store via this capability.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_STORE_CAP</code>: Authorize capability store via this capability.
+<p><strong><code>CHERI_PERM_STORE_CAP</code></strong>: Authorize capability store via this capability.
 If the permission is not present, and the tag on the stored capability is
 valid, then a hardware exception will be thrown.</p>
 </li>
@@ -1785,7 +1797,7 @@ software-defined permissions.
 CheriBSD defines the following additional memory-protection-related
 permission:</p>
 <ul>
-<li><code>CHERI_PERM_CHERIABI_VMMAP</code>: A CheriABI-specific user
+<li><strong><code>CHERI_PERM_CHERIABI_VMMAP</code></strong>: A CheriABI-specific user
 permission that the kernel uses to authorize modifications to
 virtual-memory mappings.
 If the permission is not present, system calls that alter the contents
@@ -1826,18 +1838,18 @@ For example, the number of bits available for bounds differs between 32-bit and
 These instructions can be generated using compiler builtins that are provided by <code>cheriintrin.h</code>:</p>
 <ul>
 <li>
-<p><code>size_t cheri_representable_length(size_t len)</code>: returns the length that a capability would have after using <code>cheri_bounds_set</code> to set the length to <code>len</code> (assuming appropriate alignment of the base).</p>
+<p><strong><code>size_t cheri_representable_length(size_t len)</code></strong>: returns the length that a capability would have after using <code>cheri_bounds_set</code> to set the length to <code>len</code> (assuming appropriate alignment of the base).</p>
 </li>
 <li>
-<p><code>size_t cheri_representable_alignment_mask(size_t len)</code>: returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.</p>
+<p><strong><code>size_t cheri_representable_alignment_mask(size_t len)</code></strong>: returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.</p>
 </li>
 </ul>
 <p>The precisely representable base address can be computed using:</p>
-<pre><code>base = base &amp; cheri_representable_alignment_mask(len);
+<pre><code class="language-{.clisting}">base = base &amp; cheri_representable_alignment_mask(len);
 </code></pre>
 <p>When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:</p>
-<pre><code>size_t required_alignment(size_t len) {
+<pre><code class="language-{.clisting}">size_t required_alignment(size_t len) {
     return ~cheri_representable_alignment_mask(len) + 1;
 }
 struct Buffer {

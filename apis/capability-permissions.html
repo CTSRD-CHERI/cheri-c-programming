@@ -163,22 +163,22 @@
 to CHERI memory protection are enumerated here:</p>
 <ul>
 <li>
-<p><code>CHERI_PERM_EXECUTE</code>: Authorize instruction fetch via this
+<p><strong><code>CHERI_PERM_EXECUTE</code></strong>: Authorize instruction fetch via this
 capability.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_LOAD</code>: Authorize data load via this capability.</p>
+<p><strong><code>CHERI_PERM_LOAD</code></strong>: Authorize data load via this capability.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_LOAD_CAP</code>: Authorize capability load via this capability.
+<p><strong><code>CHERI_PERM_LOAD_CAP</code></strong>: Authorize capability load via this capability.
 If the permission is not present, the tag on the loaded value
 will be silently cleared.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_STORE</code>: Authorize data store via this capability.</p>
+<p><strong><code>CHERI_PERM_STORE</code></strong>: Authorize data store via this capability.</p>
 </li>
 <li>
-<p><code>CHERI_PERM_STORE_CAP</code>: Authorize capability store via this capability.
+<p><strong><code>CHERI_PERM_STORE_CAP</code></strong>: Authorize capability store via this capability.
 If the permission is not present, and the tag on the stored capability is
 valid, then a hardware exception will be thrown.</p>
 </li>
@@ -188,7 +188,7 @@ software-defined permissions.
 CheriBSD defines the following additional memory-protection-related
 permission:</p>
 <ul>
-<li><code>CHERI_PERM_CHERIABI_VMMAP</code>: A CheriABI-specific user
+<li><strong><code>CHERI_PERM_CHERIABI_VMMAP</code></strong>: A CheriABI-specific user
 permission that the kernel uses to authorize modifications to
 virtual-memory mappings.
 If the permission is not present, system calls that alter the contents

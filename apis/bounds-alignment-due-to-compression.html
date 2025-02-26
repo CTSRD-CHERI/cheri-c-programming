@@ -188,18 +188,18 @@ For example, the number of bits available for bounds differs between 32-bit and
 These instructions can be generated using compiler builtins that are provided by <code>cheriintrin.h</code>:</p>
 <ul>
 <li>
-<p><code>size_t cheri_representable_length(size_t len)</code>: returns the length that a capability would have after using <code>cheri_bounds_set</code> to set the length to <code>len</code> (assuming appropriate alignment of the base).</p>
+<p><strong><code>size_t cheri_representable_length(size_t len)</code></strong>: returns the length that a capability would have after using <code>cheri_bounds_set</code> to set the length to <code>len</code> (assuming appropriate alignment of the base).</p>
 </li>
 <li>
-<p><code>size_t cheri_representable_alignment_mask(size_t len)</code>: returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.</p>
+<p><strong><code>size_t cheri_representable_alignment_mask(size_t len)</code></strong>: returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.</p>
 </li>
 </ul>
 <p>The precisely representable base address can be computed using:</p>
-<pre><code>base = base &amp; cheri_representable_alignment_mask(len);
+<pre><code class="language-{.clisting}">base = base &amp; cheri_representable_alignment_mask(len);
 </code></pre>
 <p>When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:</p>
-<pre><code>size_t required_alignment(size_t len) {
+<pre><code class="language-{.clisting}">size_t required_alignment(size_t len) {
     return ~cheri_representable_alignment_mask(len) + 1;
 }
 struct Buffer {

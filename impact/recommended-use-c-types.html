@@ -164,14 +164,14 @@ integers, pointers, and pointer-related values, we make the following
 recommendations:</p>
 <ul>
 <li>
-<p><code>int_t</code>, <code>int32_t</code>, <code>long_t</code>, <code>int64_t</code>, ...: These pure integer types
+<p><strong><code>int_t</code>, <code>int32_t</code>, <code>long_t</code>, <code>int64_t</code>, ...</strong>: These pure integer types
 should be used to hold integer values
 that will never be cast to a pointer type without first combining them with
 another pointer value — e.g., by using them as an array offset.
 Most integers in a C/C++-language program will be of these types.</p>
 </li>
 <li>
-<p><code>ptraddr_t</code>: This is a new integer type introduced by CHERI C and should be
+<p><strong><code>ptraddr_t</code></strong>: This is a new integer type introduced by CHERI C and should be
 used to hold addresses.
 <code>ptraddr_t</code> should not be directly cast to a pointer type for
 dereference; instead, it must be combined with an existing valid capability
@@ -179,7 +179,7 @@ to the address space to generate a dereferenceable pointer.
 Typically, this is done using the <code>cheri_address_set(c, x)</code> function.</p>
 </li>
 <li>
-<p><code>size_t</code>, <code>ssize_t</code> These integer types should be used
+<p><strong><code>size_t</code>, <code>ssize_t</code></strong>: These integer types should be used
 to hold the unsigned or signed lengths of regions of address space.</p>
 </li>
 </ul>
@@ -188,7 +188,7 @@ to hold the unsigned or signed lengths of regions of address space.</p>
 -->
 <ul>
 <li>
-<p><code>ptrdiff_t</code>: This integer type describes the difference of indices
+<p><strong><code>ptrdiff_t</code></strong>: This integer type describes the difference of indices
 between two pointers to elements of the same array, and should not be used
 for any other purpose.
 It can be added to a pointer to obtain a new pointer, but the result will
@@ -209,7 +209,7 @@ like the recommendations here are not as concrete as I'd like.}{nwf}
 -->
 </li>
 <li>
-<p><code>intptr_t</code>, <code>uintptr_t</code>: These integer types should be
+<p><strong><code>intptr_t</code>, <code>uintptr_t</code></strong>: These integer types should be
 used to hold values that may be valid pointers if cast back to a pointer
 type.
 When an <code>intptr_t</code> is assigned an integer value — e.g., due to
@@ -227,7 +227,7 @@ that of a <code>ptraddr_t</code> (or <code>ptrdiff_t</code> for <code>intptr_t</
 <em>alignment</em> and <em>storage</em> requirements.</p>
 </li>
 <li>
-<p><code>intmax_t</code>, <code>uintmax_t</code>: According to the C standard, <!--
+<p><strong><code>intmax_t</code>, <code>uintmax_t</code></strong>: According to the C standard, <!--
   \arnote{7.20.1.5 Greatest-width integer types}
   -->
 these integer types should be <em>capable of representing any value of any (unsigned) integer type</em>.
@@ -240,7 +240,7 @@ This is also true for other architectures such as x86: despite Clang and GCC sup
 However, the types may be useful in <code>printf</code> calls (using the <code>%j</code> format string width modifier) as the <code>inttypes.h</code> <code>PRI*</code> macros can be rather verbose.</p>
 </li>
 <li>
-<p><code>maxalign_t</code>: This type is defined in C as <em>an object type whose alignment is the greatest fundamental alignment</em>
+<p><strong><code>maxalign_t</code></strong>: This type is defined in C as <em>an object type whose alignment is the greatest fundamental alignment</em>
 and this includes capability types for CHERI C/C++.  <!--
   \arnote{C2x \S{}7.19.2} 
   % and in C++ as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
@@ -249,7 +249,7 @@ We found that some custom allocators use <code>sizeof(long double)</code> or <co
 While this appears to work on most architectures, in CHERI C/C++ this must be changed to <code>alignof(maxalign_t)</code>.<sup class="footnote-reference"><a href="#1">1</a></sup></p>
 </li>
 <li>
-<p><code>char *</code>, ...: These pointer types are suitable for
+<p><strong><code>char *</code>, ...</strong>: These pointer types are suitable for
 dereference, but in general <!--
   \psnote{that "in general" makes me wonder about the exceptions?}
   \arnote{The only exception I can think of is requiring `void *` due to bad API design (callback parameters, etc).}

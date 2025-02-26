@@ -164,13 +164,13 @@ When the signal handler fires, <code>siginfo.si_code</code> will be set to
 describe the cause of the fault; available values, defined in
 <code>signal.h</code>, include:</p>
 <ul>
-<li><code>PROT_CHERI_BOUNDS</code>: Capability bounds fault — an out-of-bounds access was
+<li><strong><code>PROT_CHERI_BOUNDS</code></strong>: Capability bounds fault — an out-of-bounds access was
 attempted.</li>
-<li><code>PROT_CHERI_PERM</code>: Capability permission fault — the attempted access
+<li><strong><code>PROT_CHERI_PERM</code></strong>: Capability permission fault — the attempted access
 exceeded the permissions granted by a capability.</li>
-<li><code>PROT_CHERI_SEALED</code>: Capability sealed fault — dereferencing a sealed
+<li><strong><code>PROT_CHERI_SEALED</code></strong>: Capability sealed fault — dereferencing a sealed
 capability was attempted.</li>
-<li><code>PROT_CHERI_TAG</code>: Capability tag fault — dereferencing an invalid
+<li><strong><code>PROT_CHERI_TAG</code></strong>: Capability tag fault — dereferencing an invalid
 capability was attempted.</li>
 </ul>
 

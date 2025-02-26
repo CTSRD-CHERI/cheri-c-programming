@@ -159,7 +159,7 @@
 <p>The following APIs allow capability properties to be refined on pointers:</p>
 <ul>
 <li>
-<p><code>void *cheri_address_set(void *c, ptraddr_t a)</code>: Return a new capability with the same permissions and bounds as <code>c</code> with the address set to <code>a</code>.
+<p><strong><code>void *cheri_address_set(void *c, ptraddr_t a)</code></strong>: Return a new capability with the same permissions and bounds as <code>c</code> with the address set to <code>a</code>.
 This can be useful to re-derive a valid pointer from an address.</p>
 <p><code>cheri_address_set</code> is able to set an address <code>a</code> that is
 outside of the current bounds of <code>c</code>.  The resulting capability
@@ -176,7 +176,7 @@ bounds of <code>c</code> due to capability compression,
 -->
 <ul>
 <li>
-<p><code>void *cheri_bounds_set(void *c, size_t x)</code>: Narrow the bounds of capability
+<p><strong><code>void *cheri_bounds_set(void *c, size_t x)</code></strong>: Narrow the bounds of capability
 <code>c</code> so that the lower bound is the current address (which may
 have been increased relative to <code>c</code>'s original lower bound), and its
 upper bound is suitable for a length of <code>x</code>.</p>
@@ -189,7 +189,7 @@ but they will always be a subset of
 the original bounds. <!--% of `c`.--></p>
 </li>
 <li>
-<p><code>void *cheri_bounds_set_exact(void *c, size_t x)</code>: Narrow the bounds of capability
+<p><strong><code>void *cheri_bounds_set_exact(void *c, size_t x)</code></strong>: Narrow the bounds of capability
 <code>c</code> so that the lower bound is the current address, and its
 upper bound is <code>cheri_address_get(c) + x</code>.
 This is similar to <code>cheri_bounds_set</code> but will raise a hardware exception if the resulting capability is not precisely representable instead of rounding the bounds.</p>
@@ -199,7 +199,7 @@ This is similar to <code>cheri_bounds_set</code> but will raise a hardware excep
 \nwfnote{No mention of cheri\_bounds\_set\_exact?}
 -->
 <ul>
-<li><code>void *cheri_perms_and(void *c, size_t x)</code>: Perform a bitwise-AND of capability
+<li><strong><code>void *cheri_perms_and(void *c, size_t x)</code></strong>: Perform a bitwise-AND of capability
 <code>c</code>'s permissions and the value <code>x</code>, returning the new
 capability (see <a href="capability-permissions.html">Capability permissions</a>).</li>
 </ul>
@@ -208,7 +208,7 @@ capability (see <a href="capability-permissions.html">Capability permissions</a>
   %  `__builtin_cheri_perms_and`.
 -->
 <ul>
-<li><code>void *cheri_tag_clear(void *c)</code>: Clear the tag on <code>c</code>, returning the
+<li><strong><code>void *cheri_tag_clear(void *c)</code></strong>: Clear the tag on <code>c</code>, returning the
 new capability.</li>
 </ul>
 <!--
