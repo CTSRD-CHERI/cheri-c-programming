@@ -16,7 +16,7 @@ capability metadata (bounds, permissions, ...) to be used in the output
 value.
 Consider for example the following code:
 
-```
+```{.clisting}
 void *c1 = (void *)((uintptr_t)input_ptr + 1);
 void *c2 = (void *)(1 + (uintptr_t)input_ptr);
 uintptr_t offset = 1;
@@ -37,7 +37,7 @@ The current behavior for such ambiguous cases is to select the left-hand-side as
 The recommended approach to resolve such ambiguous cases is to change the type of one operand to a non-provenance-carrying type such as `size_t`.
 Alternatively, if the variable declaration cannot be changed, it is also possible to use a cast in the expression itself.
 
-```
+```{.clisting}
 size_t offset_size_t = 1;
 void *c3_good1 = (void *)(offset_size_t + (uintptr_t)input_ptr);
 
@@ -47,7 +47,7 @@ void *c3_good2 = (void *)((size_t)offset_uintptr_t + (uintptr_t)input_ptr);
 
 We also provide a new attribute `cheri_no_provenance` that can be used to annotate variables or fields of type `intptr_t`/`uintptr_t` where the underlying type cannot be changed:
 
-```
+```{.clisting}
 struct S {
     uintptr_t maybe_tagged;
     uintptr_t never_tagged __attribute__((cheri_no_provenance));

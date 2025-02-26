@@ -1,6 +1,28 @@
 ## CHERI capabilities
 
-<!--
+CHERI capabilities are twice the width of the native integer pointer type of
+the baseline architecture: there are 128-bit capabilities on 64-bit platforms,
+and 64-bit capabilities on 32-bit platforms.
+Each capability consists of an integer (virtual) address of the natural size for
+the architecture (e.g., 32 or 64 bit), and also additional metadata that is
+compressed in order to fit in the remaining 32 or 64 bits of the capability
+(see Figure 1 for an example; details
+vary across underlying architectures and word sizes).
+In addition, they are associated with a 1-bit validity "tag" whose value is
+maintained in registers and memory by the architecture, but not part of
+addressable memory.
+
+<!--{=latex}\begin{comment}
+In LaTeX, we want to use the bitbox figure below instead of the jpeg
+image file, so we comment it out.
+-->
+
+![CHERI capability format illustration](capability-format.jpg)
+*Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.*
+
+<!--{=latex}
+\end{comment}
+
 \begin{figure}[b]
 \hspace{2.5cm}
 % Tag
@@ -28,21 +50,6 @@
 \label{figure:cheri-capability-representation}
 \end{figure}
 -->
-
-CHERI capabilities are twice the width of the native integer pointer type of
-the baseline architecture: there are 128-bit capabilities on 64-bit platforms,
-and 64-bit capabilities on 32-bit platforms.
-Each capability consists of an integer (virtual) address of the natural size for
-the architecture (e.g., 32 or 64 bit), and also additional metadata that is
-compressed in order to fit in the remaining 32 or 64 bits of the capability
-(see Figure 1 for an example; details
-vary across underlying architectures and word sizes).
-In addition, they are associated with a 1-bit validity "tag" whose value is
-maintained in registers and memory by the architecture, but not part of
-addressable memory.
-
-![CHERI capability format illustration](capability-format.jpg)
-*Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.*
 
 Each element of the additional metadata and tag of the capability contributes
 to the protection model:

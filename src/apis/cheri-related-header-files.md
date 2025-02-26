@@ -7,12 +7,12 @@ provide access to further CHERI-related programming
 interfaces including more human-friendly macro wrappers around the compiler
 builtins, and also definitions of key CHERI constants:
 
-* `cheriintrin.h`: defines interfaces to access and
+* **`cheriintrin.h`**: defines interfaces to access and
   modify capability properties.
   It also defines constants for capability permissions that are portable
   across all implementations of CHERI.
 
-* `cheri.h`: provides macros for slightly higher-level operations
+* **`cheri.h`**: provides macros for slightly higher-level operations
   such as the manipulation of low pointer bits (see
   [Bitwise operations on capability types](../impact/bitwise-operations.html)).
 
@@ -20,7 +20,7 @@ When compiling for CheriBSD, the following header provides additional
 constants relating to OS use of capabilities &mdash; for example, software-defined
 permission bits:
 
-* `cheri/cheri.h`: defines constants such as those used in the
+* **`cheri/cheri.h`**: defines constants such as those used in the
   capability permission mask.
 
 <!--

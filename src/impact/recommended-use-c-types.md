@@ -7,26 +7,26 @@ As confusion frequently arises about the most appropriate types to use for
 integers, pointers, and pointer-related values, we make the following
 recommendations:
 
-* `int_t`, `int32_t`, `long_t`, `int64_t`, ...: These pure integer types
+* **`int_t`, `int32_t`, `long_t`, `int64_t`, ...**: These pure integer types
   should be used to hold integer values
   that will never be cast to a pointer type without first combining them with
   another pointer value &mdash; e.g., by using them as an array offset.
   Most integers in a C/C++-language program will be of these types.
 
-* `ptraddr_t`: This is a new integer type introduced by CHERI C and should be
+* **`ptraddr_t`**: This is a new integer type introduced by CHERI C and should be
   used to hold addresses.
   `ptraddr_t` should not be directly cast to a pointer type for
   dereference; instead, it must be combined with an existing valid capability
   to the address space to generate a dereferenceable pointer.
   Typically, this is done using the `cheri_address_set(c, x)` function.
 
-* `size_t`, `ssize_t` These integer types should be used
+* **`size_t`, `ssize_t`**: These integer types should be used
   to hold the unsigned or signed lengths of regions of address space.
 <!--
   \arnote{\sizet not necessary the same as unsigned `ptrdiff_t`.}
 -->
 
-* `ptrdiff_t`: This integer type describes the difference of indices
+* **`ptrdiff_t`**: This integer type describes the difference of indices
   between two pointers to elements of the same array, and should not be used
   for any other purpose.
   It can be added to a pointer to obtain a new pointer, but the result will
@@ -49,7 +49,7 @@ recommendations:
   like the recommendations here are not as concrete as I'd like.}{nwf}
   -->
 
-* `intptr_t`, `uintptr_t`: These integer types should be
+* **`intptr_t`, `uintptr_t`**: These integer types should be
   used to hold values that may be valid pointers if cast back to a pointer
   type.
   When an `intptr_t` is assigned an integer value &mdash; e.g., due to
@@ -67,7 +67,7 @@ recommendations:
   that of a `ptraddr_t` (or `ptrdiff_t` for `intptr_t`), despite the increased
   *alignment* and *storage* requirements.
 
-* `intmax_t`, `uintmax_t`: According to the C standard, <!--
+* **`intmax_t`, `uintmax_t`**: According to the C standard, <!--
   \arnote{7.20.1.5 Greatest-width integer types}
   -->
   these integer types should be *capable of representing any value of any (unsigned) integer type*.
@@ -81,7 +81,7 @@ recommendations:
   We generally do not recommend use of these types in CHERI C/C++.
   However, the types may be useful in `printf` calls (using the `%j` format string width modifier) as the `inttypes.h` `PRI*` macros can be rather verbose.
 
-* `maxalign_t`: This type is defined in C as *an object type whose alignment is the greatest fundamental alignment*
+* **`maxalign_t`**: This type is defined in C as *an object type whose alignment is the greatest fundamental alignment*
   and this includes capability types for CHERI C/C++.  <!--
   \arnote{C2x \S{}7.19.2} 
   % and in C++ as a \enquote{type whose alignment requirement is at least as great as that of every scalar type}\arnote{C++17 \S{}21.2.4p5}
@@ -89,7 +89,7 @@ recommendations:
   We found that some custom allocators use `sizeof(long double)` or `sizeof(uint64_t)` to align their return values.
   While this appears to work on most architectures, in CHERI C/C++ this must be changed to `alignof(maxalign_t)`.[^1]
 
-* `char *`, ...: These pointer types are suitable for
+* **`char *`, ...**: These pointer types are suitable for
   dereference, but in general <!--
   \psnote{that "in general" makes me wonder about the exceptions?}
   \arnote{The only exception I can think of is requiring `void *` due to bad API design (callback parameters, etc).}

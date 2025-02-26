@@ -15,11 +15,11 @@ higher-level abstractions.
 If the C code is attempting to align a pointer or check the alignment of pointers,
 the following compiler builtins should be used instead:
 
-* `T __builtin_align_down(T ptr, size_t alignment)`:
+* **`T __builtin_align_down(T ptr, size_t alignment)`**:
   This builtin returns `ptr` rounded down to the next multiple of `alignment`.
-* `T __builtin_align_up(T ptr, size_t alignment)`:
+* **`T __builtin_align_up(T ptr, size_t alignment)`**:
   This builtin returns `ptr` rounded up to the next multiple of `alignment`.
-* `_Bool __builtin_is_aligned(T ptr, size_t alignment)`:
+* **`_Bool __builtin_is_aligned(T ptr, size_t alignment)`**:
   This builtin returns `true` if `ptr` is aligned to at least `alignment` bytes.
 
 <!--
@@ -53,19 +53,19 @@ but we believe that they can improve readability compared to hand-written bitwis
 Additionally, the bitwise-AND operation is ambiguous since it can be used both to clear bits (which should return a provenance-carrying `uintptr_t`) and to check bits (which should return an integer value).
 In complex nested expressions, these macros can avoid ambiguous provenance sources (see [Ambiguous provenance](../compiler/ambiguous-provenance.html)) since it shows the compiler which intermediate results can carry provenance.
 
-* `uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)`:
+* **`uintptr_t cheri_low_bits_clear(uintptr_t ptr, ptraddr_t mask)`**:
   This function clears the low bits of `ptr` in the same way as `ptr & ~mask`.
   It returns a new `uintptr_t` value that can be used for memory accesses when cast to a pointer.
   `mask` should be a bitwise-AND mask less than `_Alignof(ptr)`.
-* `ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)`:
+* **`ptraddr_t cheri_low_bits_get(uintptr_t ptr, ptraddr_t mask)`**:
   This function returns the low bits of `ptr` in the same way as `ptr & mask`.
   It should be used instead of the raw bitwise operation since it can never return
   an unexpectedly tagged value.
   `mask` should be a bitwise-AND mask less than `_Alignof(ptr)`.
-* `uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)`:
+* **`uintptr_t cheri_low_bits_or(uintptr_t ptr, ptraddr_t bits)`**:
   This function performs a bitwise-OR of `ptr` with `bits`.
   In order to retain compatibility with a non-CHERI architecture, `bits` should be less than the known alignment of `ptr`.
-* `uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)`:
+* **`uintptr_t cheri_low_bits_set(uintptr_t ptr, ptraddr_t mask, ptraddr_t bits)`**:
   This function sets the low bits of `ptr` to `bits` by clearing the low bits in  `mask` first.
 
 **Computing hash values**:

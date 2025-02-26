@@ -19,17 +19,21 @@ The fix for this problem is to change the type of the cast source to a provenanc
 C-language types](../impact/recommended-use-c-types.md)):
 
 <!--
-Need to use html formatting here to get the highlight colors in the code examples.
+Need to use HTML formatting here for mdBook to get the highlight
+colors in the code examples. The "id" attribute is required, because
+we use that unique identifier in Pandoc to generate LaTeX highlight
+formatting.
 -->
-<pre><code>char *example_bad(<mark style="background-color: #EE918D">long</mark> ptr_or_int) {
+<pre><code>char *example_bad(<mark id="BadParamTy" style="background-color: #EE918D">long</mark> ptr_or_int) {
     return strdup((const char *)ptr_or_int);
 }
-char *example_good(<mark style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
+char *example_good(<mark id="GoodParamTy" style="background-color: #77DD77">intptr_t</mark> ptr_or_int) {
   return strdup((const char *)ptr_or_int);
 }
 </code></pre>
 
-```
+
+```{.compilerwarning}
 <source>:2:17: warning: cast from provenance-free integer type to pointer type
 will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   return strdup((const char *)ptr_or_int);
@@ -42,17 +46,21 @@ For example, it is common for C callback APIs take a `void *` data argument that
 If this value is in fact an integer constant, the warning can be silenced by casting to `uintptr_t` first:
 
 <!--
-Need to use html formatting here to get the highlight colors in the code examples.
+Need to use HTML formatting here for mdBook to get the highlight
+colors in the code examples. The "id" attribute is required, because
+we use that unique identifier in Pandoc to generate LaTeX highlight
+formatting.
 -->
 <pre><code>void invoke_cb(void (*cb)(void *), void *);
 void callback(void *arg);
 void false_positive_example(int callback_data) {
     invoke_cb(&callback, (void *)callback_data); // warning
-    invoke_cb(&callback, (void *)<mark style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
+    invoke_cb(&callback, (void *)<mark id="SilenceProv" style="background-color: #77DD77">(uintptr_t)</mark>callback_data); // no warning
 }
 </code></pre>
 
-```
+
+```{.compilerwarning}
 <source>:4:24: warning: cast from provenance-free integer type to pointer type
 will give pointer that can not be dereferenced [-Wcheri-capability-misuse]
   invoke_cb(&callback, (void *)callback_data); // warning

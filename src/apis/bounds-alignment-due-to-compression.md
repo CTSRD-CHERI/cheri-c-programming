@@ -36,20 +36,20 @@ For example, the number of bits available for bounds differs between 32-bit and
 To avoid overly specific software knowledge of alignment requirements, and also to allow efficient calculation of alignment constraints during (for example) stack allocation, the CHERI ISA provides instructions that allow determining precisely representable allocations.
 These instructions can be generated using compiler builtins that are provided by `cheriintrin.h`:
 
-* `size_t cheri_representable_length(size_t len)`: returns the length that a capability would have after using `cheri_bounds_set` to set the length to `len` (assuming appropriate alignment of the base).
+* **`size_t cheri_representable_length(size_t len)`**: returns the length that a capability would have after using `cheri_bounds_set` to set the length to `len` (assuming appropriate alignment of the base).
 
-* `size_t cheri_representable_alignment_mask(size_t len)`: returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
+* **`size_t cheri_representable_alignment_mask(size_t len)`**: returns a bitmask that can be used to align an address downwards such that it is sufficiently aligned to create a precisely bounded capability.
 
 The precisely representable base address can be computed using:
 
-```
+```{.clisting}
 base = base & cheri_representable_alignment_mask(len);
 ```
 
 When allocating from a contiguous buffer, the base needs to be aligned upwards instead of downwards.
 This can be done with the following code:
 
-```
+```{.clisting}
 size_t required_alignment(size_t len) {
     return ~cheri_representable_alignment_mask(len) + 1;
 }

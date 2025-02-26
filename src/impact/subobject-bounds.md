@@ -22,13 +22,13 @@ existing code to disable use of subobject bounds:
 **Completely disable subobject bounds**: It is possible to annotate a typedef,
 record member, or variable declaration with:
 
-```
+```{.clisting}
 __attribute__((cheri_no_subobject_bounds))
 ```
 
 to indicate that the compiler should not tighten bounds when taking the address or a C++ reference. In C++11/C20 mode this can also be spelled as `[[cheri::no_subobject_bounds]]`.
 
-```
+```{.clisting}
 struct str {
     /*
      * Nul-terminated string array -- pointers taken to this subobject will
@@ -62,7 +62,7 @@ fn(void)
 It is also possible to opt out of bounds-tightening on a per-expression
 granularity by casting to an annotated type:
 
-```
+```{.clisting}
 char *foo(struct str *strp) {
     return (&((__attribute__((cheri_no_subobject_bounds))struct str *)
         strp)->str_array);
@@ -79,14 +79,14 @@ a hardware exception if the allocation does not grant access to that many bytes.
 To use the remaining allocation size instead of completely disabling bounds
 (and thus protecting against buffer underflows) the annotation:
 
-```
+```{.clisting}
 __attribute__((cheri_subobject_bounds_use_remaining_size))
 ```
 
 can be used.
 When targeting C++11/C20:
 
-```
+```{.clisting}
 [[cheri::subobject_bounds_use_remaining_size]]
 ```
 
@@ -97,7 +97,7 @@ the containing allocation (e.g., of the heap) being sized to allow additional
 space for array entries regardless of size in the type definition.
 For example:
 
-```
+```{.clisting}
 struct message {
     int     m_type;
 
