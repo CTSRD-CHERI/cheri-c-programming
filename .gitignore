@@ -14,8 +14,9 @@
 *.ind
 *.out
 /cheri-c-programming.pdf
-/cheri-c-programming-draft.pdf
+/cheri-c-programming-techreport.pdf
 /latex/build
+/latex/build-techreport
 /book
 /latex/sections.tex
 /latex/abstract.tex

@@ -24,4 +24,4 @@ techreport: latex/$(NAME).tex latex/sections.tex latex/abstract.tex
 	cp -f "latex/build-techreport/$(NAME)-techreport.pdf" "$(NAME)-techreport.pdf"
 
 clean:
-	rm -rf latex/build latex/build-draft
+	rm -rf latex/build latex/build-techreport
