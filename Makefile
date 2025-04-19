@@ -19,5 +19,9 @@ pdf: latex/$(NAME).tex latex/sections.tex latex/abstract.tex
 	latexmk -pdf latex/$(NAME) --jobname=$(NAME)-final -output-directory=latex/build
 	cp -f "latex/build/$(NAME)-final.pdf" "$(NAME).pdf"
 
+techreport: latex/$(NAME).tex latex/sections.tex latex/abstract.tex
+	latexmk -pdf latex/$(NAME) --jobname=$(NAME)-techreport -output-directory=latex/build-techreport
+	cp -f "latex/build-techreport/$(NAME)-techreport.pdf" "$(NAME)-techreport.pdf"
+
 clean:
 	rm -rf latex/build latex/build-draft

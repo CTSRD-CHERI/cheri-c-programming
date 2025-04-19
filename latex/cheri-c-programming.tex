@@ -87,6 +87,14 @@
 
 \newcommand{\SIGPROT}{{\ccode{SIGPROT}}\xspace}
 
+\usepackage{xstring}
+\IfSubStr*{\jobname}{techreport}{
+  %%%% Enable University of Cambridge tech-report formatting
+  %%%% Use \ifdefined\trformat in document to check the mode
+  \def\trformat{}
+}{
+  % Default is no tech-report formatting
+}
 
 % typeset C++ sensibly
 \usepackage{relsize}
@@ -118,14 +126,18 @@
 \begin{document}
 \sloppy
 
-%% CL tech-report format provides its own cover page.  Comment for final
-%% version.
-\maketitle
+%% Cambridge CL tech-report format provides its own cover page, so skip the
+%% title page for the TR format.
+\ifdefined\trformat
+  % no title page
+\else
+  \maketitle
+\fi
 
-%% CL tech-report format requires page numbering to start at 3.  Uncomment for
-%% final version.
-%\setcounter{page}{3}
-%%
+%% Cambridge CL tech-report format requires page numbering to start at 3.
+\ifdefined\trformat
+  \setcounter{page}{3}
+\fi
 
 %
 % Keep Abstract in sync with the Introduction.
