@@ -275,21 +275,21 @@ Pure-capability machine code is not binary compatible with capability-unaware
 code using integer pointers, not least due to the different size of the
 pointer data type.</p>
 </li>
-</ul>
-<p>While the focus of this document is CHERI C/C++, CHERI is an architectural
-feature able to support other software use cases including other
-C/C++-language mappings into its features.
-Another mapping is hybrid C/C++, in which only selected pointers are
-implemented using capabilities, with the remainder implemented using integers.
+<li>
+<p><strong>CHERI hybrid C/C++</strong> are further language dialects in which only selected
+pointers are implemented using capabilities, with the remainder implemented
+using integers as on conventional architectures.
 We have primarily used hybrid C in systems software that bridges between
 environments executing pure-capability machine code and those running largely
 or entirely non-CHERI-aware machine code.
-For example, a largely CHERI-unaware CheriBSD kernel can host pure-capability
-processes using its CheriABI wrapper implemented in hybrid C (see
-<a href="introduction/../cheriabi">CheriABI</a>).
-Hybrid machine code has stronger binary compatibility, but weaker protection,
-than pure-capability machine code.
-We do not consider hybrid C further in this document.</p>
+While hybrid machine code has stronger binary compatibility with conventionally
+generated code, it provides little or no memory protection, and its use is not
+generally recommended.</p>
+</li>
+</ul>
+<p>The remainder of this document describes the CHERI C/C++ programming languages,
+as mapped into pure-capability machine code; hybrid C/C++ will not be
+considered further.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="background"><a class="header" href="#background">Background</a></h1>
 <p>CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
 support for <em>architectural capabilities</em>.
