@@ -11,6 +11,7 @@
 * Nathaniel Filardo (Microsoft Research),
 * Simon W. Moore (University of Cambridge),
 * Edward Napierala (University of Cambridge),
+* Allison Randal (Capabilities Limited,
 * Peter Sewell (University of Cambridge), and
 * Peter G. Neumann (SRI International)
 
@@ -60,10 +61,12 @@ Smith.
 
 This work was supported by the Defense Advanced Research Projects Agency
 (DARPA) and the Air Force Research Laboratory (AFRL), under contracts
-FA8750-10-C-0237 ("CTSRD") and HR0011-18-C-0016 ("ECATS").
+FA8750-10-C-0237 ("CTSRD"), HR0011-18-C-0016 ("ECATS"), and
+FA8750-24-C-B047 ("DEC").
 The views, opinions, and/or findings contained in this report are those of the
 authors and should not be interpreted as representing the official views or
 policies of the Department of Defense or the U.S. Government.
+Approved for Public Release, Distribution Unlimited.
 
 This work was supported in part by the Innovate UK project Digital Security by
 Design (DSbD) Technology Platform Prototype, 105694.
@@ -74,7 +77,6 @@ under the European Union’s Horizon 2020 research and innovation programme
 
 We also acknowledge the EPSRC REMS Programme Grant (EP/K008528/1), Arm
 Limited, HP Enterprise, and Google, Inc.
-Approved for Public Release, Distribution Unlimited.
 
 ## Building
 
