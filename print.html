@@ -294,16 +294,28 @@ considered further.</p>
 <p>CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
 support for <em>architectural capabilities</em>.
 One important use for this new hardware data type is in the implementation
-of safer C/C++ pointers and the code or data they point at.
-Our technical report, <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf"><em>An Introduction to
+of safer C/C++ pointers and the code or data they point at.</p>
+<p>Our 2019 technical report, <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf"><em>An Introduction to
 CHERI</em></a>, provides a
 more detailed overview of the CHERI architecture, ISA modeling, hardware
-implementations, and software stack<sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
+implementations, and software stack<sup class="footnote-reference"><a href="#1">1</a></sup>.
+Our more recent 2025 article in IEEE Security and Privacy,
+<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=10568212"><em>CHERI: Hardware-Enabled C/C++ Memory Protection at
+Scale</em></a>,
+reviews recent research and results<sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
 <div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
 <p>Robert N. M. Watson, Simon W. Moore, Peter Sewell, and Peter G. Neumann.
 <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf">An Introduction to
 CHERI</a>, Technical
 Report UCAM-CL-TR-941, Computer Laboratory, September 2019.</p>
+</div>
+<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
+<p>Robert N.M. Watson, David Chisnall, Jessica Clarke, Brooks Davis,
+Nathaniel Wesley Filardo, Ben Laurie, Simon W. Moore, Peter G. Neumann,
+Alexander Richardson, Peter Sewell, Konrad Witaszczyk, and Jonathan Woodruff.
+<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=10568212">CHERI: Hardware-Enabled C/C++ Memory Protection at
+Scale</a>,
+IEEE Security &amp; Privacy, vol. 22, no. 04, pp. 50-61, July-August 2024.</p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="cheri-capabilities"><a class="header" href="#cheri-capabilities">CHERI capabilities</a></h2>
 <p>CHERI capabilities are twice the width of the native integer pointer type of
