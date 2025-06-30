@@ -5,7 +5,7 @@ programming languages, which employ CHERI's architectural capability
 primitive to implement C/C++-language memory safety.
 We explain the principles underlying these language variants, and their
 grounding in CHERI's multiple architectural instantiations:
-CHERI-RISC-V and Arm's Morello.
+CHERI-RISC-V application cores, CHERIoT microcontrollers, and Arm's Morello.
 
 We describe the most commonly encountered differences between these
 dialects and C/C++ on conventional architectures, and where existing
