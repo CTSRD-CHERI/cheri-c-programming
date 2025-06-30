@@ -232,18 +232,18 @@ programming languages, which employ CHERI's architectural capability
 primitive to implement C/C++-language memory safety.
 We explain the principles underlying these language variants, and their
 grounding in CHERI's multiple architectural instantiations:
-CHERI-RISC-V and Arm's Morello.
-We describe the most commonly encountered differences between these
+CHERI-RISC-V and Arm's Morello.</p>
+<p>We describe the most commonly encountered differences between these
 dialects and C/C++ on conventional architectures, and where existing
 software may require minor changes.
 We document new compiler warnings and errors that may be experienced compiling
 code with the CHERI Clang/LLVM compiler, and suggest how they may be addressed
 through typically minor source-code changes.
 We explain how modest language extensions allow selected software, such
-as memory allocators, to further refine permissions and bounds on pointers.
-This guidance is based on our experience adapting the FreeBSD operating-system
-userspace, and applications such as PostgreSQL and WebKit, to run in a
-CHERI C/C++ capability-based programming environment.
+as memory allocators, to further refine permissions and bounds on pointers.</p>
+<p>This guidance is based on our experience adapting the FreeBSD operating system
+userspace, and applications such as the PostgreSQL database and Chromium web
+browser, to run in a CHERI C/C++ capability-based programming environment.
 We conclude by recommending further reading.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <p>CHERI Clang/LLVM and LLD implement the following new language,
