@@ -2,7 +2,7 @@
 
 # CHERI C/C++ Programming Guide
 
-* Robert N. M. Watson (University of Cambridge),
+* Robert N. M. Watson (University of Cambridge, Capabilities Limited),
 * Alexander Richardson (University of Cambridge),
 * Brooks Davis (SRI International),
 * John Baldwin (Ararat River Consulting, LLC),
@@ -10,8 +10,8 @@
 * Jessica Clarke (University of Cambridge),
 * Nathaniel Filardo (Microsoft Research),
 * Simon W. Moore (University of Cambridge),
-* Edward Napierala (University of Cambridge),
-* Allison Randal (Capabilities Limited,
+* Edward Napierala (University of Cambridge, Capabilities Limited),
+* Allison Randal (Capabilities Limited),
 * Peter Sewell (University of Cambridge), and
 * Peter G. Neumann (SRI International)
 
