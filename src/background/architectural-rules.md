@@ -13,6 +13,8 @@ this metadata:
   derived (leaving aside sealed capabilities, used for domain transition,
   whose mechanism is not detailed in this report).
 
+### Root capabilities and capability derivation
+
 At boot time, the architecture provides initial capabilities to the firmware,
 allowing data access and instruction fetch across the full address space.
 Additionally, all tags are cleared in memory.
@@ -24,6 +26,8 @@ restricted to further limit access.
 For example, the OS may assign capabilities for only a limited portion of the
 address space to the user software, preventing use of other portions of the
 address space.
+
+### Intentionality
 
 Similarly, capabilities carry with them *intentionality*: when a
 process passes a capability as an argument to a system call, the OS kernel can
@@ -39,8 +43,12 @@ For example, this prevents the kernel from overflowing the bounds on a
 userspace buffer when a pointer to the buffer is passed as a
 system-call argument.
 
+### Capability atomicity
+
 The hardware furthermore guarantees that capability tags and capability data is written atomically.
 For example, if one thread stores a valid capability and another writes arbitrary data to the same location, it is impossible to observe the arbitrary data with the validity bit set.
+
+### Formally verified groundings for memory safety
 
 These architectural properties provide the foundation on which a
 capability-based OS, compiler, and runtime can implement C/C++-language memory

@@ -8,9 +8,9 @@ the architecture (e.g., 32 or 64 bit), and also additional metadata that is
 compressed in order to fit in the remaining 32 or 64 bits of the capability
 (see Figure 1 for an example; details
 vary across underlying architectures and word sizes).
-In addition, they are associated with a 1-bit validity "tag" whose value is
-maintained in registers and memory by the architecture, but not part of
-addressable memory.
+In addition, capabilities are associated with a 1-bit validity "tag" whose
+value is maintained in registers and memory by the architecture, but is not
+part of addressable memory.
 
 <!--{=latex}\begin{comment}
 In LaTeX, we want to use the bitbox figure below instead of the jpeg
@@ -18,7 +18,7 @@ image file, so we comment it out.
 -->
 
 ![CHERI capability format illustration](capability-format.jpg)
-*Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.*
+*Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V as described in CHERI ISAv9: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.*
 
 <!--{=latex}
 \end{comment}
@@ -65,11 +65,14 @@ to the protection model:
   portion of the address space within which the capability can be used for
   load, store, and instruction fetch.
   Setting a capability's address (i.e., where it points) within
-  bounds will retain the capability's validity tag.  Setting addresses out of
-  bounds is subject to the precision limits of the bounds compression model
-  (see below and [Out-of-bounds pointers](../impact/out-of-bounds-pointers.html)); broadly speaking, setting addresses "near"
-  the capability's bounds will preserve the validity tag.  (These out-of-bounds
-  capabilities continue to authorize access only to memory within bounds.)
+  bounds will retain the capability's validity tag.
+  Setting addresses out of bounds is subject to the precision limits of the
+  bounds compression model (see below and [Out-of-bounds
+  pointers](../impact/out-of-bounds-pointers.html)).
+  Broadly speaking, setting addresses "nearly within" the capability's bounds
+  will be "representable" in the model, and will preserve the validity tag.
+  Out-of-bounds capabilities continue to authorize access only to memory
+  within bounds.
 
 * **Permissions**: The permissions mask controls how the capability can be
   used &mdash; for example, by authorizing the loading and storing of data and/or
@@ -81,6 +84,10 @@ to the protection model:
   This feature is not described further in this document, as it is primarily
   used to implement software compartmentalization rather than object-level
   memory protection.
+
+<!-- XXXRW: Should talk about sealed entry capabilities here. -->
+
+### Bounds precision
 
 When stored in memory, valid capabilities must be naturally aligned &mdash; i.e.,
 at 64-bit or 128-bit boundaries, depending on capability size &mdash; as that is
@@ -100,3 +107,6 @@ well aligned.
 The compression scheme uses a floating-point representation, allowing high-precision bounds for small
 objects, but requiring stronger alignment and padding for larger allocations
 (see [Bounds alignment due to compression](../apis/bounds-alignment-due-to-compression.html)).
+As a result, allocators handling large objects may define "spatial safety" as
+providing non-aliasing rather than the guarantee of a trap, as allocation
+bounds may not exactly align to architectural capability bounds.
