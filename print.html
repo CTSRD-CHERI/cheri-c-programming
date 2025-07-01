@@ -326,15 +326,15 @@ the architecture (e.g., 32 or 64 bit), and also additional metadata that is
 compressed in order to fit in the remaining 32 or 64 bits of the capability
 (see Figure 1 for an example; details
 vary across underlying architectures and word sizes).
-In addition, they are associated with a 1-bit validity "tag" whose value is
-maintained in registers and memory by the architecture, but not part of
-addressable memory.</p>
+In addition, capabilities are associated with a 1-bit validity "tag" whose
+value is maintained in registers and memory by the architecture, but is not
+part of addressable memory.</p>
 <!--{=latex}\begin{comment}
 In LaTeX, we want to use the bitbox figure below instead of the jpeg
 image file, so we comment it out.
 -->
 <p><img src="background/capability-format.jpg" alt="CHERI capability format illustration" />
-<em>Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.</em></p>
+<em>Figure 1: 128-bit CHERI Concentrate capability representation used in 64-bit CHERI-RISC-V as described in CHERI ISAv9: 64-bit address and metadata in addressable memory; and 1-bit out-of-band tag.</em></p>
 <!--{=latex}
 \end{comment}
 
@@ -380,11 +380,14 @@ including its address.</p>
 portion of the address space within which the capability can be used for
 load, store, and instruction fetch.
 Setting a capability's address (i.e., where it points) within
-bounds will retain the capability's validity tag.  Setting addresses out of
-bounds is subject to the precision limits of the bounds compression model
-(see below and <a href="background/../impact/out-of-bounds-pointers.html">Out-of-bounds pointers</a>); broadly speaking, setting addresses "near"
-the capability's bounds will preserve the validity tag.  (These out-of-bounds
-capabilities continue to authorize access only to memory within bounds.)</p>
+bounds will retain the capability's validity tag.
+Setting addresses out of bounds is subject to the precision limits of the
+bounds compression model (see below and <a href="background/../impact/out-of-bounds-pointers.html">Out-of-bounds
+pointers</a>).
+Broadly speaking, setting addresses "nearly within" the capability's bounds
+will be "representable" in the model, and will preserve the validity tag.
+Out-of-bounds capabilities continue to authorize access only to memory
+within bounds.</p>
 </li>
 <li>
 <p><strong>Permissions</strong>: The permissions mask controls how the capability can be
@@ -400,6 +403,8 @@ used to implement software compartmentalization rather than object-level
 memory protection.</p>
 </li>
 </ul>
+<!-- XXXRW: Should talk about sealed entry capabilities here. -->
+<h3 id="bounds-precision"><a class="header" href="#bounds-precision">Bounds precision</a></h3>
 <p>When stored in memory, valid capabilities must be naturally aligned — i.e.,
 at 64-bit or 128-bit boundaries, depending on capability size — as that is
 the granularity at which in-memory tags are maintained.
@@ -416,7 +421,10 @@ close to) its associated allocation, and because allocations are typically
 well aligned.
 The compression scheme uses a floating-point representation, allowing high-precision bounds for small
 objects, but requiring stronger alignment and padding for larger allocations
-(see <a href="background/../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to compression</a>).</p>
+(see <a href="background/../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to compression</a>).
+As a result, allocators handling large objects may define "spatial safety" as
+providing non-aliasing rather than the guarantee of a trap, as allocation
+bounds may not exactly align to architectural capability bounds.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="architectural-rules-for-capability-use"><a class="header" href="#architectural-rules-for-capability-use">Architectural rules for capability use</a></h2>
 <p>The architecture enforces several important security properties on changes to
 this metadata:</p>
@@ -434,6 +442,7 @@ derived (leaving aside sealed capabilities, used for domain transition,
 whose mechanism is not detailed in this report).</p>
 </li>
 </ul>
+<h3 id="root-capabilities-and-capability-derivation"><a class="header" href="#root-capabilities-and-capability-derivation">Root capabilities and capability derivation</a></h3>
 <p>At boot time, the architecture provides initial capabilities to the firmware,
 allowing data access and instruction fetch across the full address space.
 Additionally, all tags are cleared in memory.
@@ -445,6 +454,7 @@ restricted to further limit access.
 For example, the OS may assign capabilities for only a limited portion of the
 address space to the user software, preventing use of other portions of the
 address space.</p>
+<h3 id="intentionality"><a class="header" href="#intentionality">Intentionality</a></h3>
 <p>Similarly, capabilities carry with them <em>intentionality</em>: when a
 process passes a capability as an argument to a system call, the OS kernel can
 carefully use only that capability to ensure that it does not access other
@@ -458,8 +468,10 @@ authorized.
 For example, this prevents the kernel from overflowing the bounds on a
 userspace buffer when a pointer to the buffer is passed as a
 system-call argument.</p>
+<h3 id="capability-atomicity"><a class="header" href="#capability-atomicity">Capability atomicity</a></h3>
 <p>The hardware furthermore guarantees that capability tags and capability data is written atomically.
 For example, if one thread stores a valid capability and another writes arbitrary data to the same location, it is impossible to observe the arbitrary data with the validity bit set.</p>
+<h3 id="formally-verified-groundings-for-memory-safety"><a class="header" href="#formally-verified-groundings-for-memory-safety">Formally verified groundings for memory safety</a></h3>
 <p>These architectural properties provide the foundation on which a
 capability-based OS, compiler, and runtime can implement C/C++-language memory
 safety.
