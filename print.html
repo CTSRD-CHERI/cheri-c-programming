@@ -243,9 +243,12 @@ through typically minor source-code changes.
 We explain how modest language extensions allow selected software, such
 as memory allocators, to further refine permissions and bounds on pointers.</p>
 <p>This guidance is based on our experience adapting the FreeBSD operating system
-userspace, and applications such as the PostgreSQL database and Chromium web
-browser, to run in a CHERI C/C++ capability-based programming environment.
-We conclude by recommending further reading.</p>
+kernel and userspace, and applications such as the PostgreSQL database, nginx
+web server, and Chromium web browser, to run in a CHERI C/C++ capability-based
+programming environment.
+It has also benefited from the considerable efforts taken by others to adapt
+large-scale code bases such as the Linux kernel and OpenJDK.</p>
+<p>We conclude by recommending further reading.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <p>CHERI Clang/LLVM and LLD implement the following new language,
 code-generation, and linkage models:</p>
@@ -306,7 +309,8 @@ release:</p>
 <li>Updates to cited articles and technical reports.</li>
 <li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
 <li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT.</li>
+platforms, including Morello and CHERIoT, as well as work on arising
+CHERI-adapted OSes such as CHERI Linux and seL4.</li>
 <li>Numerous minor editorial and formatting improvements.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="background"><a class="header" href="#background">Background</a></h1>
@@ -504,18 +508,21 @@ to hold for the CHERI-MIPS architecture.<sup class="footnote-reference"><a href=
 software.
 One particularly useful use case is in implementing <em>CHERI C/C++</em>.
 In this model, all C/C++ language-visible pointer types, as well as any
-implied pointers implementing vtables, return addresses, global variables,
-arrays of variadic-function arguments, and so on, are implemented using
-capabilities with tight bounds.
+implied pointers implementing vtables, return addresses, function pointers,
+global variables, arrays of variadic-function arguments, and so on, are
+implemented using capabilities with tight bounds.
 This allows the architecture to imbue pointers with protection by virtue of
 architectural provenance validity, bounds checking, and permission checking,
 protecting pointers from corruption and providing strong spatial memory
-safety.</p>
+safety.
+In some execution environments, such as in CHERIoT and CheriBSD's CheriABI
+process environment, capabilities are combined with efficient architectural
+revocation features to enable strong heap temporal safety.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="the-cheri-cc-run-time-environment"><a class="header" href="#the-cheri-cc-run-time-environment">The CHERI C/C++ run-time environment</a></h2>
 <p>CHERI C code executes within a capability-aware run-time environment
 — whether "bare metal" with a suitable runtime, or in a richer, OS-based
-process environment such as CheriABI (see <a href="cheri-ccpp/../cheriabi">CheriABI</a>),
-which ensures that:</p>
+process environment such as CheriABI (see <a href="cheri-ccpp/../cheriabi">CheriABI</a>) or
+CHERIoT RTOS, which ensures that:</p>
 <ul>
 <li>capabilities are context switched (if required);</li>
 <li>tags are maintained by the OS virtual-memory subsystem (if present);</li>
@@ -523,20 +530,39 @@ which ensures that:</p>
 debugging (as needed);</li>
 <li>system-call arguments, the
 run-time linker, and other aspects of the OS Application Binary Interface
-(ABI) utilize capabilities rather than integer pointers; and</li>
+(ABI) utilize capabilities rather than integer pointers;</li>
 <li>the C/C++-language runtime implements suitable capability preservation
-(e.g., in <code>memcpy</code>) and restriction (e.g., in <code>malloc</code>).</li>
+(e.g., in <code>memcpy</code>) and restriction (e.g., in <code>malloc</code>); and</li>
+<li>temporal safety is enforced by heap allocators (if supported).</li>
 </ul>
-<p>In CheriBSD, our CHERI-extended version of the open-source FreeBSD operating
+<p>CHERI is supported by a growing set of operating systems:</p>
+<ul>
+<li>CheriBSD, the CHERI-extended version of the open-source FreeBSD operating
 system, CheriABI operates as a complete additional OS ABI.
-CheriABI is implemented in the style of a 32-bit or 64-bit OS personality, in
-that it requires its own set of suitably compiled system libraries and classes.
-We have also successfully adapted bare-metal runtimes, such as newlib, and
-embedded operating systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS
-(CHERI-RTEMS), to support CHERI memory protection.</p>
+CheriABI is implemented in the style of a 32-bit or 64-bit OS personality,
+in that it requires its own set of suitably compiled system libraries and
+classes.
+Userlevel runs with referential, spatial, and temporal safety.
+At the time of writing, the kernel supports referential and spatial
+safety, but not temporal safety.</li>
+<li>CHERI Linux also implements a pure-capability kernel and process
+environment modeled on CheriABI that support referential and spatial
+safety.</li>
+<li>A number of bare-metal runtimes, such as newlib, and embedded operating
+systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS (CHERI-RTEMS), have
+been adapted to support referential and spatial memory protection using
+CHERI.</li>
+<li>seL4 has been updated (out of tree) to support referential and spatial
+memory protction using CHERI.</li>
+<li>CHERIoT RTOS implements referential, spaital, and temporal memory
+protection using CHERI.</li>
+</ul>
 <p>Outside of the OS and language runtime themselves, CHERI C/C++ require
 relatively few source-code-level changes to C/C++-language software.
-We explore those changes in the remainder of this document.</p>
+Exceptions to this rule of thumb typically take the form of compiler
+toolchain, low-level C/C++ runtimes such as run-time linkers, and high-level
+language runtimes that may (for example) include just-in-time compilers.</p>
+<p>We explore the changes required to software in the remainder of this document.</p>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="referential-spatial-and-temporal-safety"><a class="header" href="#referential-spatial-and-temporal-safety">Referential, spatial, and temporal safety</a></h2>
 <p>Pure-capability C/C++ introduces a number of new types of protection not
 present in compilation to conventional architectures:</p>
@@ -565,9 +591,10 @@ Monotonicity ensures that callers cannot later broaden the bounds to cover
 other allocations.</p>
 </li>
 </ul>
-<p>Referential safety and spatial safety are implemented in CheriBSD's
-pure-capability CheriABI execution environment and for bare-metal in
-CheriFreeRTOS and CHERI-RTEMS.</p>
+<p>Referential safety and spatial safety are implemented in CheriBSD's and
+CHERI Linux's kernels and pure-capability CheriABI execution environments, in
+CHERIoT RTOS, CHERI-adapted seL4, and a number of CHERI-adapted embedded
+operating systems including FreeRTOS and RTEMS.</p>
 <ul>
 <li>
 <p><strong>Temporal safety</strong> prevents a pointer retained after the release of its
@@ -579,22 +606,21 @@ current pointer passed to <code>free</code>).</p>
 returned to a previously allocated region of memory while any prior pointers
 to that memory persist in application-accessible memory.
 Memory will be held in <em>quarantine</em> until any prior pointers have
-been revoked; then the memory may be reallocated.
-Architectural capability tags and virtual memory allow intermittent
+been revoked; then the memory may be reallocated.</p>
+<p>Architectural capability tags and revocation features allow intermittent
 <em>revocation sweeps</em> to accurately and efficiently locate and
 overwrite any capabilities implementing stale pointers.
+On application cores, architectural support includes MMU features to allow
+the tracking of "capability versions" of pages (a la loadside
+garbage-collection techniques), and on microcontroller cores, direct
+revocation bits may be stored directly in SRAM.
 Spatial safety ensures that pointers cannot be used to reference other
 memory, including other freed memory.</p>
 </li>
 </ul>
-<p>Temporal safety is the object of ongoing experiments.
-A prototype that guards <em>heap</em> allocations has been developed for
-CheriABI on CheriBSD, but is not yet integrated with the main development
-branch.
-We currently have no plans to develop support for temporal memory safety in
-CheriFreeRTOS and CHERI-RTEMS, both due to the complexity of the temporal
-safety runtime, and also because of CHERI temporal safety's dependence on an
-MMU for performance.</p>
+<p>Temporal heap safety is implemented in CheriBSD's pure-capability CheriABI
+execution environment running on Arm Morello and CHERI-RISC-V application
+cores, and in CHERIoT RTOS running on CHERIoT microcontroller cores.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="impact-on-the-cc-programming-model"><a class="header" href="#impact-on-the-cc-programming-model">Impact on the C/C++ programming model</a></h1>
 <p>Several kinds of changes may be required by programmers; the extent to which
 these changes impact a particular library or application will depend

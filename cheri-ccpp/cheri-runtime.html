@@ -158,8 +158,8 @@
                         <h2 id="the-cheri-cc-run-time-environment"><a class="header" href="#the-cheri-cc-run-time-environment">The CHERI C/C++ run-time environment</a></h2>
 <p>CHERI C code executes within a capability-aware run-time environment
 — whether "bare metal" with a suitable runtime, or in a richer, OS-based
-process environment such as CheriABI (see <a href="../cheriabi">CheriABI</a>),
-which ensures that:</p>
+process environment such as CheriABI (see <a href="../cheriabi">CheriABI</a>) or
+CHERIoT RTOS, which ensures that:</p>
 <ul>
 <li>capabilities are context switched (if required);</li>
 <li>tags are maintained by the OS virtual-memory subsystem (if present);</li>
@@ -167,20 +167,39 @@ which ensures that:</p>
 debugging (as needed);</li>
 <li>system-call arguments, the
 run-time linker, and other aspects of the OS Application Binary Interface
-(ABI) utilize capabilities rather than integer pointers; and</li>
+(ABI) utilize capabilities rather than integer pointers;</li>
 <li>the C/C++-language runtime implements suitable capability preservation
-(e.g., in <code>memcpy</code>) and restriction (e.g., in <code>malloc</code>).</li>
+(e.g., in <code>memcpy</code>) and restriction (e.g., in <code>malloc</code>); and</li>
+<li>temporal safety is enforced by heap allocators (if supported).</li>
 </ul>
-<p>In CheriBSD, our CHERI-extended version of the open-source FreeBSD operating
+<p>CHERI is supported by a growing set of operating systems:</p>
+<ul>
+<li>CheriBSD, the CHERI-extended version of the open-source FreeBSD operating
 system, CheriABI operates as a complete additional OS ABI.
-CheriABI is implemented in the style of a 32-bit or 64-bit OS personality, in
-that it requires its own set of suitably compiled system libraries and classes.
-We have also successfully adapted bare-metal runtimes, such as newlib, and
-embedded operating systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS
-(CHERI-RTEMS), to support CHERI memory protection.</p>
+CheriABI is implemented in the style of a 32-bit or 64-bit OS personality,
+in that it requires its own set of suitably compiled system libraries and
+classes.
+Userlevel runs with referential, spatial, and temporal safety.
+At the time of writing, the kernel supports referential and spatial
+safety, but not temporal safety.</li>
+<li>CHERI Linux also implements a pure-capability kernel and process
+environment modeled on CheriABI that support referential and spatial
+safety.</li>
+<li>A number of bare-metal runtimes, such as newlib, and embedded operating
+systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS (CHERI-RTEMS), have
+been adapted to support referential and spatial memory protection using
+CHERI.</li>
+<li>seL4 has been updated (out of tree) to support referential and spatial
+memory protction using CHERI.</li>
+<li>CHERIoT RTOS implements referential, spaital, and temporal memory
+protection using CHERI.</li>
+</ul>
 <p>Outside of the OS and language runtime themselves, CHERI C/C++ require
 relatively few source-code-level changes to C/C++-language software.
-We explore those changes in the remainder of this document.</p>
+Exceptions to this rule of thumb typically take the form of compiler
+toolchain, low-level C/C++ runtimes such as run-time linkers, and high-level
+language runtimes that may (for example) include just-in-time compilers.</p>
+<p>We explore the changes required to software in the remainder of this document.</p>
 
                     </main>
 
