@@ -35,6 +35,8 @@
   - [Ambiguous provenance](compiler/ambiguous-provenance.md)
   - [Underaligned capabilities](compiler/underaligned-capabilities.md)
 - [Printing capabilities from C](printf/README.md)
+  - [strfcap(3)](printf/strfcap.md)
+  - [printf(3)](printf/printf.md)
 - [C APIs to get and set capability properties](apis/README.md)
   - [CHERI-related header files](apis/cheri-related-header-files.md)
   - [Retrieving capability properties](apis/retrieving-capability-properties.md)
