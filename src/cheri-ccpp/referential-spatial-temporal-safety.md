@@ -41,17 +41,17 @@ CheriFreeRTOS and CHERI-RTEMS.
   to that memory persist in application-accessible memory.
   Memory will be held in *quarantine* until any prior pointers have
   been revoked; then the memory may be reallocated.
-  Architectural capability tags and virtual memory allow intermittent
+
+  Architectural capability tags and revocation features allow intermittent
   *revocation sweeps* to accurately and efficiently locate and
   overwrite any capabilities implementing stale pointers.
+  On application cores, architectural support includes MMU features to allow
+  the tracking of "capability versions" of pages (a la loadside
+  garbage-collection techniques), and on microcontroller cores, direct
+  revocation bits may be stored directly in SRAM.
   Spatial safety ensures that pointers cannot be used to reference other
   memory, including other freed memory.
 
-Temporal safety is the object of ongoing experiments.
-A prototype that guards *heap* allocations has been developed for
-CheriABI on CheriBSD, but is not yet integrated with the main development
-branch.
-We currently have no plans to develop support for temporal memory safety in
-CheriFreeRTOS and CHERI-RTEMS, both due to the complexity of the temporal
-safety runtime, and also because of CHERI temporal safety's dependence on an
-MMU for performance.
+Temporal heap safety is implemented in CheriBSD's pure-capability CheriABI
+execution environment running on Arm Morello and CHERI-RISC-V application
+cores, and in CHERIoT RTOS running on CHERIoT microcontroller cores.
