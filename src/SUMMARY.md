@@ -1,6 +1,7 @@
 [CHERI C/C++ Programming Guide](cover/README.md)
 
 - [Introduction](introduction/README.md)
+  - [Version history](introduction/history.md)
   - [Definitions](introduction/definitions.md)
 - [Background](background/README.md)
   - [CHERI capabilities](background/cheri-capabilities.md)
