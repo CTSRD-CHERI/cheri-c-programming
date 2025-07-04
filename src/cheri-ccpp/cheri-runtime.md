@@ -32,6 +32,8 @@ CHERI is supported by a growing set of operating systems:
    systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS (CHERI-RTEMS), have
    been adapted to support referential and spatial memory protection using
    CHERI.
+ * seL4 has been updated (out of tree) to support referential and spatial
+   memory protction using CHERI.
  * CHERIoT RTOS implements referential, spaital, and temporal memory
    protection using CHERI.
 

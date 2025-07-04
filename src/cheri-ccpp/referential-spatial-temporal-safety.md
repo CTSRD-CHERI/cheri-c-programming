@@ -26,9 +26,10 @@ present in compilation to conventional architectures:
   Monotonicity ensures that callers cannot later broaden the bounds to cover
   other allocations.
 
-Referential safety and spatial safety are implemented in CheriBSD's
-pure-capability CheriABI execution environment and for bare-metal in
-CheriFreeRTOS and CHERI-RTEMS.
+Referential safety and spatial safety are implemented in CheriBSD's and
+CHERI Linux's pure-capability CheriABI execution environment, in CHERIoT RTOS,
+CHERI-adapted seL4, and a number of CHERI-adapted embedded operating systems
+including FreeRTOS and RTEMS.
 
 * **Temporal safety** prevents a pointer retained after the release of its
   underlying allocation from being used to access its memory if that memory
