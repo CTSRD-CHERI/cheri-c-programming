@@ -34,6 +34,7 @@
   - [Loss of provenance](compiler/loss-of-provenance.md)
   - [Ambiguous provenance](compiler/ambiguous-provenance.md)
   - [Underaligned capabilities](compiler/underaligned-capabilities.md)
+- [Printing capabilities from C](printf/README.md)
 - [C APIs to get and set capability properties](apis/README.md)
   - [CHERI-related header files](apis/cheri-related-header-files.md)
   - [Retrieving capability properties](apis/retrieving-capability-properties.md)
