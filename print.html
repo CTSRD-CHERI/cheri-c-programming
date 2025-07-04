@@ -246,24 +246,6 @@ as memory allocators, to further refine permissions and bounds on pointers.</p>
 userspace, and applications such as the PostgreSQL database and Chromium web
 browser, to run in a CHERI C/C++ capability-based programming environment.
 We conclude by recommending further reading.</p>
-<div style="break-before: page; page-break-before: always;"></div><h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The first version of this report was published in June 2020.
-The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<p>The following broad categories of changes have been made since the 2020
-release:</p>
-<ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Updates to cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
-</ul>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
 <p>CHERI Clang/LLVM and LLD implement the following new language,
 code-generation, and linkage models:</p>
@@ -309,6 +291,24 @@ generally recommended.</p>
 <p>The remainder of this document describes the CHERI C/C++ programming languages,
 as mapped into pure-capability machine code; hybrid C/C++ will not be
 considered further.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
+<p>The first version of this report was published in June 2020.
+The current web version is a living document being prepared for release as a
+second edition in late 2025, based on five years of deployed experience with
+hundreds of CHERI C/C++ developers working on various CHERI platforms
+including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
+the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
+CVA6-CHERI platforms.</p>
+<p>The following broad categories of changes have been made since the 2020
+release:</p>
+<ul>
+<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
+<li>Updates to cited articles and technical reports.</li>
+<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
+<li>Include information on using CHERI C/C++ on a more diverse range of
+platforms, including Morello and CHERIoT.</li>
+<li>Numerous minor editorial and formatting improvements.</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="background"><a class="header" href="#background">Background</a></h1>
 <p>CHERI extends conventional processor Instruction-Set Architectures (ISAs) with
 support for <em>architectural capabilities</em>.
