@@ -15,5 +15,6 @@ release:
  * Updates to cited articles and technical reports.
  * Better define, and discourage use of, CHERI Hybrid C/C++.
  * Include information on using CHERI C/C++ on a more diverse range of
-   platforms, including Morello and CHERIoT.
+   platforms, including Morello and CHERIoT, as well as work on arising
+   CHERI-adapted OSes such as CHERI Linux and seL4.
  * Numerous minor editorial and formatting improvements.

@@ -26,8 +26,9 @@ CHERI is supported by a growing set of operating systems:
    Userlevel runs with referential, spatial, and temporal safety.
    At the time of writing, the kernel supports referential and spatial
    safety, but not temporal safety.
- * CHERI Linux implements a process environment modeled on CheriABI that
-   supports referential and spatial safety.
+ * CHERI Linux also implements a pure-capability kernel and process
+   environment modeled on CheriABI that support referential and spatial
+   safety.
  * A number of bare-metal runtimes, such as newlib, and embedded operating
    systems, such as FreeRTOS (CheriFreeRTOS) and RTEMS (CHERI-RTEMS), have
    been adapted to support referential and spatial memory protection using

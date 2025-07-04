@@ -17,6 +17,10 @@ We explain how modest language extensions allow selected software, such
 as memory allocators, to further refine permissions and bounds on pointers.
 
 This guidance is based on our experience adapting the FreeBSD operating system
-userspace, and applications such as the PostgreSQL database and Chromium web
-browser, to run in a CHERI C/C++ capability-based programming environment.
+kernel and userspace, and applications such as the PostgreSQL database, nginx
+web server, and Chromium web browser, to run in a CHERI C/C++ capability-based
+programming environment.
+It has also benefited from the considerable efforts taken by others to adapt
+large-scale code bases such as the Linux kernel and OpenJDK.
+
 We conclude by recommending further reading.

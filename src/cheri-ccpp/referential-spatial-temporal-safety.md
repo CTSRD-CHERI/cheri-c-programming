@@ -27,9 +27,9 @@ present in compilation to conventional architectures:
   other allocations.
 
 Referential safety and spatial safety are implemented in CheriBSD's and
-CHERI Linux's pure-capability CheriABI execution environment, in CHERIoT RTOS,
-CHERI-adapted seL4, and a number of CHERI-adapted embedded operating systems
-including FreeRTOS and RTEMS.
+CHERI Linux's kernels and pure-capability CheriABI execution environments, in
+CHERIoT RTOS, CHERI-adapted seL4, and a number of CHERI-adapted embedded
+operating systems including FreeRTOS and RTEMS.
 
 * **Temporal safety** prevents a pointer retained after the release of its
   underlying allocation from being used to access its memory if that memory
