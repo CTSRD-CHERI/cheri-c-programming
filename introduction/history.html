@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Definitions - CHERI C/C++ Programming Guide</title>
+        <title>Version history - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,61 +155,34 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="definitions"><a class="header" href="#definitions">Definitions</a></h2>
-<p>CHERI Clang/LLVM and LLD implement the following new language,
-code-generation, and linkage models:</p>
+                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
+<p>The first version of this report was published in June 2020.
+The current web version is a living document being prepared for release as a
+second edition in late 2025, based on five years of deployed experience with
+hundreds of CHERI C/C++ developers working on various CHERI platforms
+including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
+the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
+CVA6-CHERI platforms.</p>
+<p>The following broad categories of changes have been made since the 2020
+release:</p>
 <ul>
-<li>
-<p><strong>CHERI C/C++</strong> are C/C++-language dialects tuned to requirements arising from
-implementing all pointers using CHERI capabilities.
-This includes all explicit pointers (i.e., those declared by the programmer)
-and all implied pointers (e.g., those used to access local and global
-variables).
-For example, they diverge from C/C++ implementations on conventional
-architectures by preventing pointers passed through integer type other
-than <code>uintptr_t</code> and <code>intptr_t</code> from being dereferenced.
-New Application Programming Interfaces (APIs) provide access to capability
-features of pointers, including getting and setting their bounds, required
-by selected software such as memory allocators.
-The vast majority of C/C++ source code we have encountered requires little
-or no modification to be compiled as CHERI C/C++.</p>
-</li>
-<li>
-<p><strong>Pure-capability machine code</strong> is compiled code (or hand-written assembly)
-that utilizes CHERI capabilities for all memory accesses — including
-loads, stores, and instruction fetches — rather than integer addresses.
-Capabilities are used to implement pointers explicitly described in the source
-program, and also to implement implied pointers in the C execution
-environment, such as those used for control flow.
-Pure-capability machine code is not binary compatible with capability-unaware
-code using integer pointers, not least due to the different size of the
-pointer data type.</p>
-</li>
-<li>
-<p><strong>CHERI hybrid C/C++</strong> are further language dialects in which only selected
-pointers are implemented using capabilities, with the remainder implemented
-using integers as on conventional architectures.
-We have primarily used hybrid C in systems software that bridges between
-environments executing pure-capability machine code and those running largely
-or entirely non-CHERI-aware machine code.
-While hybrid machine code has stronger binary compatibility with conventionally
-generated code, it provides little or no memory protection, and its use is not
-generally recommended.</p>
-</li>
+<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
+<li>Updates to cited articles and technical reports.</li>
+<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
+<li>Include information on using CHERI C/C++ on a more diverse range of
+platforms, including Morello and CHERIoT.</li>
+<li>Numerous minor editorial and formatting improvements.</li>
 </ul>
-<p>The remainder of this document describes the CHERI C/C++ programming languages,
-as mapped into pure-capability machine code; hybrid C/C++ will not be
-considered further.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/history.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../introduction/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../introduction/definitions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -219,11 +192,11 @@ considered further.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/history.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../introduction/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../introduction/definitions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
