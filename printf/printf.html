@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>printf(3) - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,37 +155,32 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The first version of this report was published in June 2020.
-The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<p>The following broad categories of changes have been made since the 2020
-release:</p>
-<ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
-</ul>
+                        <h3 id="printf3"><a class="header" href="#printf3">printf(3)</a></h3>
+<p>When using the <code>printf(3)</code> family of APIs, the <code>#</code> qualifier to the <code>p</code> format
+string will cause additional architecture-specific information to be printed
+about a pointer.
+In CHERI C/C++, this prints out capability metadata as rendered using
+<code>strfcap(3)</code>'s <code>%C</code> format string.
+For example, the following code fragment:</p>
+<pre><code>int foo;
+...
+        printf("%%p:\t%p\n", &amp;foo);
+        printf("%%#p:\t%#p\n", &amp;foo);
+</code></pre>
+<p>Will print out the following output in CheriBSD's CheriABI:</p>
+<pre><code>%p:	0x130b60
+%#p:	0x130b60 [rwRW,0x130b60-0x130b64]
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../printf/strfcap.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../apis/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -195,11 +190,11 @@ CHERI-adapted OSes such as CHERI Linux and seL4.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../printf/strfcap.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../apis/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

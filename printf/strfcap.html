@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>strfcap(3) - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,37 +155,57 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The first version of this report was published in June 2020.
-The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<p>The following broad categories of changes have been made since the 2020
-release:</p>
+                        <h3 id="strfcap3"><a class="header" href="#strfcap3">strfcap(3)</a></h3>
+<pre><code>ssize_t
+     strfcap(char * restrict buf, size_t maxsize,
+         const char * restrict format, uintcap_t cap);
+</code></pre>
+<p>The <code>strfcap(3)</code> API accepts multiple arguments:</p>
 <ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
+<li><code>buf</code> is a target character buffer for the resulting generated string.</li>
+<li><code>maxsize</code> is the size of the target character buffer.</li>
+<li><code>format</code> is a string containing zero or more conversion specifiers or
+ordinary characters.</li>
+<li><code>cap</code> is the capability to decode.</li>
 </ul>
+<p>The return value is the number of characters that would have been printed if
+`size were unlimited, excluding the trailing nul terminator.
+A negative value is returned on failure.</p>
+<p>Various format specifiers, documented in the <a href="https://man.cheribsd.org/cgi-bin/man.cgi/strfcap.3">CheriBSD <code>strfcap(3)</code> man
+page</a>, include various
+individual field specifiers for capability metadata such as its address,
+attributes, base address, length, offset, permissions, and so on.
+The <code>%C</code> format string will print out capabilities with the following format
+<code>%#xa [%P,%#xb-%%xt]%? %A</code>:</p>
+<ul>
+<li><code>%xa</code>: Hex formatted capability address</li>
+<li><code>%P</code>: Abbreviated human-readable capability permissions</li>
+<li><code>%xb</code>: Hex formatted capability base</li>
+<li><code>%xt</code>: Hext-formatted capability top address</li>
+<li><code>%A</code>: Textual representation of capability attributes, such as <code>invalid</code> or <code>sentry</code></li>
+</ul>
+<p>For example, the <code>strfcap(3)</code> output <code>0x130b60 [rwRW,0x130b60-0x130b64]</code>
+describes a capability whose:</p>
+<ul>
+<li>Capability address is <code>0x130b60</code></li>
+<li>Capability permissions are <code>rwRW</code> (can read and write both data and
+capabilities)</li>
+<li>Capability base address is <code>0x130b60</code></li>
+<li>Capability top address is <code>0x130b64</code></li>
+<li>Has a valid tag</li>
+<li>Is not sealed</li>
+</ul>
+<p>The <code>strfcap(3)</code> man page should be referenced for full details.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../printf/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../printf/printf.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -195,11 +215,11 @@ CHERI-adapted OSes such as CHERI Linux and seL4.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../printf/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../printf/printf.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
