@@ -12,9 +12,11 @@ The following broad categories of changes have been made since the 2020
 release:
 
  * Conversion to mdbook from LaTeX to enable a live web version.
- * Updates to cited articles and technical reports.
+ * Update cited articles and technical reports.
  * Better define, and discourage use of, CHERI Hybrid C/C++.
  * Include information on using CHERI C/C++ on a more diverse range of
    platforms, including Morello and CHERIoT, as well as work on arising
    CHERI-adapted OSes such as CHERI Linux and seL4.
+ * Include information on printing capability values via `strfcap(3)` and
+   `printf(3)`.
  * Numerous minor editorial and formatting improvements.
