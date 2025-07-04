@@ -54,8 +54,9 @@ The `strfcap(3)` man page should be referenced for full details.
 
 ### printf(3)
 
-When using `printf(3)`, the `#` qualifier to the `p` format string will cause
-additional architecture-specific information to be printed about a pointer.
+When using the `printf(3)` family of APIs, the `#` qualifier to the `p` format
+string will cause additional architecture-specific information to be printed
+about a pointer.
 In CHERI C/C++, this prints out capability metadata as rendered using
 `strfcap(3)`'s `%C` format string.
 For example, the following code fragment:
