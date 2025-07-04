@@ -1693,6 +1693,68 @@ struct AtLeast8ByteAlignedGood {
     void *data;
 } __attribute__((packed, aligned(4), <mark id="SilenceAlign" style="background-color: #77DD77">annotate("underaligned_capability")</mark>));
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="printing-capabilities-from-c"><a class="header" href="#printing-capabilities-from-c">Printing capabilities from C</a></h2>
+<p>Capability pointers carry additional metadata that it can sometimes be useful
+to print to a human readable string.
+CHERI C/C++ defines a decoded string format for capabilities, which may be
+accessed indirectly via existing C APIs such as <code>printf(3)</code>, <code>snprintf(3)</code>, or
+directly via calls to the <code>strfcap(3)</code> function itself.</p>
+<h3 id="strfcap3"><a class="header" href="#strfcap3">strfcap(3)</a></h3>
+<pre><code>ssize_t
+     strfcap(char * restrict buf, size_t maxsize,
+         const char * restrict format, uintcap_t cap);
+</code></pre>
+<p>The <code>strfcap(3)</code> API accepts multiple arguments:</p>
+<ul>
+<li><code>buf</code> is a target character buffer for the resulting generated string.</li>
+<li><code>maxsize</code> is the size of the target character buffer.</li>
+<li><code>format</code> is a string containing zero or more conversion specifiers or
+ordinary characters.</li>
+<li><code>cap</code> is the capability to decode.</li>
+</ul>
+<p>The return value is the number of characters that would have been printed if
+`size were unlimited, excluding the trailing nul terminator.
+A negative value is returned on failure.</p>
+<p>Various format specifiers, documented in the <a href="https://man.cheribsd.org/cgi-bin/man.cgi/strfcap.3">CheriBSD <code>strfcap(3)</code> man
+page</a>, include various
+individual field specifiers for capability metadata such as its address,
+attributes, base address, length, offset, permissions, and so on.
+The <code>%C</code> format string will print out capabilities with the following format
+<code>%#xa [%P,%#xb-%%xt]%? %A</code>:</p>
+<ul>
+<li><code>%xa</code>: Hex formatted capability address</li>
+<li><code>%P</code>: Abbreviated human-readable capability permissions</li>
+<li><code>%xb</code>: Hex formatted capability base</li>
+<li><code>%xt</code>: Hext-formatted capability top address</li>
+<li><code>%A</code>: Textual representation of capability attributes, such as <code>invalid</code> or <code>sentry</code></li>
+</ul>
+<p>For example, the <code>strfcap(3)</code> output <code>0x130b60 [rwRW,0x130b60-0x130b64]</code>
+describes a capability whose:</p>
+<ul>
+<li>Capability address is <code>0x130b60</code></li>
+<li>Capability permissions are <code>rwRW</code> (can read and write both data and
+capabilities)</li>
+<li>Capability base address is <code>0x130b60</code></li>
+<li>Capability top address is <code>0x130b64</code></li>
+<li>Has a valid tag</li>
+<li>Is not sealed</li>
+</ul>
+<p>The <code>strfcap(3)</code> man page should be referenced for full details.</p>
+<h3 id="printf3"><a class="header" href="#printf3">printf(3)</a></h3>
+<p>When using <code>printf(3)</code>, the <code>#</code> qualifier to the <code>p</code> format string will cause
+additional architecture-specific information to be printed about a pointer.
+In CHERI C/C++, this prints out capability metadata as rendered using
+<code>strfcap(3)</code>'s <code>%C</code> format string.
+For example, the following code fragment:</p>
+<pre><code>int foo;
+...
+        printf("%%p:\t%p\n", &amp;foo);
+        printf("%%#p:\t%#p\n", &amp;foo);
+</code></pre>
+<p>Will print out the following output in CheriBSD's CheriABI:</p>
+<pre><code>%p:	0x130b60
+%#p:	0x130b60 [rwRW,0x130b60-0x130b64]
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="c-apis-to-get-and-set-capability-properties"><a class="header" href="#c-apis-to-get-and-set-capability-properties">C APIs to get and set capability properties</a></h1>
 <!--
 \label{sec:cheri-apis}
