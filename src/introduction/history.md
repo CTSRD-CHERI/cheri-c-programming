@@ -21,6 +21,8 @@ release:
    `printf(3)`.
  * Discuss the goal of non-aliasing spatial and temporal memory safety, and
    explore when exceptions may be, or must be, delivered.
+ * Document a subset of `malloc_revoke(3)` APIs controlling revocation for the
+   system heap allocator.
  * Note that some behaviors, such as bounds precision and revocation behavior,
    are implementation defined.
  * Numerous minor editorial and formatting improvements.
