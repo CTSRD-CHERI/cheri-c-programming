@@ -1,6 +1,5 @@
 ## Version history
 
-The first version of this report was published in June 2020.
 The current web version is a living document being prepared for release as a
 second edition in late 2025, based on five years of deployed experience with
 hundreds of CHERI C/C++ developers working on various CHERI platforms
@@ -8,8 +7,15 @@ including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
 the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
 CVA6-CHERI platforms.
 
-The following broad categories of changes have been made since the 2020
-release:
+### 2020
+
+We published the first version of the *CHERI C/C++ Programming Guide* in June
+2020.
+
+### 2025
+
+This work-in-progress version of the *CHERI C/C++ Programming Guide* contains
+the following changes:
 
  * Conversion to mdbook from LaTeX to enable a live web version.
  * Update cited articles and technical reports.
