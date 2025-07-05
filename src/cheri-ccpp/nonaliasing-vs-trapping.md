@@ -40,6 +40,16 @@ CHERI C/C++ therefore adopt the following definitions and approximations:
 
 These practical design choices have some important implications, including:
 
+ * **Exception delivery semantics** are implementation defined, as: (a) bounds
+   precision varies by underlying architecture; (b) memory allocators and
+   revocation support may very by software runtime; and (c) compiler behavior,
+   and in particular optimization, will vary in the presence of statically
+   identifiable undefined behavior.
+   Software developers should not make strong assumptions about whether an
+   overflow on a particular size object may lead immediately to an exception.
+   However, they may depend on dynamically enforced, deterministic,
+   non-aliasing memory protection.
+
  * **Security arguments** are often easier to make in the presence of
    fail-stop behavior.
    Immediate trapping on a bounds or temporal-safety violation may make it
