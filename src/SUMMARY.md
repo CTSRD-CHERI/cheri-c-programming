@@ -20,7 +20,7 @@
     - [Bounds from the compiler and linker](impact/bounds-from-compiler.md)
     - [Bounds from the heap allocator](impact/bounds-from-heap-allocator.md)
     - [Subobject bounds](impact/subobject-bounds.md)
-  - [Other sources of bounds](impact/other-sources-of-bounds.md)
+    - [Other sources of bounds](impact/other-sources-of-bounds.md)
     - [Out-of-bounds pointers](impact/out-of-bounds-pointers.md)
   - [Pointer comparison](impact/pointer-comparison.md)
   - [Implications of capability revocation for temporal safety](impact/revocation.md)
