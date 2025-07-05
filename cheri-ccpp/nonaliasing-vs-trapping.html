@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Referential, spatial, and temporal safety - CHERI C/C++ Programming Guide</title>
+        <title>Non-aliasing vs trapping memory safety - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,75 +155,91 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="referential-spatial-and-temporal-safety"><a class="header" href="#referential-spatial-and-temporal-safety">Referential, spatial, and temporal safety</a></h2>
-<p>Pure-capability C/C++ introduces a number of new types of protection not
-present in compilation to conventional architectures:</p>
+                        <h2 id="non-aliasing-vs-trapping-for-memory-safety"><a class="header" href="#non-aliasing-vs-trapping-for-memory-safety">Non-aliasing vs. trapping for memory safety</a></h2>
+<p>The CHERI architecture accepts a number of tradeoffs for performance reasons,
+including imprecise bounds for spatial safety (to reduce pointer-size growth),
+and quarantining for temporal safety (to mitigate revocation overheads).
+CHERI C/C++ therefore adopt the following definitions and approximations:</p>
 <ul>
 <li>
-<p><strong>Referential safety</strong> protects pointers (references) themselves.
-This includes <em>integrity</em> (corrupted pointers cannot be dereferenced)
-and <em>provenance validity</em> (only pointers derived from valid pointers
-via valid manipulations can be dereferenced).</p>
-<p>When pointers are implemented using architectural capabilities, CHERI's
-capability tags and provenance validity naturally provide this protection.</p>
+<p><strong>Referential safety</strong> guarantees that a corrupted or reinjected pointer
+will be non-dereferenceable.
+This protection is guaranteed from the point of mis-manipulation (e.g., a
+partial overwrite in memory, manipulation using an inappropriate arithmetic
+operation, an attempt to violate monotonicity) but an architectural
+exception is not guaranteed to take place until a dereference (e.g., a
+load, store, or jump) is attempted.</p>
 </li>
 <li>
-<p><strong>Spatial safety</strong> ensures that pointers may be used only to access memory
-within bounds of their associated allocation; dually, manipulating an
-out-of-bounds pointer will not grant access to another allocation.</p>
-<p>This is accomplished by adapting various memory allocators, including the run-time
-linker for global variables, thread-local variables, the stack allocator,
-and the heap allocator,
-to set the bounds on the capability implementing a pointer before returning
-it to the caller.
-Due to precision constraints on capability bounds, bounds on returned
-pointers may include additional padding, but will still not permit access to any
-other allocations (see <a href="../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to
-compression</a>).
-Monotonicity ensures that callers cannot later broaden the bounds to cover
-other allocations.</p>
+<p><strong>Spatial safety</strong> guarantees non-aliasing between allocations: A pointer
+returned for one allocation will throw an architectural exception rather
+than permit out-of-bounds access to memory associated with another
+allocation.
+However, it is not guaranteed to throw an architectural exception if an
+out-of-bounds access would not access memory associated with another
+allocation.
+For example, non-trapping access may be permitted to padding after the end
+of a heap allocation for larger allocation sizes, due to bounds
+imprecision.
+It is the responsibility of the allocator to ensure that any non-trapping
+out-of-bounds access is <em>safe</em>.</p>
+</li>
+<li>
+<p><strong>Temporal safety</strong> guarantees non-aliasing between freed and current
+allocations: A pointer returned to a previously freed allocation will throw
+an architectural exception rather than permit use of the memory after
+reallocation.
+However, it is not guaranteed to throw an architectural exception if a use
+after free occurs before reallocation of that memory.
+For example, non-trapping access may be permitted to memory immediately
+after a call to <code>free()</code> but prior to asynchronous revocation or a further
+call to <code>malloc()</code> that reallocates the sam memory.
+It is the responsibility of the allocator to ensure that any non-trapping
+use-after-free access is <em>safe</em>.</p>
 </li>
 </ul>
-<p>Referential safety and spatial safety are implemented in CheriBSD's and
-CHERI Linux's kernels and pure-capability CheriABI execution environments, in
-CHERIoT RTOS, CHERI-adapted seL4, and a number of CHERI-adapted embedded
-operating systems including FreeRTOS and RTEMS.</p>
+<p>These practical design choices have some important implications, including:</p>
 <ul>
 <li>
-<p><strong>Temporal safety</strong> prevents a pointer retained after the release of its
-underlying allocation from being used to access its memory if that memory
-has been reused for a fresh allocation (e.g., after a fresh pointer to that
-memory has been returned by a further call to <code>malloc</code> after the
-current pointer passed to <code>free</code>).</p>
-<p>Heap temporal safety is accomplished by preventing new pointers being
-returned to a previously allocated region of memory while any prior pointers
-to that memory persist in application-accessible memory.
-Memory will be held in <em>quarantine</em> until any prior pointers have
-been revoked; then the memory may be reallocated.</p>
-<p>Architectural capability tags and revocation features allow intermittent
-<em>revocation sweeps</em> to accurately and efficiently locate and
-overwrite any capabilities implementing stale pointers.
-On application cores, architectural support includes MMU features to allow
-the tracking of "capability versions" of pages (a la loadside
-garbage-collection techniques), and on microcontroller cores, direct
-revocation bits may be stored directly in SRAM.
-Spatial safety ensures that pointers cannot be used to reference other
-memory, including other freed memory.</p>
+<p><strong>Security arguments</strong> are often easier to make in the presence of
+fail-stop behavior.
+Immediate trapping on a bounds or temporal-safety violation may make it
+easier to understand that code does not then proceed to other insecure
+behavior.
+Allocator authors may therefore choose to avoid aligning and padding
+strategies that unnecessarily introduce bounds imprecision.
+However, these tradeoffs do not weaken a security argument based on
+deterministic non-aliasing as the security guarantee, which tolerate
+continued execution beyond undefined behavior caused by a exception-free
+memory-safety bug.</p>
+</li>
+<li>
+<p><strong>Debugabbility</strong> is greatest when software fails stop close to the point
+of a bug occurring.
+CHERI will frequently ease debugging by ensuring trapping when aliasing
+takes place, as well as in many other situations.
+Deferred architectural exceptions until the point of dererence (for
+referential safety), or the point of potential alising (for spatial and
+temporal safety) do not weaken current debuggability, but also may not
+improve it in some situations.
+This is especially true when working with large or non-aligned memory
+allocations (for spatial safety) or rapid use-after-free without
+reallocation (for temporal safety).
+These design choices differ from those made in, for example, LLVM's address
+sanitizer, where rapid exception throwing is weighted more greatly than
+security mitigation.</p>
 </li>
 </ul>
-<p>Temporal heap safety is implemented in CheriBSD's pure-capability CheriABI
-execution environment running on Arm Morello and CHERI-RISC-V application
-cores, and in CHERIoT RTOS running on CHERIoT microcontroller cores.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../cheri-ccpp/cheri-runtime.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../cheri-ccpp/referential-spatial-temporal-safety.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../cheri-ccpp/nonaliasing-vs-trapping.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../impact/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -233,11 +249,11 @@ cores, and in CHERIoT RTOS running on CHERIoT microcontroller cores.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../cheri-ccpp/cheri-runtime.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../cheri-ccpp/referential-spatial-temporal-safety.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../cheri-ccpp/nonaliasing-vs-trapping.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../impact/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
