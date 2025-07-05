@@ -31,6 +31,7 @@
 - [The CheriABI POSIX process environment](cheriabi/README.md)
   - [POSIX API changes](cheriabi/posix-api-changes.md)
   - [Handling capability-related signals](cheriabi/handling-capability-signals.md)
+  - [Revocation APIs](cheriabi/revocation-apis.md)
 - [CHERI compiler warnings and errors](compiler/README.md)
   - [Loss of provenance](compiler/loss-of-provenance.md)
   - [Ambiguous provenance](compiler/ambiguous-provenance.md)
@@ -45,10 +46,5 @@
   - [Capability permissions](apis/capability-permissions.md)
   - [Bounds alignment due to compression](apis/bounds-alignment-due-to-compression.md)
   - [Implications for memory-allocator design](apis/implications-for-memory-allocator-design.md)
-- [C APIs for temporal safety](temporal-apis/README.md)
-  - [Checking whether heap revocation is
-    enabled](temporal-apis/malloc_revoke_enabled.md)
-  - [Forcing revocation of outstanding freed
-    pointers](temporal-apis/malloc_revoke_quarantine_force_flush.md)
 - [Further reading](reading/README.md)
 - [Acknowledgements](acks/README.md)
