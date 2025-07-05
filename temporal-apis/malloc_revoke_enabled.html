@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Further reading - CHERI C/C++ Programming Guide</title>
+        <title>cheri_revoke_enabled(3) - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,118 +155,20 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="further-reading"><a class="header" href="#further-reading">Further reading</a></h1>
-<h2 id="the-cheri-isa"><a class="header" href="#the-cheri-isa">The CHERI ISA</a></h2>
-<p>The primary reference for the CHERI Instruction-Set Architecture (ISA) is the
-ISA specification; at the time of writing, the most recent version is
-<a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-927.pdf">Capability Hardware Enhanced RISC Instructions: CHERI Instruction-Set
-Architecture (Version
-7)</a><sup class="footnote-reference"><a href="#1">1</a></sup>.</p>
-<h2 id="an-introduction-to-cheri"><a class="header" href="#an-introduction-to-cheri">An Introduction to CHERI</a></h2>
-<p>Our technical report, <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf">An Introduction to
-CHERI</a>, provides a
-high-level overview of the CHERI architecture, ISA modeling, hardware
-implementations, and software stack<sup class="footnote-reference"><a href="#2">2</a></sup>.</p>
-<h2 id="cc-memory-safety"><a class="header" href="#cc-memory-safety">C/C++ Memory Safety</a></h2>
-<p>Published at ASPLOS 2015, <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201503-asplos2015-cheri-cmachine.pdf">Beyond the PDP-11: Architectural support for a
-memory-safe C abstract
-machine</a>
-describes idiomatic C and spatial memory protection<sup class="footnote-reference"><a href="#3">3</a></sup>.</p>
-<p>We published a paper on our memory-safe OS userspace and application suite,
-<a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201904-asplos-cheriabi.pdf">CheriABI: Enforcing Valid Pointer Provenance and Minimizing Pointer Privilege
-in the POSIX C Run-time
-Environment</a>,
-at ASPLOS 2019<sup class="footnote-reference"><a href="#4">4</a></sup>.
-We also released an <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-932.pdf">extended technical-report version of this
-paper</a> that includes
-greater implementation detail<sup class="footnote-reference"><a href="#5">5</a></sup>.</p>
-<p>We published <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/2020oakland-cornucopia.pdf">Cornucopia: Temporal Safety for CHERI
-Heaps</a> at Oakland 2020, explaining how to implement "sweeping revocation"
-using virtual-memory acceleration<sup class="footnote-reference"><a href="#6">6</a></sup>.</p>
-<p>We published our paper, <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201901-popl-cerberus.pdf">Exploring C Semantics and Pointer
-Provenance</a>,
-and the implications for software design, at POPL 2019; CHERI C was a case
-study in the practical enforcement of capability provenance-validity
-enforcement<sup class="footnote-reference"><a href="#7">7</a></sup>.</p>
-<div class="footnote-definition" id="1"><sup class="footnote-definition-label">1</sup>
-<p>Robert N. M. Watson, Peter G. Neumann, Jonathan Woodruff, Michael Roe,
-Hesham Almatary, Jonathan Anderson, John Baldwin, David Chisnall,
-Brooks Davis, Nathaniel Wesley Filardo, Alexandre Joannou, Ben Laurie,
-A. Theodore Markettos, Simon W. Moore, Steven J. Murdoch, Kyndylan Nienhuis,
-Robert Norton, Alex Richardson, Peter Rugg, Peter Sewell, Stacey Son,
-Hongyan Xia. <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-927.pdf">Capability Hardware Enhanced RISC Instructions: CHERI
-Instruction-Set Architecture (Version
-7)</a>, Technical Report
-UCAM-CL-TR-927, Computer Laboratory, June 2019.</p>
-</div>
-<div class="footnote-definition" id="2"><sup class="footnote-definition-label">2</sup>
-<p>Robert N. M. Watson, Simon W. Moore, Peter Sewell, and Peter G. Neumann.
-<a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-941.pdf">An Introduction to
-CHERI</a>, Technical
-Report UCAM-CL-TR-941, Computer Laboratory, September 2019.</p>
-</div>
-<div class="footnote-definition" id="3"><sup class="footnote-definition-label">3</sup>
-<p>David Chisnall, Colin Rothwell, Robert N.M. Watson, Jonathan Woodruff,
-Munraj Vadera, Simon W. Moore, Michael Roe, Brooks Davis, and
-Peter G. Neumann. <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201503-asplos2015-cheri-cmachine.pdf">Beyond the PDP-11: Architectural support for a memory-safe
-C abstract machine</a>,
-Proceedings of the Twentieth International Conference on Architectural Support
-for Programming Languages and Operating Systems (ASPLOS 2015), Istanbul,
-Turkey, March 2015.</p>
-</div>
-<div class="footnote-definition" id="4"><sup class="footnote-definition-label">4</sup>
-<p>Brooks Davis, Robert N. M. Watson, Alexander Richardson,
-Peter G. Neumann, Simon W. Moore, John Baldwin, David Chisnall,
-Jessica Clarke, Nathaniel Wesley Filardo, Khilan Gudka, Alexandre Joannou,
-Ben Laurie, A. Theodore Markettos, J. Edward Maste, Alfredo Mazzinghi,
-Edward Tomasz Napierala, Robert M. Norton, Michael Roe, Peter Sewell,
-Stacey Son, and Jonathan Woodruff. <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201904-asplos-cheriabi.pdf">CheriABI: Enforcing Valid Pointer
-Provenance and Minimizing Pointer Privilege in the POSIX C Run-time
-Environment</a>.
-In Proceedings of 2019 Architectural Support for Programming Languages and
-Operating Systems (ASPLOS’19). Providence, RI, USA, April 13-17, 2019.</p>
-</div>
-<div class="footnote-definition" id="5"><sup class="footnote-definition-label">5</sup>
-<p>Brooks Davis, Robert N. M. Watson, Alexander Richardson,
-Peter G. Neumann, Simon W. Moore, John Baldwin, David Chisnall,
-Jessica Clarke, Nathaniel Wesley Filardo, Khilan Gudka, Alexandre Joannou,
-Ben Laurie, A. Theodore Markettos, J. Edward Maste, Alfredo Mazzinghi,
-Edward Tomasz Napierala, Robert M. Norton, Michael Roe, Peter Sewell,
-Stacey Son, and Jonathan Woodruff. <a href="https://www.cl.cam.ac.uk/techreports/UCAM-CL-TR-932.pdf">CheriABI: Enforcing valid pointer
-provenance and minimizing pointer privilege in the POSIX C run-time
-environment</a>,
-Technical Report UCAM-CL-TR-932, Computer Laboratory, January 2019.</p>
-</div>
-<div class="footnote-definition" id="6"><sup class="footnote-definition-label">6</sup>
-<p>Nathaniel Wesley Filardo, Brett F. Gutstein, Jonathan Woodruff,
-Sam Ainsworth, Lucian Paul-Trifu, Brooks Davis, Hongyan Xia,
-Edward Tomasz Napierala, Alexander Richardson, John Baldwin, David Chisnall,
-Jessica Clarke, Khilan Gudka, Alexandre Joannou, A. Theodore Markettos,
-Alfredo Mazzinghi, Robert M. Norton, Michael Roe, Peter Sewell, Stacey Son,
-Timothy M. Jones, Simon W. Moore, Peter G. Neumann, and Robert N. M. Watson.
-<a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/2020oakland-cornucopia.pdf">Cornucopia: Temporal Safety for CHERI
-Heaps</a>.
-In Proceedings of the 41st IEEE Symposium on Security and Privacy (Oakland
-2020). San Jose, CA, USA, May 18-20, 2020.</p>
-</div>
-<div class="footnote-definition" id="7"><sup class="footnote-definition-label">7</sup>
-<p>Kayvan Memarian, Victor B. F. Gomes, Brooks Davis, Stephen Kell,
-Alexander Richardson, Robert N. M. Watson, and Peter Sewell. <a href="https://www.cl.cam.ac.uk/research/security/ctsrd/pdfs/201901-popl-cerberus.pdf">Exploring C
-Semantics and Pointer
-Provenance</a>.
-In Proceedings of the 46th ACM SIGPLAN Symposium on Principles of Programming
-Languages (POPL), Cascais, Portugal, 13-19 January, 2019.</p>
-</div>
+                        <h3 id="malloc_revoke_enabled3"><a class="header" href="#malloc_revoke_enabled3">malloc_revoke_enabled(3)</a></h3>
+<p>Heap allocator use of revocation is configurable by process.
+If it is enabled in the current process, <code>malloc_revoke_enabled(3)</code> will
+return true; otherwise, it will return false.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../temporal-apis/malloc_revoke_quarantine_force_flush.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../temporal-apis/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../acks/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../temporal-apis/malloc_revoke_quarantine_force_flush.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -276,11 +178,11 @@ Languages (POPL), Cascais, Portugal, 13-19 January, 2019.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../temporal-apis/malloc_revoke_quarantine_force_flush.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../temporal-apis/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../acks/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../temporal-apis/malloc_revoke_quarantine_force_flush.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
