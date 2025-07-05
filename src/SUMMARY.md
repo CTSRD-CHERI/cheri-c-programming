@@ -45,5 +45,8 @@
   - [Capability permissions](apis/capability-permissions.md)
   - [Bounds alignment due to compression](apis/bounds-alignment-due-to-compression.md)
   - [Implications for memory-allocator design](apis/implications-for-memory-allocator-design.md)
+- [C APIs for temporal safety](temporal-apis/README.md)
+  - [cheri_revoke_enabled(3)](temporal-apis/malloc_revoke_enabled.md)
+  - [malloc_revoke_quarantine_force_flush(3)](temporal-apis/malloc_revoke_quarantine_force_flush.md)
 - [Further reading](reading/README.md)
 - [Acknowledgements](acks/README.md)
