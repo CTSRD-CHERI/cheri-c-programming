@@ -1,4 +1,4 @@
-### printf(3)
+### Printing capabilities with the printf(4) API family
 
 When using the `printf(3)` family of APIs, the `#` qualifier to the `p` format
 string will cause additional architecture-specific information to be printed

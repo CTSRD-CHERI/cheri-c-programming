@@ -1,4 +1,4 @@
-### strfcap(3)
+### Generating string representations of capabilities
 
 ```
 ssize_t

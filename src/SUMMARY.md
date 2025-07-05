@@ -36,8 +36,8 @@
   - [Ambiguous provenance](compiler/ambiguous-provenance.md)
   - [Underaligned capabilities](compiler/underaligned-capabilities.md)
 - [Printing capabilities from C](printf/README.md)
-  - [strfcap(3)](printf/strfcap.md)
-  - [printf(3)](printf/printf.md)
+  - [Generating string representations of capabilities](printf/strfcap.md)
+  - [Printing capabilities with the printf(3) API family](printf/printf.md)
 - [C APIs to get and set capability properties](apis/README.md)
   - [CHERI-related header files](apis/cheri-related-header-files.md)
   - [Retrieving capability properties](apis/retrieving-capability-properties.md)
@@ -46,7 +46,9 @@
   - [Bounds alignment due to compression](apis/bounds-alignment-due-to-compression.md)
   - [Implications for memory-allocator design](apis/implications-for-memory-allocator-design.md)
 - [C APIs for temporal safety](temporal-apis/README.md)
-  - [cheri_revoke_enabled(3)](temporal-apis/malloc_revoke_enabled.md)
-  - [malloc_revoke_quarantine_force_flush(3)](temporal-apis/malloc_revoke_quarantine_force_flush.md)
+  - [Checking whether heap revocation is
+    enabled](temporal-apis/malloc_revoke_enabled.md)
+  - [Forcing revocation of outstanding freed
+    pointers](temporal-apis/malloc_revoke_quarantine_force_flush.md)
 - [Further reading](reading/README.md)
 - [Acknowledgements](acks/README.md)

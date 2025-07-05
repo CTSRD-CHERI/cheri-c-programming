@@ -1,4 +1,4 @@
-### malloc_revoke_quarantine_force_flush(3)
+### Forcing revocation of outstanding freed pointers
 
 Revocation of freed pointers is normally deferred, with the memory placed in
 quarantine, for performance reasons.
