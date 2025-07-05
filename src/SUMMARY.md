@@ -9,6 +9,7 @@
 - [CHERI C/C++](cheri-ccpp/README.md)
   - [The CHERI C/C++ run-time environment](cheri-ccpp/cheri-runtime.md)
   - [Referential, spatial, and temporal safety](cheri-ccpp/referential-spatial-temporal-safety.md)
+  - [Non-aliasing vs trapping memory safety](cheri-ccpp/nonaliasing-vs-trapping.md)
 - [Impact on the C/C++ programming model](impact/README.md)
   - [Capability-related faults](impact/capability-faults.md)
   - [Pointer provenance validity](impact/pointer-provenance-validity.md)
