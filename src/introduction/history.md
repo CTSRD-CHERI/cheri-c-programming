@@ -19,4 +19,8 @@ release:
    CHERI-adapted OSes such as CHERI Linux and seL4.
  * Include information on printing capability values via `strfcap(3)` and
    `printf(3)`.
+ * Discuss the goal of non-aliasing spatial and temporal memory safety, and
+   explore when exceptions may be, or must be, delivered.
+ * Note that some behaviors, such as bounds precision and revocation behavior,
+   are implementation defined.
  * Numerous minor editorial and formatting improvements.
