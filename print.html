@@ -1803,7 +1803,7 @@ to print to a human readable string.
 CHERI C/C++ defines a decoded string format for capabilities, which may be
 accessed indirectly via existing C APIs such as <code>printf(3)</code>, <code>snprintf(3)</code>, or
 directly via calls to the <code>strfcap(3)</code> function itself.</p>
-<div style="break-before: page; page-break-before: always;"></div><h3 id="strfcap3"><a class="header" href="#strfcap3">strfcap(3)</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="generating-string-representations-of-capabilities"><a class="header" href="#generating-string-representations-of-capabilities">Generating string representations of capabilities</a></h3>
 <pre><code>ssize_t
      strfcap(char * restrict buf, size_t maxsize,
          const char * restrict format, uintcap_t cap);
@@ -1844,7 +1844,7 @@ capabilities)</li>
 <li>Is not sealed</li>
 </ul>
 <p>The <code>strfcap(3)</code> man page should be referenced for full details.</p>
-<div style="break-before: page; page-break-before: always;"></div><h3 id="printf3"><a class="header" href="#printf3">printf(3)</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="printing-capabilities-with-the-printf4-api-family"><a class="header" href="#printing-capabilities-with-the-printf4-api-family">Printing capabilities with the printf(4) API family</a></h3>
 <p>When using the <code>printf(3)</code> family of APIs, the <code>#</code> qualifier to the <code>p</code> format
 string will cause additional architecture-specific information to be printed
 about a pointer.
@@ -2173,11 +2173,11 @@ See that manual page for complete documentation on available APIs.</p>
 temporal safety support being enabled, and
 <code>malloc_revoke_quarantine_force_flush(3)</code>, which triggers revocation and acts
 as a barrier on its completion.</p>
-<div style="break-before: page; page-break-before: always;"></div><h3 id="malloc_revoke_enabled3"><a class="header" href="#malloc_revoke_enabled3">malloc_revoke_enabled(3)</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="checking-whether-heap-revocation-is-enabled"><a class="header" href="#checking-whether-heap-revocation-is-enabled">Checking whether heap revocation is enabled</a></h3>
 <p>Heap allocator use of revocation is configurable by process.
 If it is enabled in the current process, <code>malloc_revoke_enabled(3)</code> will
 return true; otherwise, it will return false.</p>
-<div style="break-before: page; page-break-before: always;"></div><h3 id="malloc_revoke_quarantine_force_flush3"><a class="header" href="#malloc_revoke_quarantine_force_flush3">malloc_revoke_quarantine_force_flush(3)</a></h3>
+<div style="break-before: page; page-break-before: always;"></div><h3 id="forcing-revocation-of-outstanding-freed-pointers"><a class="header" href="#forcing-revocation-of-outstanding-freed-pointers">Forcing revocation of outstanding freed pointers</a></h3>
 <p>Revocation of freed pointers is normally deferred, with the memory placed in
 quarantine, for performance reasons.
 <code>malloc_revoke_quarantine_force_flush(3)</code> flushes the current quarantine,
