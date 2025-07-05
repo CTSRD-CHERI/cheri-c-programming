@@ -16,7 +16,8 @@ present in compilation to conventional architectures:
   out-of-bounds pointer will not grant access to another allocation.
 
   This is accomplished by adapting various memory allocators, including the run-time
-  linker for global variables, the stack allocator, and the heap allocator,
+  linker for global variables, thread-local variables, the stack allocator,
+  and the heap allocator,
   to set the bounds on the capability implementing a pointer before returning
   it to the caller.
   Due to precision constraints on capability bounds, bounds on returned

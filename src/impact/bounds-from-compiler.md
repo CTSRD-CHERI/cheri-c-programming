@@ -2,7 +2,7 @@
 
 The compiler will arrange that language-level pointers to stack allocations have suitable
 bounds, and that the run-time linker will return bounded pointers to global
-variables.
+and thread-local variables.
 Bounds will typically be set based on an explicitly requested allocation size
 (e.g., via the size passed to `alloca` or, for compiler-generated
 code or linker-allocated memory, by the C type mechanism (e.g.,
