@@ -11,7 +11,16 @@ Operating-system kernels are able to catch this exception via a trap handler,
 optionally delivering it to the run-time environment via OS-specific
 mechanisms.
 
-However, the language-level behavior of CHERI C/C++ is considerably more
+However, these exceptions are not guaranteed under the CHERI C/C++ model;
+instead, a combination of hardware and software implement non-aliasing spatial
+and temporal memory safety.
+This means that pointers are never permitted to access memory from another
+allocation, no matter how they are manipulated, but overruns into padding, or
+access after free while memory is in quarantine, may still be permitted.
+This topic is explored in greater detail in [Non-aliasing vs trapping memory
+safety](../cheri-ccpp/nonaliasing-vs-trapping.md).
+
+Further, the language-level behavior of CHERI C/C++ is considerably more
 subtle: existing undefined behavior semantics in C are retained.
 The compiler is free to assume that loads and stores will not trap (i.e., that
 any program is free of undefined behavior), and may optimize under this
@@ -26,8 +35,8 @@ In other environments, such as bare metal or under an embedded OS, behavior is
 specific to those environments, as it will depend both on how architectural
 exceptions are handled, and how those events are delivered to the C-language
 stack.
-Fail stop may be appropriate behavior in some environments, and is in fact the
-default behavior in CheriABI when `SIGPROT` is not handled.
+Fail stop may be appropriate behavior in some environments, and is the default
+behavior in CheriABI when `SIGPROT` is not handled.
 
 <!--
 \rwnote{We've opted to use the term "hardware exception" throughout, and
