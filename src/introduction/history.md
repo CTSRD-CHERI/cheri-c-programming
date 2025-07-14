@@ -31,4 +31,7 @@ the following changes:
    system heap allocator.
  * Note that some behaviors, such as bounds precision and revocation behavior,
    are implementation defined.
+ * Document expectations for in-memory capabilities, in particular the
+   portability of `NULL` pointer values, and non-portability of any other
+   assumptions.
  * Numerous minor editorial and formatting improvements.

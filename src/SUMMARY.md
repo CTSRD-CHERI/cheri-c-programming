@@ -16,6 +16,7 @@
     - [Recommended use of C-language types](impact/recommended-use-c-types.md)
     - [Capability alignment in memory](impact/capability-alignment-in-memory.md)
     - [Single-origin provenance](impact/single-origin-provenance.md)
+  - [Capability representation in memory](impact/capability-representation.md)
   - [Bounds](impact/bounds.md)
     - [Bounds from the compiler and linker](impact/bounds-from-compiler.md)
     - [Bounds from the heap allocator](impact/bounds-from-heap-allocator.md)
