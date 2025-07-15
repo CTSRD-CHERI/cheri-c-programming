@@ -52,9 +52,9 @@ The address and the metadata are held in addressable memory, but direct
 interpretation of the metadata will be non-portable across CHERI
 implementations.
 There are cases in which non-portability is both acceptable and essential,
-such as in the implementation of debugging and tracing tools intentionally
-targeting specific target architectures, especially for cross-debugging or
-coredump analysis.
+such as in the implementation of compilation, linking, debugging, and tracing
+tools intentionally targeting specific target architectures, especially for
+cross compilation, cross debugging, or coredump analysis.
 However, for general-purpose software, portable access is offered via
 [CHERI C APIs to get and set capability
 properties](../apis/retrieving-capability-properties.md), and these should
