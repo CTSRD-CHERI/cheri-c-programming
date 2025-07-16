@@ -1,10 +1,11 @@
 ## Capability representation in memory
 
 Underlying implementations of CHERI are diverse, spanning 32-bit
-microcontrollers (such as CHERIoT) to 64-bit server-class processors (such as
-Arm's Morello).
+microcontrollers (such as Microsoft's CHERIoT) to 64-bit server-class
+processors (such as Arm's Morello).
 CHERI C/C++ provide broad flexibility for implementations to represent
-capability metadata in ways most suitable to their individual requirements.
+capability metadata in the ways most suitable to their individual
+requirements.
 One specific area in which CHERI implementations may differ is in the specific
 in-memory representations of capabilities, due to not just different address
 sizes, but also different tradeoffs around bounds compression, permissions,
@@ -15,57 +16,39 @@ types, with operations such as dereferencing a pointer or performing pointer
 arithmetic implemented by compiler-generated code.
 Broadly, a capability consists of three parts: An address, inline metadata,
 and a validity tag.
-When stored in memory, CHERI capabilities consist of two adjacent
-address-sized words, stored at capability alignment:
+When stored in memory, CHERI capabilities are twice the size of the native
+address type (e.g., 128 bits on 64-bit systems, and 64 bits on 32-bit
+systems), in addition to an unaddressable tag bit.
+Tag storage is capability aligned, and hence capabilities must themselves be
+stored at capability alignment.
 
- - The lower address-sized word holds the address.
- - The higher address-sized word holds the inline metadata.
+### Non-portability of the in-memory representation
 
-The capability validity tag is not directly addressable in memory.
+To the greatest extent possible, it is desirable to write *portable CHERI
+C/C++ code* that never directly interprets the in-memory representation of a
+capability, with the exception of `NULL` values (see below).
+Portable access to capability fields must be made for [CHERI C APIs to get and
+set capability properties](../apis/retrieving-capability-properties.md).
 
-### In-memory representation of the capability address
+However, there are cases in which writing *non-portable CHERI C/C++ code* is
+both acceptable and essential, such as in the implementation of compilation,
+linking, debugging, and tracing tools intentionally targeting specific target
+architectures.
+This is especially true when code will not be operating on the target
+architecture itself, such as for cross-compilation, cross-linkage, and
+cross-debugging, including in accessing core dumps.
+In these cases, architecture specifications must be referenced in writing
+encoding and decoding code, as there are significant variations between
+platforms, and platforms themselves may also have parametizable elements to
+their encoding.
 
-The address word is stored in the native integer representation of the
-architecture, and will be identical to the value returned by
-[`cheri_address_get()`](../apis/retrieving-capability-properties.md) for the
-capability.
-Taking a pointer to an in-memory capability and casting it to an address-sized
-integer type (e.g., `ptraddr_t`) will give access to the capability's address
-or integer value.
-These integer values can be printed, subjected to integer arithmetic, and so
-on, but do not preserve pointer provenance and cannot be cast back to valid
-pointers to be dereferenced.
-Capabilities must be loaded and stored as either pointer types, or as
-`intptr_t` or `uintptr_t`, as described in [Recommended use of C-language
-types](recommended-use-c-types.md).
-
-The following code will always succeed:
-```
-	char c, *cp = &c;
-
-	assert(*(ptraddr_t *)&cp == cheri_address_get(cp);
-```
-
-### In-memory representation of capability inline metadata
-
-The address and the metadata are held in addressable memory, but direct
-interpretation of the metadata will be non-portable across CHERI
-implementations.
-There are cases in which non-portability is both acceptable and essential,
-such as in the implementation of compilation, linking, debugging, and tracing
-tools intentionally targeting specific target architectures, especially for
-cross compilation, cross debugging, or coredump analysis.
-However, for general-purpose software, portable access is offered via
-[CHERI C APIs to get and set capability
-properties](../apis/retrieving-capability-properties.md), and these should
-always be preferred where their use is practical.
-
-### In-memory capabilities holding NULL pointers
+### In-memory representation of NULL pointers
 
 In conventional, integer-based architectures implement `NULL` pointers
 integers with a value of `0`.
 CHERI C/C++ similarly represents `NULL` as an all-zero capability value with
-zero tag value.
+zero tag value, which is the only *portable* aspect of the in-mmory
+representation of a CHERI capability.
 
 This has a number of implications, including that zero-filled memory with
 zeroed tag values will be interpreted as being `NULL`-filled, as is the case
