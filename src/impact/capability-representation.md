@@ -47,7 +47,7 @@ their encoding.
 In conventional, integer-based architectures implement `NULL` pointers
 integers with a value of `0`.
 CHERI C/C++ similarly represents `NULL` as an all-zero capability value with
-zero tag value, which is the only *portable* aspect of the in-mmory
+zero tag value, which is the only *portable* aspect of the in-memory
 representation of a CHERI capability.
 
 This has a number of implications, including that zero-filled memory with
