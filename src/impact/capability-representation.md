@@ -19,8 +19,8 @@ and a validity tag.
 When stored in memory, CHERI capabilities are twice the size of the native
 address type (e.g., 128 bits on 64-bit systems, and 64 bits on 32-bit
 systems), in addition to an unaddressable tag bit.
-Tag storage is capability aligned, and hence capabilities must themselves be
-stored at capability alignment.
+There is one tag per capability aligned region of memory, and hence
+capabilities must themselves be stored at capability alignment.
 
 ### Non-portability of the in-memory representation
 
