@@ -52,7 +52,7 @@ representation of a CHERI capability.
 
 This has a number of implications, including that zero-filled memory with
 zeroed tag values will be interpreted as being `NULL`-filled, as is the case
-with conventional architecture targets for C/C++.
+with conventional runtimes for C/C++.
 This is particularly relevant for automatically initialized variable values
 (such as global variables without specific initialization values), pre-zeroed
 memory allocated by `calloc()`, or memory explicitly zeroed using
