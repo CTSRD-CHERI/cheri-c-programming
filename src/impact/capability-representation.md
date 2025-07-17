@@ -71,5 +71,5 @@ The following code will always succeed:
 
 	/* All bytes in the NULL pointer are 0. */
 	memset(zeroes, 0, sizeof(zeroes));
-	assert(memcpy(&p, zeroes, sizeof(p)) == 0);
+	assert(memcmp(&p, zeroes, sizeof(p)) == 0);
 ```
