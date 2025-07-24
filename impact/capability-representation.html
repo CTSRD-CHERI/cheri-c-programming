@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Bounds - CHERI C/C++ Programming Guide</title>
+        <title>Capability representation in memory - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,30 +155,82 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="bounds"><a class="header" href="#bounds">Bounds</a></h2>
-<p>CHERI C/C++ pointers are implemented using capabilities that enforce lower and
-upper bounds on access.
-In the pure-capability run-time environment, those bounds are normally set to
-the range of the memory allocation into which the pointer is intended to
-point.
-Because of capability compression, increased alignment requirements may apply
-to larger allocations (see <a href="../apis/bounds-alignment-due-to-compression.html">Bounds alignment due to compression</a>).</p>
-<p>Bounds may be set on pointers returned by multiple system components including
-the OS kernel, the run-time linker, compiler-generated code, system libraries,
-and other utility functions.
-As with violations of provenance validity, out-of-bounds accesses — including
-load, store, and instruction fetch — trigger a hardware exception (see
-<a href="capability-faults.html">Capability-related faults</a>).</p>
+                        <h2 id="capability-representation-in-memory"><a class="header" href="#capability-representation-in-memory">Capability representation in memory</a></h2>
+<p>Underlying implementations of CHERI are diverse, spanning 32-bit
+microcontrollers (such as Microsoft's CHERIoT) to 64-bit server-class
+processors (such as Arm's Morello).
+CHERI C/C++ provide broad flexibility for implementations to represent
+capability metadata in the ways most suitable to their individual
+requirements.
+One specific area in which CHERI implementations may differ is in the specific
+in-memory representations of capabilities, due to not just different address
+sizes, but also different tradeoffs around bounds compression, permissions,
+and so on.</p>
+<p>CHERI C/C++ in general expect that capabilities will be accessed via pointer
+types, with operations such as dereferencing a pointer or performing pointer
+arithmetic implemented by compiler-generated code.
+Broadly, a capability consists of three parts: An address, inline metadata,
+and a validity tag.
+When stored in memory, CHERI capabilities are twice the size of the native
+address type (e.g., 128 bits on 64-bit systems, and 64 bits on 32-bit
+systems), in addition to an unaddressable tag bit.
+There is one tag per capability aligned region of memory, and hence
+capabilities must themselves be stored at capability alignment.</p>
+<h3 id="non-portability-of-the-in-memory-representation"><a class="header" href="#non-portability-of-the-in-memory-representation">Non-portability of the in-memory representation</a></h3>
+<p>To the greatest extent possible, it is desirable to write <em>portable CHERI
+C/C++ code</em> that never directly interprets the in-memory representation of a
+capability, with the exception of <code>NULL</code> values (see below).
+Portable access to capability fields must be made using the <a href="../apis/retrieving-capability-properties.html">CHERI C APIs to
+get and set capability
+properties</a>.</p>
+<p>However, there are cases in which writing <em>non-portable CHERI C/C++ code</em> is
+both acceptable and essential, such as in the implementation of compilation,
+linking, debugging, and tracing tools intentionally targeting specific target
+architectures.
+This is especially true when code will not be operating on the target
+architecture itself, such as for cross-compilation, cross-linkage, and
+cross-debugging, including in accessing core dumps.
+In these cases, architecture specifications must be referenced in writing
+encoding and decoding code, as there are significant variations between
+platforms, and platforms themselves may also have parametizable elements to
+their encoding.</p>
+<h3 id="in-memory-representation-of-null-pointers"><a class="header" href="#in-memory-representation-of-null-pointers">In-memory representation of NULL pointers</a></h3>
+<p>Conventional, integer-based architectures implement <code>NULL</code> pointers
+integers with a value of <code>0</code>.
+CHERI C/C++ similarly represents <code>NULL</code> as an all-zero capability value with
+zero tag value, which is the only <em>portable</em> aspect of the in-memory
+representation of a CHERI capability.</p>
+<p>This has a number of implications, including that zero-filled memory with
+zeroed tag values will be interpreted as being <code>NULL</code>-filled, as is the case
+with conventional runtimes for C/C++.
+This is particularly relevant for automatically initialized variable values
+(such as global variables without specific initialization values), pre-zeroed
+memory allocated by <code>calloc()</code>, or memory explicitly zeroed using
+<code>memset(p, 0, n)</code>.
+Similarly, storing <code>NULL</code> pointer values in memory will result in that memory
+being zeroed.</p>
+<p>The following code will always succeed:</p>
+<pre><code>	void *p = NULL;
+	char zeroes[sizeof(p)];
+
+	/* NULL == 0. */
+	assert(p == 0);
+	assert(cheri_address_get(p) == 0);
+
+	/* All bytes in the NULL pointer are 0. */
+	memset(zeroes, 0, sizeof(zeroes));
+	assert(memcmp(&amp;p, zeroes, sizeof(p)) == 0);
+</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../impact/capability-representation.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../impact/single-origin-provenance.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../impact/bounds-from-compiler.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../impact/bounds.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -188,11 +240,11 @@ load, store, and instruction fetch — trigger a hardware exception (see
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../impact/capability-representation.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../impact/single-origin-provenance.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../impact/bounds-from-compiler.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../impact/bounds.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

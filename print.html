@@ -323,6 +323,9 @@ explore when exceptions may be, or must be, delivered.</li>
 system heap allocator.</li>
 <li>Note that some behaviors, such as bounds precision and revocation behavior,
 are implementation defined.</li>
+<li>Document expectations for in-memory capabilities, in particular the
+portability of <code>NULL</code> pointer values, and non-portability of any other
+assumptions.</li>
 <li>Numerous minor editorial and formatting improvements.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="background"><a class="header" href="#background">Background</a></h1>
@@ -1053,6 +1056,72 @@ However, this would add significant complexity to the compiler and we have not s
 \psnote{from a language-design POV, it'd be pretty horrid to have substantial semantics depend on just how smart one's analysis is}
 \arnote{I agree. Even the current behavior is quite ugly, but at least it has measurable compatibility benefits.}
 -->
+<div style="break-before: page; page-break-before: always;"></div><h2 id="capability-representation-in-memory"><a class="header" href="#capability-representation-in-memory">Capability representation in memory</a></h2>
+<p>Underlying implementations of CHERI are diverse, spanning 32-bit
+microcontrollers (such as Microsoft's CHERIoT) to 64-bit server-class
+processors (such as Arm's Morello).
+CHERI C/C++ provide broad flexibility for implementations to represent
+capability metadata in the ways most suitable to their individual
+requirements.
+One specific area in which CHERI implementations may differ is in the specific
+in-memory representations of capabilities, due to not just different address
+sizes, but also different tradeoffs around bounds compression, permissions,
+and so on.</p>
+<p>CHERI C/C++ in general expect that capabilities will be accessed via pointer
+types, with operations such as dereferencing a pointer or performing pointer
+arithmetic implemented by compiler-generated code.
+Broadly, a capability consists of three parts: An address, inline metadata,
+and a validity tag.
+When stored in memory, CHERI capabilities are twice the size of the native
+address type (e.g., 128 bits on 64-bit systems, and 64 bits on 32-bit
+systems), in addition to an unaddressable tag bit.
+There is one tag per capability aligned region of memory, and hence
+capabilities must themselves be stored at capability alignment.</p>
+<h3 id="non-portability-of-the-in-memory-representation"><a class="header" href="#non-portability-of-the-in-memory-representation">Non-portability of the in-memory representation</a></h3>
+<p>To the greatest extent possible, it is desirable to write <em>portable CHERI
+C/C++ code</em> that never directly interprets the in-memory representation of a
+capability, with the exception of <code>NULL</code> values (see below).
+Portable access to capability fields must be made using the <a href="impact/../apis/retrieving-capability-properties.html">CHERI C APIs to
+get and set capability
+properties</a>.</p>
+<p>However, there are cases in which writing <em>non-portable CHERI C/C++ code</em> is
+both acceptable and essential, such as in the implementation of compilation,
+linking, debugging, and tracing tools intentionally targeting specific target
+architectures.
+This is especially true when code will not be operating on the target
+architecture itself, such as for cross-compilation, cross-linkage, and
+cross-debugging, including in accessing core dumps.
+In these cases, architecture specifications must be referenced in writing
+encoding and decoding code, as there are significant variations between
+platforms, and platforms themselves may also have parametizable elements to
+their encoding.</p>
+<h3 id="in-memory-representation-of-null-pointers"><a class="header" href="#in-memory-representation-of-null-pointers">In-memory representation of NULL pointers</a></h3>
+<p>Conventional, integer-based architectures implement <code>NULL</code> pointers
+integers with a value of <code>0</code>.
+CHERI C/C++ similarly represents <code>NULL</code> as an all-zero capability value with
+zero tag value, which is the only <em>portable</em> aspect of the in-memory
+representation of a CHERI capability.</p>
+<p>This has a number of implications, including that zero-filled memory with
+zeroed tag values will be interpreted as being <code>NULL</code>-filled, as is the case
+with conventional runtimes for C/C++.
+This is particularly relevant for automatically initialized variable values
+(such as global variables without specific initialization values), pre-zeroed
+memory allocated by <code>calloc()</code>, or memory explicitly zeroed using
+<code>memset(p, 0, n)</code>.
+Similarly, storing <code>NULL</code> pointer values in memory will result in that memory
+being zeroed.</p>
+<p>The following code will always succeed:</p>
+<pre><code>	void *p = NULL;
+	char zeroes[sizeof(p)];
+
+	/* NULL == 0. */
+	assert(p == 0);
+	assert(cheri_address_get(p) == 0);
+
+	/* All bytes in the NULL pointer are 0. */
+	memset(zeroes, 0, sizeof(zeroes));
+	assert(memcmp(&amp;p, zeroes, sizeof(p)) == 0);
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h2 id="bounds"><a class="header" href="#bounds">Bounds</a></h2>
 <p>CHERI C/C++ pointers are implemented using capabilities that enforce lower and
 upper bounds on access.
