@@ -127,13 +127,15 @@ existing code, it does slightly increase the porting effort.
 
 Subobject bounds are considered *opportunistic* because it may not be possible
 to prevent aliasing within the bounds of a subobject pointer without
-disturbing the binary layout of the containing structure to permit greater
-alignment and padding.
+disturbing the binary layout policy for containing structures to permit
+greater alignment and padding.
 This particularly affects larger objects embedded within otherwise short
 structures, such as large buffers with a short header.
 In these cases, more precise bounds can be achieved by separately heap
 allocating storage for the buffer, rather than embedding them in the same
 allocation.
+In some limited cases, ordering structure fields can also assist with bounds
+precision for subobjects.
 
 This is an active area of research.
 In the future, new compiler modes may be supported that allow fail stops to
