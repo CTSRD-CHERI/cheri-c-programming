@@ -7,8 +7,12 @@ Subject to limitations arising from imprecise bounds (see
 [Bounds precision](../background/cheri-capabilities.md#bounds-precision)),
 this will prevent an overflow on that array from affecting the remainder of
 the structure, improving spatial safety.
+
 Subobject bounds are not enabled by default as they may require additional source code changes
 for compatibility, but can be enabled using the `-Xclang -cheri-bounds=subobject-safe` compiler flag.
+This is an active area of research, with consideration being given to enabling
+a subset of subobject bounds checks by default in the future due to the
+measurable security benefit and relatively low adoption friction.
 
 One example of C code that requires changes for subobject bounds is the `containerof`
 pattern, in which pointer arithmetic on a pointer to a subobject is used to
@@ -131,6 +135,7 @@ In these cases, more precise bounds can be achieved by separately heap
 allocating storage for the buffer, rather than embedding them in the same
 allocation.
 
+This is an active area of research.
 In the future, new compiler modes may be supported that allow fail stops to
 occur if non-aliasing is not achieved, or to implement required alignment and
 padding additions -- which may have significant memory overheads.
