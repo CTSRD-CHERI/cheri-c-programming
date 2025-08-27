@@ -1,10 +1,11 @@
-### Subobject bounds
+### Opportunistic subobject bounds
 
-CHERI C/C++ also supports automatically restricting the
+CHERI C/C++ also supports opportunistically restricting the
 bounds when a pointer is taken to a subobject &mdash; for example, an array
 embedded within another structure that itself has been heap allocated.
-This will prevent an overflow on that array from affecting the remainder of
-the structure, improving spatial safety.
+Subject to limitations arising from imprecise bounds, this will prevent an
+overflow on that array from affecting the remainder of the structure,
+improving spatial safety.
 Subobject bounds are not enabled by default as they may require additional source code changes
 for compatibility, but can be enabled using the `-Xclang -cheri-bounds=subobject-safe` compiler flag.
 
@@ -117,17 +118,24 @@ existing C and C++ code.
 While we have not encountered many issues related to subobject bounds in
 existing code, it does slightly increase the porting effort.
 
-<!--
-%\nwfnote{Already said above:}
-%Therefore, this feature is currently not enabled by default and requires a
-%compiler flag to be enabled.
--->
+## Effects of imprecise bounds
 
-<!--
-\psnote{that seems excessively bold to me}
-\psnote{what flag?}
-\psnote{curious: what has to change before you think it'd be a good default?}
--->
+Subobject bounds are considered *opportunistic* because it may not be possible
+to prevent aliasing within the bounds of a subobject pointer without
+disturbing the binary layout of the containing structure to permit greater
+alignment and padding.
+This particularly affects larger arrays embedded within otherwise short
+structures, such as large buffers with a short header.
+In these cases, more precise bounds can be achieved by separately heap
+allocating storage for the buffer, rather than embedding them in the same
+allocation.
+
+In the future, new compiler modes may be supported that allow fail stops to
+occur if non-aliasing is not achieved, or to implement required alignment and
+padding additions -- which may have significant memory overheads.
+We are exploring potential improvements to compiler warnings and errors to
+assist developers in debugging structure layouts that may lead to imprecise
+bounds, a fail stop, or potentially unacceptable memory overhead.
 
 [^5]: If flexible arrays members are declared using the C99 syntax with empty
 square brackets, the compiler will automatically use the remaining allocation
