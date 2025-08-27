@@ -125,7 +125,7 @@ Subobject bounds are considered *opportunistic* because it may not be possible
 to prevent aliasing within the bounds of a subobject pointer without
 disturbing the binary layout of the containing structure to permit greater
 alignment and padding.
-This particularly affects larger arrays embedded within otherwise short
+This particularly affects larger objects embedded within otherwise short
 structures, such as large buffers with a short header.
 In these cases, more precise bounds can be achieved by separately heap
 allocating storage for the buffer, rather than embedding them in the same
