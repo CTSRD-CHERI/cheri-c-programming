@@ -3,9 +3,10 @@
 CHERI C/C++ also supports opportunistically restricting the
 bounds when a pointer is taken to a subobject &mdash; for example, an array
 embedded within another structure that itself has been heap allocated.
-Subject to limitations arising from imprecise bounds, this will prevent an
-overflow on that array from affecting the remainder of the structure,
-improving spatial safety.
+Subject to limitations arising from imprecise bounds (see
+[Bounds precision](../background/cheri-capabilities.md#bounds-precision)),
+this will prevent an overflow on that array from affecting the remainder of
+the structure, improving spatial safety.
 Subobject bounds are not enabled by default as they may require additional source code changes
 for compatibility, but can be enabled using the `-Xclang -cheri-bounds=subobject-safe` compiler flag.
 
