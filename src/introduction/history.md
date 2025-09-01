@@ -34,4 +34,6 @@ the following changes:
  * Document expectations for in-memory capabilities, in particular the
    portability of `NULL` pointer values, and non-portability of any other
    assumptions.
+ * Document that subobject bounds, as currently implemented, are
+   opportunistic, and may not be precise.
  * Numerous minor editorial and formatting improvements.
