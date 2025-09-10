@@ -131,13 +131,24 @@ disturbing the binary layout policy for containing structures to permit
 greater alignment and padding.
 This particularly affects larger objects embedded within otherwise short
 structures, such as large buffers with a short header.
-In these cases, more precise bounds can be achieved by separately heap
-allocating storage for the buffer, rather than embedding them in the same
-allocation.
+Furthermore, variable-size structures pose a challenge because their size is
+determined at run-time and the code requires explicit changes to the layout and
+at the point of allocation to ensure representability.
+
+This is an active area of research.
+The problem of subobject bounds imprecision is also found in other programming
+patterns, where an allocation is subdivided into multiple chunks, without any
+cooperation from the allocator. We refer to these patterns as
+intra-allocation bounds.
+
+There are multiple approaches to address subobject bounds imprecision.
+In general, precise bounds can be achieved by separately heap
+allocating storage for each imprecise structure member, rather than embedding
+them in the same allocation. This has trade-offs with respect to the added
+complexity of managing an additional allocation, as well as additional indirection.
 In some limited cases, ordering structure fields can also assist with bounds
 precision for subobjects.
 
-This is an active area of research.
 In the future, new compiler modes may be supported that allow fail stops to
 occur if non-aliasing is not achieved, or to implement required alignment and
 padding additions -- which may have significant memory overheads.
@@ -145,6 +156,25 @@ We are exploring potential improvements to compiler warnings and errors to
 assist developers in debugging structure layouts that may lead to imprecise
 bounds, a fail stop, or potentially unacceptable memory overhead.
 
+Bounds precision of variable-size structures is determined by the offset
+and size of the last member. This is more complicated to address with
+compile-time warnings, because the size is not known.
+Multiple approaches are possible in this case as well.
+One option is to continue best-effort for variable size structs, specifically
+for the variable-size member, to maximise source code compatibility.
+A compiler option could control the exact bounds behaviour for variable-size
+structure members, so that the programmer can opt-in to the fail-open behaviour.
+It also possible to introduce annotations on variable-size members that specify
+the maximum expected size, so that the compiler can insert the appropriate
+amount of padding.
+
+Finally, note that variable-size structures can only exhibit bounds aliasing on
+the base, because the variable-size member is necessarily at the end of the
+structure and, assuming the allocator is well-behaved, any rounding on the top
+will only alias with extra padding space that is already part of the
+representability padding for the whole allocation.
+
 [^5]: If flexible arrays members are declared using the C99 syntax with empty
 square brackets, the compiler will automatically use the remaining allocation
 size.
+
