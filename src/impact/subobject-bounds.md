@@ -1,12 +1,18 @@
-### Subobject bounds
+### Opportunistic subobject bounds
 
-CHERI C/C++ also supports automatically restricting the
+CHERI C/C++ also supports opportunistically restricting the
 bounds when a pointer is taken to a subobject &mdash; for example, an array
 embedded within another structure that itself has been heap allocated.
-This will prevent an overflow on that array from affecting the remainder of
+Subject to limitations arising from imprecise bounds (see
+[Bounds precision](../background/cheri-capabilities.md#bounds-precision)),
+this will prevent an overflow on that array from affecting the remainder of
 the structure, improving spatial safety.
+
 Subobject bounds are not enabled by default as they may require additional source code changes
 for compatibility, but can be enabled using the `-Xclang -cheri-bounds=subobject-safe` compiler flag.
+This is an active area of research, with consideration being given to enabling
+a subset of subobject bounds checks by default in the future due to the
+measurable security benefit and relatively low adoption friction.
 
 One example of C code that requires changes for subobject bounds is the `containerof`
 pattern, in which pointer arithmetic on a pointer to a subobject is used to
@@ -117,18 +123,58 @@ existing C and C++ code.
 While we have not encountered many issues related to subobject bounds in
 existing code, it does slightly increase the porting effort.
 
-<!--
-%\nwfnote{Already said above:}
-%Therefore, this feature is currently not enabled by default and requires a
-%compiler flag to be enabled.
--->
+## Effects of imprecise bounds
 
-<!--
-\psnote{that seems excessively bold to me}
-\psnote{what flag?}
-\psnote{curious: what has to change before you think it'd be a good default?}
--->
+Subobject bounds are considered *opportunistic* because it may not be possible
+to prevent aliasing within the bounds of a subobject pointer without
+disturbing the binary layout policy for containing structures to permit
+greater alignment and padding.
+This particularly affects larger objects embedded within otherwise short
+structures, such as large buffers with a short header.
+Furthermore, variable-size structures pose a challenge because their size is
+determined at run-time and the code requires explicit changes to the layout and
+at the point of allocation to ensure representability.
+
+This is an active area of research.
+The problem of subobject bounds imprecision is also found in other programming
+patterns, where an allocation is subdivided into multiple chunks, without any
+cooperation from the allocator. We refer to these patterns as
+intra-allocation bounds.
+
+There are multiple approaches to address subobject bounds imprecision.
+In general, precise bounds can be achieved by separately heap
+allocating storage for each imprecise structure member, rather than embedding
+them in the same allocation. This has trade-offs with respect to the added
+complexity of managing an additional allocation, as well as additional indirection.
+In some limited cases, ordering structure fields can also assist with bounds
+precision for subobjects.
+
+In the future, new compiler modes may be supported that allow fail stops to
+occur if non-aliasing is not achieved, or to implement required alignment and
+padding additions -- which may have significant memory overheads.
+We are exploring potential improvements to compiler warnings and errors to
+assist developers in debugging structure layouts that may lead to imprecise
+bounds, a fail stop, or potentially unacceptable memory overhead.
+
+Bounds precision of variable-size structures is determined by the offset
+and size of the last member. This is more complicated to address with
+compile-time warnings, because the size is not known.
+Multiple approaches are possible in this case as well.
+One option is to continue best-effort for variable size structs, specifically
+for the variable-size member, to maximise source code compatibility.
+A compiler option could control the exact bounds behaviour for variable-size
+structure members, so that the programmer can opt-in to the fail-open behaviour.
+It also possible to introduce annotations on variable-size members that specify
+the maximum expected size, so that the compiler can insert the appropriate
+amount of padding.
+
+Finally, note that variable-size structures can only exhibit bounds aliasing on
+the base, because the variable-size member is necessarily at the end of the
+structure and, assuming the allocator is well-behaved, any rounding on the top
+will only alias with extra padding space that is already part of the
+representability padding for the whole allocation.
 
 [^5]: If flexible arrays members are declared using the C99 syntax with empty
 square brackets, the compiler will automatically use the remaining allocation
 size.
+
