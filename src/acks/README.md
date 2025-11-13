@@ -16,7 +16,7 @@ This work was supported in part by the Innovate UK project Digital Security by
 Design (DSbD) Technology Platform Prototype, 105694.
 
 This work was supported by part by the Engineering and Physical Sciences
-Research Council (SPSRC) under UKRI3001: CHERI Research Centre, and under the
+Research Council (EPSRC) under UKRI3001: CHERI Research Centre, and under the
 EPSRC REMS Programme Grant (EP/EP/K008528/1).
 
 This project has received funding from the European Research Council (ERC)
