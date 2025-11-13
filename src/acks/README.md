@@ -15,11 +15,13 @@ policies of the Department of Defense or the U.S. Government.
 This work was supported in part by the Innovate UK project Digital Security by
 Design (DSbD) Technology Platform Prototype, 105694.
 
+This work was supported by part by the Engineering and Physical Sciences
+Research Council (SPSRC) under UKRI3001: CHERI Research Centre, and under the
+EPSRC REMS Programme Grant (EP/EP/K008528/1).
+
 This project has received funding from the European Research Council (ERC)
 under the European Union’s Horizon 2020 research and innovation programme
-(grant agreement No 789108), ERC Advanced Grant ELVER, and also under
-UKRI3001: CHERI Research Centre.
+(grant agreement No 789108), ERC Advanced Grant ELVER.
 
-We also acknowledge the EPSRC REMS Programme Grant (EP/K008528/1), Arm
-Limited, HP Enterprise, and Google, Inc.
+We also acknowledge Arm Limited, HP Enterprise, and Google, Inc.
 Approved for Public Release, Distribution Unlimited.
