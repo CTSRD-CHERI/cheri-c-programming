@@ -87,7 +87,7 @@ to the protection model:
 
 <!-- XXXRW: Should talk about sealed entry capabilities here. -->
 
-### Bounds precision
+### Capability tagging
 
 When stored in memory, valid capabilities must be naturally aligned &mdash; i.e.,
 at 64-bit or 128-bit boundaries, depending on capability size &mdash; as that is
@@ -95,6 +95,8 @@ the granularity at which in-memory tags are maintained.
 Partial or complete overwrites with data, rather than a complete overwrite
 with a valid capability, lead to the in-memory tag being cleared, preventing
 corrupted capabilities from later being dereferenced.
+
+### Bounds precision
 
 In order to reduce the memory footprint of capabilities, capability
 compression is used to reduce the overhead of bounds so that the full
