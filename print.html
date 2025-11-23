@@ -444,13 +444,14 @@ memory protection.</p>
 </li>
 </ul>
 <!-- XXXRW: Should talk about sealed entry capabilities here. -->
-<h3 id="bounds-precision"><a class="header" href="#bounds-precision">Bounds precision</a></h3>
+<h3 id="capability-tagging"><a class="header" href="#capability-tagging">Capability tagging</a></h3>
 <p>When stored in memory, valid capabilities must be naturally aligned — i.e.,
 at 64-bit or 128-bit boundaries, depending on capability size — as that is
 the granularity at which in-memory tags are maintained.
 Partial or complete overwrites with data, rather than a complete overwrite
 with a valid capability, lead to the in-memory tag being cleared, preventing
 corrupted capabilities from later being dereferenced.</p>
+<h3 id="bounds-precision"><a class="header" href="#bounds-precision">Bounds precision</a></h3>
 <p>In order to reduce the memory footprint of capabilities, capability
 compression is used to reduce the overhead of bounds so that the full
 capability, including address, permissions, and bounds fits within 64 or
