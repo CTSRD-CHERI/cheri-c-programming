@@ -29,7 +29,7 @@
   - [Function prototypes and calling conventions](impact/function-prototypes-and-calling-conventions.md)
   - [Data-structure and memory-allocation alignment](impact/data-structure-and-memory-allocation-alignment.md)
     - [Restrictions in capability locations in memory](impact/restrictions-in-capability-locations.md)
-- [Limitations to memory safety](limitations/README.md)
+- [Limitations to CHERI C/C++ memory safety](limitations/README.md)
   - [Integer-pointer safety vs. true pointer type safety](limitations/integer-pointer-safety.md)
   - [Compile-time uncertainty on regarding pointer types](limitations/compile-time-type-uncertainty.md)
   - [Bounds imprecision, sub-object bounds, and custom allocators](limitations/bounds-imprecision.md)
