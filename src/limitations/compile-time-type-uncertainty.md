@@ -19,7 +19,7 @@ also a construct that programmers can implement.
 The C `memcpy()` API copies a fixed quantity of data from one memory location
 to another.
 In CHERI C/C++, `memcpy()` is capability-oblivious: It is not, in general,
-possibly to know whether the originating memory should or does contain
+possible to know whether the originating memory should or does contain
 capabilities, or whether the destination should or can accept their storage.
 For example, a pointer to a structure that does contain a pointer field could
 be cast to `void *`, losing that information.
