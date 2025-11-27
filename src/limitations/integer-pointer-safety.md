@@ -53,4 +53,4 @@ full dynamic type safety.
   Frequently, type errors of interest in C++ involve complex class hierarchies
   and inheritence, which are not directly mappable into a flat type space.
   New types of dynamic type enforcement, using *otype* or other capability 
-  features, seems a promising area to explore in the future.
+  features, seem a promising area to explore in the future.
