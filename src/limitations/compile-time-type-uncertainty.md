@@ -25,7 +25,7 @@ For example, a pointer to a structure that does contain a pointer field could
 be cast to `void *`, losing that information.
 Similarly, a pointer to an array integer types, and no pointer fields, could
 be cast to `void *`, losing that information.
-While a manual copy of fields might do so using variables the do (or do not)
+While a manual copy of fields might do so using variables that do (or do not)
 preserve tagged values, `memcpy()` implementations must be *capability
 oblivious*: They copy copy any capabilities present, preserving rather than
 stripping tags.
