@@ -27,7 +27,7 @@ Similarly, a pointer to an array integer types, and no pointer fields, could
 be cast to `void *`, losing that information.
 While a manual copy of fields might do so using variables that do (or do not)
 preserve tagged values, `memcpy()` implementations must be *capability
-oblivious*: They copy copy any capabilities present, preserving rather than
+oblivious*: They copy any capabilities present, preserving rather than
 stripping tags.
 
 The situation is furhter complicated by compiler optimizations that may either
