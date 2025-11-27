@@ -2,7 +2,7 @@
 
 CHERI C/C++ provide strong, dynamic differentiation of integer and pointer
 values by virtue of capability tags: Integer values are not architecturally
-redereferenceable.
+dereferenceable.
 CHERI C/C++ also strongly differentiate executable pointers (which will be
 sealed and have execute permission) from data pointers (which will have load
 and store permissions), which prevents execution of data as well as pointer
