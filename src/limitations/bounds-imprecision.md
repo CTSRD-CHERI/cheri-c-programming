@@ -28,6 +28,14 @@ of this imprecise bounding behavior, including:
    not just set bounds, but also ensure suitable alignment and padding such
    that non-aliasing can be enforced using CHERI bounds.
 
+ - Sub-allocation patterns, where the result of a single call to `malloc()` is used
+   to allocate two or more related but disjointed objects, possibly of different types.
+   This is different from custom allocators, because the intent is not to write
+   a memory allocator, but rather to optimise the allocation of multiple
+   related objects. Consider, for example, the contiguous allocation of an
+   array and a structure that references the array. In this case, bounds must be
+   set manually and bounds precision considerations are necessary.
+
  - Other uses of manually set bounds in libraries and applications to limit
    the potential for underruns and overruns, such as in packet parsing, which
    must similarly take into account new alignment and padding requirements.
@@ -43,6 +51,16 @@ bounds cannot be guaranteed to provide precise spatial protection.
   Compiler warnings about limited precision should be observed.
   When implementing protecion in memory allocators, guidance provided in this
   document should be observed to ensure precise spatial safety is achieved.
+
+**Advice to developers**: Sub-allocation patterns should be avoided. If multiple
+  objects need to be allocated, the system allocator (or application-specific
+  allocators) should be used to allocate each disjointed object separately and
+  should guarantee that the allocation is properly aligned and padded for
+  representability. If sub-allocation can not be avoided, care must be taken to
+  ensure that each sub-allocated object is placed at a representable boundary
+  within the main allocation (note that this is platform-specific).
+  Splitting a large allocation into multiple representable objects is not
+  straightforward, see [Bounds alignment](../apis/bounds-alignment-due-to-compression.md#bounds-alignment-due-to-compression).
 
 **Ongoing research**: SRI/Cambridge have ongoing research to improve the
   safety of sub-object bounds in the hopes of transitioning them from being
