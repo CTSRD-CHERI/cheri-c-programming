@@ -103,3 +103,10 @@ long` will lead to the pointer no longer being dereferenceable.
   rich forms of arithmetic on pointers.
   `long` and `unsigned long` should never be used to hold pointers that must
   remain deferenceable.
+
+**Advice to developers**: `ptraddr_t` should be used in place of `long`,
+`unsigned long` or `uint64_t` where an integer type is required to hold
+a virtual address.
+As [previously introduced](../impact/recommended-use-c-types.md), `ptraddr_t`
+is not dereferenceable on CHERI, and must be combined with a valid capability
+to generate a dereferenceable pointer.
