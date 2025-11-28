@@ -33,6 +33,38 @@ jobs:
           name: book
           path: book
 
+  build-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          gh \
+          texlive-latex-recommended \
+          texlive-latex-extra \
+          texlive-fonts-recommended \
+          texlive-fonts-extra \
+          texlive-xetex \
+          latexmk \
+          lmodern \
+          texlive-science
+
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Build PDF book
+        run: make pdf
+
+      - name: Upload pdf book artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cheri-c-programming.pdf
+          path: book
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     needs: build-mdbook
