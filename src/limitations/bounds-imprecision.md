@@ -68,3 +68,10 @@ bounds cannot be guaranteed to provide precise spatial protection.
   This involves improvements to compiler analysis, the use of trapping
   bounds-setting instructions to ensure fail-closedd behavior, and optional
   support for additional alignment and padding.
+  Early experiments with the CheriBSD kernel suggest that migrating to a
+  deterministically safe sub-object bounds mode can be feasible with potentially
+  modest disruption to the codebase (at least for the kernel). The main sources
+  of friction appear to be Variable Length Arrays (VLAs). The toolchain can be
+  extended to introduce padding to ensure sub-object representability; however,
+  there are open questions to quantify the disruption to structure padding,
+  whether this is acceptable and whether this can be automated.
