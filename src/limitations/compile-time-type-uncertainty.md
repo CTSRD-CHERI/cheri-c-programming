@@ -30,7 +30,7 @@ preserve tagged values, `memcpy()` implementations must be *capability
 oblivious*: They copy any capabilities present, preserving rather than
 stripping tags.
 
-The situation is furhter complicated by compiler optimizations that may either
+The situation is further complicated by compiler optimizations that may either
 inline or outline `memcpy()`.
 For example, a large structure assignment may appear to be type aware,
 generating a series of suitably typed loads and stores, preserving or
@@ -53,13 +53,17 @@ cause that to take place.
   when they need to, but may also preserve them when not expected to.
   If it is important to prevent propagation, use the
   `cheri_perms_and()` API to strip the `CHERI_PERM_LOAD_CAP` permission before
-    passing it to a routine that may perform a memory copy.
+  passing it to a routine that may perform a memory copy.
+  In the CheriBSD kernel, which frequently needs to limit the flow of
+  capabilities, `memcpynocap()` exists as a wrapper to this.
 
 **Ongoing research**: SRI/Cambridge are continuing our research into the
   effects of compiler optimisations and when to constrain optimisations to
   better enforce protection properties.
   However, the tradeoffs here are tricky given the pracical goal of minimizing
   source-code disruption.
+  It may be useful to add a new `memcpy_nocap()` API usable by both userlevel
+  and the kernel.
 
 ### Intentional integer-pointer type ambiguity
 
