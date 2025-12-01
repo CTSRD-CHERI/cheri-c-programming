@@ -29,12 +29,12 @@ of this imprecise bounding behavior, including:
    that non-aliasing can be enforced using CHERI bounds.
 
  - Sub-allocation patterns, where the result of a single call to `malloc()` is used
-   to allocate two or more related but disjointed objects, possibly of different types.
-   This is different from custom allocators, because the intent is not to write
+   to allocate two or more related but disjoint objects, possibly of different types.
+   This case is different from custom allocators, because the intention is not to write
    a memory allocator, but rather to optimise the allocation of multiple
    related objects. Consider, for example, the contiguous allocation of an
    array and a structure that references the array. In this case, bounds must be
-   set manually and bounds precision considerations are necessary.
+   set manually and considering precision will be necessary.
 
  - Other uses of manually set bounds in libraries and applications to limit
    the potential for underruns and overruns, such as in packet parsing, which
