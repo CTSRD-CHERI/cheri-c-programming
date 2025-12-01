@@ -19,10 +19,11 @@ for further details.
 There are, however, situations in which programmers must be explicitly aware
 of this imprecise bounding behavior, including:
 
- - Optional use of sub-object bounds, which are currently considered
-   *opportunistic protection* as they do not adjust structure alignment and
-   padding for fields.
-   This feaure is not currently enabled by default in the compiler.
+ - Optional use of sub-object bounds, which is currently considered
+   *opportunistic protection* as sub-object bounds do not adjust structure
+   alignment and padding for fields.
+   This feaure is not currently enabled by default in the compiler due to
+   these limitations.
 
  - Application-specific memory allocators, which require modest extensions to
    not just set bounds, but also ensure suitable alignment and padding such
