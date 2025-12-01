@@ -54,7 +54,7 @@ bounds cannot be guaranteed to provide precise spatial protection.
 
 **Advice to developers**: Sub-allocation patterns should be avoided. If multiple
   objects need to be allocated, the system allocator (or application-specific
-  allocators) should be used to allocate each disjointed object separately and
+  allocators) should be used to allocate each disjoint object separately, and
   should guarantee that the allocation is properly aligned and padded for
   representability. If sub-allocation can not be avoided, care must be taken to
   ensure that each sub-allocated object is placed at a representable boundary
