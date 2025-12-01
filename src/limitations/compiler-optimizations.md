@@ -25,7 +25,7 @@ control flows.
 CHERI does not, itself, prevent the use of uninitialized values, although it
 does impose a number of protections that hamper exploitation (such as tagged
 pointers, sealed control-flow pointers, spatial safety, and temporal safety).
-Further, compartmentalization limits the scope for stack reuse, preventing
+Further, compartmentalization may limit the scope for stack reuse, preventing
 (for example) application compartments from reusing stack space previously
 used for privileged components such as the run-time linker and heap
 allocators.
