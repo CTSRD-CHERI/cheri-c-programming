@@ -105,6 +105,9 @@ long` will lead to the pointer no longer being dereferenceable.
   essential to achieving the programming goals of either holding a pointer or
   integer in the same type (perhaps as an opaque argument), or to enable more
   rich forms of arithmetic on pointers.
+  Where programers wish to compute on the address of pointers without provenance, `ptraddr_t` should be used to make this clear.
+  Pointers can be unambiguously reconstructed using `ptraddr_t` computations and `cheri_address_set()`.
+  `ptraddr_t` is currently under consideration for standardization as paper [P3744R0](https://isocpp.org/files/papers/P3744R0.html).
   `long` and `unsigned long` should never be used to hold pointers that must
   remain deferenceable.
 
