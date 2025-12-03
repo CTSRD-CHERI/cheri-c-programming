@@ -80,7 +80,7 @@ realworld source code.
 When these types are used in CHERI C/C++, there are two important implications
 with programmer impact:
 
-  1. Capability-sized strorage will be allocated, rather than that of the
+  1. Capability-sized storage will be allocated, rather than that of the
      largest integer type, which can be confusing; i.e., `sizeof(intptr_t)`
      is not the same as `sizeof(intmax_t)`.
      Further, if these types have been used extensively, perhaps in preference
