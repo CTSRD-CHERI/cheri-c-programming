@@ -7,7 +7,7 @@ As confusion frequently arises about the most appropriate types to use for
 integers, pointers, and pointer-related values, we make the following
 recommendations:
 
-* **`int_t`, `int32_t`, `long_t`, `int64_t`, ...**: These pure integer types
+* **`int`, `int32_t`, `long`, `int64_t`, ...**: These pure integer types
   should be used to hold integer values
   that will never be cast to a pointer type without first combining them with
   another pointer value &mdash; e.g., by using them as an array offset.
