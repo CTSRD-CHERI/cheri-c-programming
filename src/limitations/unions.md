@@ -25,7 +25,7 @@ CHERI's underlying robustness to integer-pointer type confusion is valuable in
 mitigating such potential vulnerabilities, but as this does not provide strong
 type safety, nor prevent other types of type confusion, ultimately this is
 mitigation against attack techniques, rather than elimination of
-ulnerability.
+vulnerability.
 
 **Advice to developers**: Avoiding the use of unions in C will avoid such
   situations arising, especially in programming environments where the memory
