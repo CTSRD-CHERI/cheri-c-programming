@@ -36,4 +36,8 @@ the following changes:
    assumptions.
  * Document that subobject bounds, as currently implemented, are
    opportunistic, and may not be precise.
+ * Provide more detailed discussion of the limitations of the CHERI C/C++
+   approach including with respect to integer-pointer type safety vs full
+   pointer type safety, compile-time uncertainty on types, bounds imprecision,
+   unions, stack temporal safety, and compiler optimizations.
  * Numerous minor editorial and formatting improvements.
