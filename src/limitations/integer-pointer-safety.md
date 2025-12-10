@@ -41,7 +41,7 @@ full dynamic type safety.
 **Advice to developers**: While many integer-pointer type confusions are
   strongly prevented in CHERI C/C++, pointer-pointer type confusions other
   than between code and data are not prevented.
-  Given the apparent absence of static analysis tools addressing this problem,
+  Given the current absence of static analysis tools addressing this problem,
   the best recourse will be defensive programming styles that avoid the
   opportunity for pointer-pointer type confusion, and careful tagging and
   checking of invariants dynamically.
