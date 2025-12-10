@@ -82,7 +82,7 @@ with programmer impact:
 
   1. Capability-sized storage will be allocated, rather than that of the
      largest integer type, which can be confusing; i.e., `sizeof(intptr_t)`
-     is not the same as `sizeof(intmax_t)`.
+     may not be the same as `sizeof(intmax_t)`.
      Further, if these types have been used extensively, perhaps in preference
      to other integer types, this can lead to a significant memory overhead
      beyond that seen just from increasing the size of pointer types.
