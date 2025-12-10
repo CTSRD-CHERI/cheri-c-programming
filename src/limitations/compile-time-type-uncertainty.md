@@ -90,9 +90,17 @@ with programmer impact:
   2. Instructions are therefore used that will preserve the tag on a
      capability dynamically by virtue of using arithetic instructions normally
      used only for pointer types.
-     However, this means that CHERI C/C++ are not able to provide dynamic
-     integer-pointer type-confusion prevention, as the types are inherently
-     ambiguous.
+     However, this means that CHERI C/C++ are not able to provide certain
+     types of dynamic integer-pointer type-confusion prevention, as the types
+     are inherently ambiguous.
+
+     For example, while with non-`intptr_t` integer types, the tag will always
+     be cleared when its arithmetic operations are applied to a pointer, this
+     is not true when `intptr_t` is used for integers.
+     If `intptr_t` is used extensively for integer types (e.g., as the atom
+     type in a language runtime), then the opportunity for dynamic confusion
+     is restored: arithmetic operations intended only to operate on integer
+     values will also operate on pointers preserving the tag.
 
 It is worth further noting that the C types `long` and `unsigned long` have
 historically been used for these purposes, although that has been discouraged
