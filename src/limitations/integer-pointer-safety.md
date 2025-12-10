@@ -54,3 +54,13 @@ full dynamic type safety.
   and inheritence, which are not directly mappable into a flat type space.
   New types of dynamic type enforcement, using *otype* or other capability 
   features, seem a promising area to explore in the future.
+
+  In the CHERIoT design, sealing is frequently used for type safety between
+  compartments to allow compartment state to be efficiently referenced without
+  connoting access to that state, which was one of the fundamental design aims
+  of the capability *otype* mechanism.
+  This is driven via direct use of types in the source code, rather than being
+  an automatic compiler feature.
+  Similarly, we have used sealing in earlier explorations of how vtables in
+  language runtimes (e.g., Java runtimes) can be used to improve robustness
+  through explicit use of the *otype* mechanism.
