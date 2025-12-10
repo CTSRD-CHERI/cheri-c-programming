@@ -63,7 +63,7 @@ bounds cannot be guaranteed to provide precise spatial protection.
   Splitting a large allocation into multiple representable objects is not
   straightforward, see [Bounds alignment](../apis/bounds-alignment-due-to-compression.md#bounds-alignment-due-to-compression).
 
-**Ongoing research**: SRI/Cambridge have ongoing research to improve the
+**Ongoing research**: SRI/Cambridge/SCI have ongoing research to improve the
   safety of sub-object bounds in the hopes of transitioning them from being
   "opportunistic" to being deterministically safe.
   This involves improvements to compiler analysis, the use of trapping
