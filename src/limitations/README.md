@@ -26,7 +26,7 @@ the currently implementations -- especially of the compiler and its
 optimizations -- that we hope further research will rectify.
 We explore:
 
- * Integer-pointer safety vs. true pointer type safety
+ * Integer-pointer safety vs. pointer type safety
  * Compile-time uncertainty on regarding pointer types
  * Bounds imprecision, sub-object bounds, and custom allocators
  * Unions
