@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>Unions - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,55 +155,51 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<h3 id="2020"><a class="header" href="#2020">2020</a></h3>
-<p>We published the first version of the <em>CHERI C/C++ Programming Guide</em> in June
-2020.</p>
-<h3 id="2025"><a class="header" href="#2025">2025</a></h3>
-<p>This work-in-progress version of the <em>CHERI C/C++ Programming Guide</em> contains
-the following changes:</p>
-<ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Discuss the goal of non-aliasing spatial and temporal memory safety, and
-explore when exceptions may be, or must be, delivered.</li>
-<li>Document a subset of <code>malloc_revoke(3)</code> APIs controlling revocation for the
-system heap allocator.</li>
-<li>Note that some behaviors, such as bounds precision and revocation behavior,
-are implementation defined.</li>
-<li>Document expectations for in-memory capabilities, in particular the
-portability of <code>NULL</code> pointer values, and non-portability of any other
-assumptions.</li>
-<li>Document that subobject bounds, as currently implemented, are
-opportunistic, and may not be precise.</li>
-<li>Provide more detailed discussion of the limitations of the CHERI C/C++
-approach including with respect to integer-pointer type safety vs full
-pointer type safety, compile-time uncertainty on types, bounds imprecision,
-unions, stack temporal safety, and compiler optimizations.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
-</ul>
+                        <h2 id="unions"><a class="header" href="#unions">Unions</a></h2>
+<p>A significant benefit to introducing strong spatial and temporal safety in the
+C and C++ programming languages is to reduce the opportunity for <em>type
+confusion</em>, in which two different views (aliases) on the same memory region
+allow that memory to be interpreted in different ways.
+A classic example of this in widespread memory-corruption attacks is to store
+to a memory region via characters (e.g., provided by network input) and then
+to cause the application to load from the region interpreting it as a pointer
+(e.g., as a control-flow pointer) making it possible to substantially
+manipulate software including by achieving arbitrary code execution.
+By implementing non-aliasing protection, pointers to one allocation of memory
+cannot be used to implement type confusion with another pointer from a past or
+future allocation of that memory.</p>
+<p>Unions, however, are a C-language feature that intentionally allows multiple
+interpretions of the same memory even within a single allocation.
+While the precise impact is specific to its use, it is frequently the case
+that unions may be used to reduce memory overhead or implement object
+orientation, allowing code to interpret regions of memory as (for example)
+both an array of characters and a control-flow pointer, enabling common attack
+patterns.</p>
+<p>CHERI's underlying robustness to integer-pointer type confusion is valuable in
+mitigating such potential vulnerabilities, but as this does not provide strong
+type safety, nor prevent other types of type confusion, ultimately this is
+mitigation against attack techniques, rather than elimination of
+vulnerability.</p>
+<p><strong>Advice to developers</strong>: Avoiding the use of unions in C will avoid such
+situations arising, especially in programming environments where the memory
+savings from such techniques may have little impact.
+Where unions must be used, attention can be paid to the types of confusion
+that might arise, as well as robust programming techniques to avoid type
+confusion.</p>
+<p><strong>Ongoing research</strong>: While SRI/Cambridge do not have current research in this
+space, it is easy to imagine introducing static limitations on union use,
+which could be evaluated for their impact on C/C++ code corpora to establish
+how disruptive this limitation might be at scale.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../limitations/bounds-imprecision.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../limitations/stack-temporal-safety.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -213,11 +209,11 @@ unions, stack temporal safety, and compiler optimizations.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../limitations/bounds-imprecision.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../limitations/stack-temporal-safety.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

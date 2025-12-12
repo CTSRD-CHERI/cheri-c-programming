@@ -328,6 +328,10 @@ portability of <code>NULL</code> pointer values, and non-portability of any othe
 assumptions.</li>
 <li>Document that subobject bounds, as currently implemented, are
 opportunistic, and may not be precise.</li>
+<li>Provide more detailed discussion of the limitations of the CHERI C/C++
+approach including with respect to integer-pointer type safety vs full
+pointer type safety, compile-time uncertainty on types, bounds imprecision,
+unions, stack temporal safety, and compiler optimizations.</li>
 <li>Numerous minor editorial and formatting improvements.</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="background"><a class="header" href="#background">Background</a></h1>
@@ -1697,6 +1701,442 @@ thrown on attempted unaligned accesses of capability values
 However, they can also arise in the form of stripped tag bits, leading to
 invalid capabilities that cannot be dereferenced, if, for example, pointer
 values are copied into inappropriately aligned allocations.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="limitations-to-cheri-cc-memory-safety"><a class="header" href="#limitations-to-cheri-cc-memory-safety">Limitations to CHERI C/C++ memory safety</a></h1>
+<p>The idea of memory-safe C and C++ variants able to compile and run the vast
+majority of extant code, despite research exploration for several
+decades, remains surprising: Both languages have long histories of
+catatrophic memory-safety vulnerabilities, leading to disastrous reputations
+for their unsafety.
+It is our experience in developing CHERI C and C++ that there are indeed
+fundamental limits to the nature of improvements that can be made: Software
+written in C and C++ expects significant type-system flexibility, making many
+forms of static and dynamic enforcement difficult, and inherently embeds
+assumptions that lead rapidly to "type confusion," a historically exploitable
+condition that frequently allows minor memory corruption to be escalated into
+arbitrary code execution.
+However, it is also our practical experience that quite substantial headway
+can be made in achieving strong memory safety for C and C++ despite this.</p>
+<p>In this section we document and explore a number of constraints and
+limitations to CHERI C and C++ memory safety.
+Some originate from limitations in capturing language-level notions of type
+safety (e.g., preventing integer-pointer confusion while not introducting
+dynamic typing to differentiate pointer types from one another) when mapping
+into CHERI's simpler capability model, some from CHERI's performance and
+memory overhead(such as bounds compression), and others from limitations of
+the currently implementations -- especially of the compiler and its
+optimizations -- that we hope further research will rectify.
+We explore:</p>
+<ul>
+<li>Integer-pointer safety vs. pointer type safety</li>
+<li>Compile-time uncertainty on regarding pointer types</li>
+<li>Bounds imprecision, sub-object bounds, and custom allocators</li>
+<li>Unions</li>
+<li>Stack temporal safety</li>
+<li>Compiler optimizations and undefined behavior</li>
+</ul>
+<p>For each issue, we provide advice to developers and, where applicable,
+information on current research directions that may address these issues in
+the future.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="integer-pointer-safety-vs-pointer-type-safety"><a class="header" href="#integer-pointer-safety-vs-pointer-type-safety">Integer-pointer safety vs. pointer type safety</a></h2>
+<p>CHERI C/C++ provide strong, dynamic differentiation of integer and pointer
+values by virtue of capability tags: Integer values are not architecturally
+dereferenceable.
+CHERI C/C++ also strongly differentiate executable pointers (which will be
+sealed and have execute permission) from data pointers (which will have load
+and store permissions), which prevents execution of data as well as pointer
+arithmetic on control-flow pointers.</p>
+<p>However, tagged capabilities do not dynamically enforce C/C++-language types.
+For example, casting from <code>struct foo *</code> to <code>struct bar *</code> is permitted
+dynamically as long as the compiler accepts the cast, regardless of whether
+that leads to unintended type confusion.
+This is required because idiomatic C/C++ software has a strong expectation for
+flexible casting, and enforcing these types breaks a significant proportion of
+real-world software.</p>
+<p>Common usage patterns requiring this sort of cast include object-oriented
+programming styles used in C, and it is not clear what dynamic type system
+might be both strong enough to provide useful vulnerability mitigation while
+also being flexible enough to accept most software.
+In C++, there are well defined rules for casting between classes and
+subclasses, but those rules are extremely flexible and are not easily or
+efficiently implemented architecturally.</p>
+<p>CHERI permissions to prevent certain very narrow types of dynamic type
+confusion that are essential to low-level memory safety: Specifically,
+CHERI-enabled kernels and run-time linkers will by invariant prevent the
+creation of code pointers with store privilege, or data pointers with execute
+privilege.
+Sealed capabilities also prevent undesired mutation of code pointers outside
+of run-time linkers, just-in-time compilers, or the dynamic creation of
+return addresses during function calls.</p>
+<p>As such, while CHERI C/C++ preventing integer-pointer type, as well as certain
+narrow forms of pointer-pointer type confusion, is incredibly valuable in
+implementing memory safety, its benefits should not be confused with those of
+full dynamic type safety.</p>
+<p><strong>Advice to developers</strong>: While many integer-pointer type confusions are
+strongly prevented in CHERI C/C++, pointer-pointer type confusions other
+than between code and data are not prevented.
+Given the current absence of static analysis tools addressing this problem,
+the best recourse will be defensive programming styles that avoid the
+opportunity for pointer-pointer type confusion, and careful tagging and
+checking of invariants dynamically.</p>
+<p><strong>Ongoing research</strong>: SRI/Cambridge have been exploring dynamic enforcement
+of language-level types using the architectural <em>otype</em> feature, but have
+yet to find a satisfactory middle ground between idiomatic type flexibility
+and strong vulnerability mitigation.
+Frequently, type errors of interest in C++ involve complex class hierarchies
+and inheritence, which are not directly mappable into a flat type space.
+New types of dynamic type enforcement, using <em>otype</em> or other capability
+features, seem a promising area to explore in the future.</p>
+<p>In the CHERIoT design, sealing is frequently used for type safety between
+compartments to allow compartment state to be efficiently referenced without
+connoting access to that state, which was one of the fundamental design aims
+of the capability <em>otype</em> mechanism.
+This is driven via direct use of types in the source code, rather than being
+an automatic compiler feature.
+Similarly, we have used sealing in earlier explorations of how vtables in
+language runtimes (e.g., Java runtimes) can be used to improve robustness
+through explicit use of the <em>otype</em> mechanism.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="compile-time-uncertainty-on-pointer-types"><a class="header" href="#compile-time-uncertainty-on-pointer-types">Compile-time uncertainty on pointer types</a></h2>
+<p>CHERI C/C++ provide strong dynamic differentiation of pointer and integer
+values by virtue of the capability tag, which prevents their confusion at run
+time.
+For example, C code intended to increment a pure integer type will clear the
+tag on a previously valid pointer, preventing its future dereference.
+However, there are some necessary situations in which there is ambiguity --
+perhaps required by the language specification, or perhaps just idiomatic use
+-- and either integer or pointer values must be loaded or stored.
+These fall into two common cases: Capability-oblivious copying, and explicit
+type ambiguity.</p>
+<h3 id="capability-oblivious-memory-copying"><a class="header" href="#capability-oblivious-memory-copying">Capability-oblivious memory copying</a></h3>
+<p>Memory-copying is both a explicit and implied in the C and C++ languages, and
+also a construct that programmers can implement.</p>
+<p>The C <code>memcpy()</code> API copies a fixed quantity of data from one memory location
+to another.
+In CHERI C/C++, <code>memcpy()</code> is capability-oblivious: It is not, in general,
+possible to know whether the originating memory should or does contain
+capabilities, or whether the destination should or can accept their storage.
+For example, a pointer to a structure that does contain a pointer field could
+be cast to <code>void *</code>, losing that information.
+Similarly, a pointer to an array of integer types, and no pointer fields, could
+be cast to <code>void *</code>, losing that information.
+While a manual copy of fields might do so using variables that do (or do not)
+preserve tagged values, <code>memcpy()</code> implementations must be <em>capability
+oblivious</em>: They copy any capabilities present, preserving rather than
+stripping tags.</p>
+<p>The situation is further complicated by compiler optimizations that may either
+inline or outline <code>memcpy()</code>.
+For example, a large structure assignment may appear to be type aware,
+generating a series of suitably typed loads and stores, preserving or
+stripping tagged values as appropriate, but the compiler is permitted to
+replace that sequence with a call to <code>memcpy()</code> that will preserve tags even
+if the source or destination types would not permit it.</p>
+<p>Finally, there are many APIs in C, common libraries, and applications that are
+in fact <code>memcpy()</code> implementations that must similarly be oblivious to dynamic
+enforcement for the same reason.
+For example, <code>qsort()</code> might be used on structures that contain pointers, and
+therefore must preserve pointer types.
+This imposes both a compatibility burden (custom memory-copying routines
+require adaptation to preserve pointers) and also in effect causes capability
+values to be propagated even if the C types themselves would not generally
+cause that to take place.</p>
+<p><strong>Advice to developers</strong>: In general, C APIs such as <code>memcpy()</code>, and in fact
+structure assignment statements, can be assumed to always preserve pointers
+when they need to, but may also preserve them when not expected to.
+If it is important to prevent propagation, use the
+<code>cheri_perms_and()</code> API to strip the <code>CHERI_PERM_LOAD_CAP</code> permission before
+passing it to a routine that may perform a memory copy.
+In the CheriBSD kernel, which frequently needs to limit the flow of
+capabilities, <code>memcpynocap()</code> exists as a wrapper to this.</p>
+<p><strong>Ongoing research</strong>: SRI/Cambridge are continuing our research into the
+effects of compiler optimisations and when to constrain optimisations to
+better enforce protection properties.
+However, the tradeoffs here are tricky given the pracical goal of minimizing
+source-code disruption.
+It may be useful to add a new <code>memcpy_nocap()</code> API usable by both userlevel
+and the kernel.</p>
+<h3 id="intentional-integer-pointer-type-ambiguity"><a class="header" href="#intentional-integer-pointer-type-ambiguity">Intentional integer-pointer type ambiguity</a></h3>
+<p>Sometimes, programmers require an integer type that can be used to hold both
+integer and pointer values, and furher, require that pointer arithmetic
+performed on that type result in a dereferenceable pointer.
+This is typically performed using the types <code>intptr_t</code> and <code>uintptr_t</code>, which
+will frequently be found in software such as language runtimes, but also in
+code implementing <em>callbacks</em> or similar programming behaviors where arbitrary
+arguments or return values must be passed around by code not aware of the true
+data types being used.
+Stripping the tag on values calculated via these types will seriously disrupt
+realworld source code.
+When these types are used in CHERI C/C++, there are two important implications
+with programmer impact:</p>
+<ol>
+<li>
+<p>Capability-sized storage will be allocated, rather than that of the
+largest integer type, which can be confusing; i.e., <code>sizeof(intptr_t)</code>
+may not be the same as <code>sizeof(intmax_t)</code>.
+Further, if these types have been used extensively, perhaps in preference
+to other integer types, this can lead to a significant memory overhead
+beyond that seen just from increasing the size of pointer types.</p>
+</li>
+<li>
+<p>Instructions are therefore used that will preserve the tag on a
+capability dynamically by virtue of using arithetic instructions normally
+used only for pointer types.
+However, this means that CHERI C/C++ are not able to provide certain
+types of dynamic integer-pointer type-confusion prevention, as the types
+are inherently ambiguous.</p>
+<p>For example, while with non-<code>intptr_t</code> integer types, the tag will always
+be cleared when its arithmetic operations are applied to a pointer, this
+is not true when <code>intptr_t</code> is used for integers.
+If <code>intptr_t</code> is used extensively for integer types (e.g., as the atom
+type in a language runtime), then the opportunity for dynamic confusion
+is restored: arithmetic operations intended only to operate on integer
+values will also operate on pointers preserving the tag.</p>
+</li>
+</ol>
+<p>It is worth further noting that the C types <code>long</code> and <code>unsigned long</code> have
+historically been used for these purposes, although that has been discouraged
+for many years.
+Code using <code>long</code> and <code>unsigned long</code> to hold pointer values in CHERI C/C++
+will not preserve tags, and hence casting a pointer via <code>long</code> or <code>unsigned long</code> will lead to the pointer no longer being dereferenceable.</p>
+<p><strong>Advice to developers</strong>: <code>intptr_t</code> and <code>uintptr_t</code> should be used only where
+essential to achieving the programming goals of either holding a pointer or
+integer in the same type (perhaps as an opaque argument), or to enable more
+rich forms of arithmetic on pointers.
+Where programers wish to compute on the address of pointers without provenance, <code>ptraddr_t</code> should be used to make this clear.
+Pointers can be unambiguously reconstructed using <code>ptraddr_t</code> computations and <code>cheri_address_set()</code>.
+<code>ptraddr_t</code> is currently under consideration for standardization as paper <a href="https://isocpp.org/files/papers/P3744R0.html">P3744R0</a>.
+<code>long</code> and <code>unsigned long</code> should never be used to hold pointers that must
+remain deferenceable.</p>
+<p><strong>Advice to developers</strong>: <code>ptraddr_t</code> should be used in place of <code>long</code>,
+<code>unsigned long</code> or <code>uint64_t</code> where an integer type is required to hold
+a virtual address.
+As <a href="limitations/../impact/recommended-use-c-types.html">previously introduced</a>, <code>ptraddr_t</code>
+is not dereferenceable on CHERI, and must be combined with a valid capability
+to generate a dereferenceable pointer.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="bounds-imprecision-sub-object-bounds-and-custom-allocators"><a class="header" href="#bounds-imprecision-sub-object-bounds-and-custom-allocators">Bounds imprecision, sub-object bounds, and custom allocators</a></h2>
+<p>CHERI capabilities employ bounds compression to fit both the lower and upper
+bounds into a single address-sized word of metadata.
+See (Bounds precision)[../background/cheri-capabilities.html#bounds-precision]
+for further details.</p>
+<p>As a result, it is not possible to represent all possible combinations of
+lower and upper bounds with a given address, leading to stronger alignment and
+padding requirements for memory allocations.
+The compiler, linker, and run-time environment are aware of these constraints,
+and hence generally introduce necessary alignment and padding as required --
+for example, by placing additional padding around some memory allocations to
+ensure that more coarse bounds do not allow underruns or overruns to access
+memory associated with other allocations.
+See (Bounds alignment due to compression)[../apis/bounds-alignment-due-to-compression.html#bounds-alignment-due-to-compression]
+for further details.</p>
+<p>There are, however, situations in which programmers must be explicitly aware
+of this imprecise bounding behavior, including:</p>
+<ul>
+<li>
+<p>Optional use of sub-object bounds, which is currently considered
+<em>opportunistic protection</em> as sub-object bounds do not adjust structure
+alignment and padding for fields.
+This feaure is not currently enabled by default in the compiler due to
+these limitations.</p>
+</li>
+<li>
+<p>Application-specific memory allocators, which require modest extensions to
+not just set bounds, but also ensure suitable alignment and padding such
+that non-aliasing can be enforced using CHERI bounds.</p>
+</li>
+<li>
+<p>Sub-allocation patterns, where the result of a single call to <code>malloc()</code> is used
+to allocate two or more related but disjoint objects, possibly of different types.
+This case is different from custom allocators, because the intention is not to write
+a memory allocator, but rather to optimise the allocation of multiple
+related objects. Consider, for example, the contiguous allocation of an
+array and a structure that references the array. In this case, bounds must be
+set manually and considering precision will be necessary.</p>
+</li>
+<li>
+<p>Other uses of manually set bounds in libraries and applications to limit
+the potential for underruns and overruns, such as in packet parsing, which
+must similarly take into account new alignment and padding requirements.</p>
+</li>
+</ul>
+<p>Where possible, the compiler will emit warnings in situations where sub-object
+bounds cannot be guaranteed to provide precise spatial protection.</p>
+<p><strong>Advice to developers</strong>: When using sub-object bounds, additional padding and
+alignment may be required to ensure precise protection.
+In some situations, it may be more efficient to use external allocations
+pointed to by a primary allocation rather than embed sub-objects with large
+sizes and poor alignment within a larger strucure.
+Compiler warnings about limited precision should be observed.
+When implementing protecion in memory allocators, guidance provided in this
+document should be observed to ensure precise spatial safety is achieved.</p>
+<p><strong>Advice to developers</strong>: Sub-allocation patterns should be avoided. If multiple
+objects need to be allocated, the system allocator (or application-specific
+allocators) should be used to allocate each disjoint object separately, and
+should guarantee that the allocation is properly aligned and padded for
+representability. If sub-allocation can not be avoided, care must be taken to
+ensure that each sub-allocated object is placed at a representable boundary
+within the main allocation (note that this is platform-specific).
+Splitting a large allocation into multiple representable objects is not
+straightforward, see <a href="limitations/../apis/bounds-alignment-due-to-compression.html#bounds-alignment-due-to-compression">Bounds alignment</a>.</p>
+<p><strong>Ongoing research</strong>: SRI/Cambridge/SCI have ongoing research to improve the
+safety of sub-object bounds in the hopes of transitioning them from being
+"opportunistic" to being deterministically safe.
+This involves improvements to compiler analysis, the use of trapping
+bounds-setting instructions to ensure fail-closedd behavior, and optional
+support for additional alignment and padding.
+Early experiments with the CheriBSD kernel suggest that migrating to a
+deterministically safe sub-object bounds mode can be feasible with potentially
+modest disruption to the codebase (at least for the kernel). The main sources
+of friction appear to be Variable Length Arrays (VLAs). The toolchain can be
+extended to introduce padding to ensure sub-object representability; however,
+there are open questions to quantify the disruption to structure padding,
+whether this is acceptable and whether this can be automated.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="unions"><a class="header" href="#unions">Unions</a></h2>
+<p>A significant benefit to introducing strong spatial and temporal safety in the
+C and C++ programming languages is to reduce the opportunity for <em>type
+confusion</em>, in which two different views (aliases) on the same memory region
+allow that memory to be interpreted in different ways.
+A classic example of this in widespread memory-corruption attacks is to store
+to a memory region via characters (e.g., provided by network input) and then
+to cause the application to load from the region interpreting it as a pointer
+(e.g., as a control-flow pointer) making it possible to substantially
+manipulate software including by achieving arbitrary code execution.
+By implementing non-aliasing protection, pointers to one allocation of memory
+cannot be used to implement type confusion with another pointer from a past or
+future allocation of that memory.</p>
+<p>Unions, however, are a C-language feature that intentionally allows multiple
+interpretions of the same memory even within a single allocation.
+While the precise impact is specific to its use, it is frequently the case
+that unions may be used to reduce memory overhead or implement object
+orientation, allowing code to interpret regions of memory as (for example)
+both an array of characters and a control-flow pointer, enabling common attack
+patterns.</p>
+<p>CHERI's underlying robustness to integer-pointer type confusion is valuable in
+mitigating such potential vulnerabilities, but as this does not provide strong
+type safety, nor prevent other types of type confusion, ultimately this is
+mitigation against attack techniques, rather than elimination of
+vulnerability.</p>
+<p><strong>Advice to developers</strong>: Avoiding the use of unions in C will avoid such
+situations arising, especially in programming environments where the memory
+savings from such techniques may have little impact.
+Where unions must be used, attention can be paid to the types of confusion
+that might arise, as well as robust programming techniques to avoid type
+confusion.</p>
+<p><strong>Ongoing research</strong>: While SRI/Cambridge do not have current research in this
+space, it is easy to imagine introducing static limitations on union use,
+which could be evaluated for their impact on C/C++ code corpora to establish
+how disruptive this limitation might be at scale.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="stack-temporal-safety"><a class="header" href="#stack-temporal-safety">Stack temporal safety</a></h2>
+<p>CHERI includes different temporal-safety mechanisms at different
+microarchitectural scales.
+In general, those mechanisms scale well to providing temporal safety for
+services such as memory mappings and heap allocations, but do not perform
+sufficiently well to enable generalized stack temporal safety able to address
+use-after-function-return and use-out-of-scope vulnerabilities.
+In the presence of compartmentalization support (e.g., for libraries in
+CheriBSD or between compartments in CHERIoT RTOS), there may be stronger
+protections preventing stack reuse or limiting the flow and reuse of stack
+memory, but these are not provided within compartments.</p>
+<p><strong>Advice to developers</strong>: Existing sanitizers used to detect some
+use-after-function-return and use-out-of-scope bugs should be used when
+writing code intended to be robust on CHERI.
+As exploitation of stack temporal-safety vulnerabilities often involves the
+use of uninitialized stack values, compiler features automatically
+initialize stack variables can also play an important role in mitigation
+(see below).
+Finally, integer-pointer and other CHERI protections, such as sealing of
+code pointers, provide significant robustness against exploitation of such
+vulnerabilities -- but cannot be argued to strongly mitigate stack
+temporal-safety vulnerabilities in the same way that can be argued for heap
+allocations.</p>
+<p><strong>Ongoing research</strong>: The broader CHERI research community has been exploring
+a variety of mechanisms to provide probablistic or deterministic stack
+protections at varying costs, including concepts such as capability flow
+control and capability linearity.
+None have yet been deemed appropriate for widespread adoption, but we hope
+that at least one mechanism will proceed to maturity in due course.</p>
+<div style="break-before: page; page-break-before: always;"></div><h2 id="compiler-optimizations-and-undefined-behavior"><a class="header" href="#compiler-optimizations-and-undefined-behavior">Compiler optimizations and undefined behavior</a></h2>
+<p>Many of CHERI's protections can be seen as an effort to determine new, and
+safer, dynamic outcomes to undefined behavior specified in the C/C++
+languages.
+For example, CHERI's dynamic bounds checking and exception throwing replaces
+the common (and specification-compliant) behavior of enabling arbitrary code
+execution found in many C/C++ implementations.
+There is, however, an important interaction with compiler optimizations:
+Compilers are allowed to (and not infrequently do) assume that software will
+not behave in undefined ways, and are permitted to optimize on that basis.
+In this section, we explore several such cases that are important to be aware
+of in understanding key limitations to the CHERI C/C++ approach.
+This is an active area of research at SRI/Cambridge.</p>
+<h3 id="uninitialized-local-variables"><a class="header" href="#uninitialized-local-variables">Uninitialized local variables</a></h3>
+<p>In the C language, it is undefined behavior to depend on the value of an
+uninitialized local variable, and bugs triggering this behavior are sometimes
+exploitable vulnerabilities.
+For example, an integer or pointer value may "shadow through" from a now free
+stack frames, which could lead to misbehavior such as attacker-controlled
+control flows.</p>
+<p>CHERI does not, itself, prevent the use of uninitialized values, although it
+does impose a number of protections that hamper exploitation (such as tagged
+pointers, sealed control-flow pointers, spatial safety, and temporal safety).
+Further, compartmentalization may limit the scope for stack reuse, preventing
+(for example) application compartments from reusing stack space previously
+used for privileged components such as the run-time linker and heap
+allocators.
+However, CHERI in isolation does not prevent the use of undefined values
+exposed by uninitalized local variables,and it remains important to prevent or
+mitigate these vulnerabilities in other ways.</p>
+<p><strong>Advice to developers</strong>: Compilers support both warnings regarding the use of
+unitialized local variables, as well as options to automatically zero (or
+otherwise initialize) uninitialized local variables.
+We strongly recommend that uninitialized local variables be considered a
+compile-time error or that automatic initialization be enabled, when using
+CHERI C/C++ for memory protection.</p>
+<p><strong>Ongoing research</strong>: The CHERI research community is actively exploring
+potential extensions to CHERI to detect or prevent undefined behavior.</p>
+<h3 id="uninitialized-arguments-and-return-values"><a class="header" href="#uninitialized-arguments-and-return-values">Uninitialized arguments and return values</a></h3>
+<p>As with software bugs involving uninitialized local variables, CHERI does not
+directly prevent vulnerabilities from arising as a result of uninitialized
+arguments or return values.
+And, as with uninitialized local variabls, compilers are permitted to optimize
+based on the assumption that no undefined behavior occurs in execution, and
+may generate code that causes surprising resuls in the presence of improper
+initialization.
+CHERI indirectly affects the exploitability of those vulnerabilities by
+virtue of pointer tagging, spatial safety, and temporal safety, but these
+limited exploitation rather than preventing vulnerability.</p>
+<p><strong>Advice to developers</strong>: As with uninitialized local variables, compilers
+support warnings regarding the use of uninitialized arguments and failures
+to return values as defined by a function's prototype.
+We strongly recommend that uninitialized arguments and return values be
+considered compile-time errors.</p>
+<h3 id="out-of-bounds-memory-accesses"><a class="header" href="#out-of-bounds-memory-accesses">Out-of-bounds memory accesses</a></h3>
+<p>Compilers are, however, permitted to assume that undefined behavior does not
+occur for the purposes of optimization, and may, for example, elide stores
+that can be statically determined to be out of bounds.</p>
+<p>For example, dynamic bounds checking on memory allocations frequently replaces
+the specification-compliant corruption of other in-memory structures when a
+buffer overflow occurs with a dynamic exception that, by default, terminates
+an application.</p>
+<p>Further, for a buffer with suitably scoped lifetime, not only may the store be
+elided, but a later load may carry forward the expected value for being
+loaded, despite the store not taking place.</p>
+<p>This interacts importantly with the definitions of spatial and temporal safety
+in CHERI, which are focused on <em>non-aliasing</em> rather than <em>precise
+exceptions</em>.
+If the compiler optimizes out an out-of-bounds store, then no CHERI exception
+will be thrown dynamically.
+Further, out-of-bounds loads may not only not throw an exception, but they may
+see the value that was not stored.
+CHERI's spatial safety is not violated, as no other object was corrupted.
+However, this behavior may be surprising, and is a more broad example of how
+memory-unsafe code may not fail stop, leading to further undefined execution
+that could have surprising or insecure behavior.</p>
+<p><strong>Advice to developers</strong>: If memory-safety vulnerabilities are reported in
+software, it is important to validate the protection CHERI provides through
+testing and not just source-code inspection.
+This will help differentiate cases in which a clean "fail stop" is generated
+vs. those in which other undefined behavior may be reached, which must be
+analyzed in order to determine impact.</p>
+<p><strong>Ongoing research</strong>: The SRI/Cambridge team is actively investigating the
+impact of undefined behavior and compiler optimizations alongside CHERI
+memory protection.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cheri-compiler-warnings-and-errors"><a class="header" href="#cheri-compiler-warnings-and-errors">CHERI compiler warnings and errors</a></h1>
 <p>The CHERI Clang compiler includes many diagnostic warnings to identify code
 that is incompatible with CHERI C/C++ or may result in behavioral

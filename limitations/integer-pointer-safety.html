@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>Integer-pointer safety vs. pointer type safety - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,55 +155,74 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<h3 id="2020"><a class="header" href="#2020">2020</a></h3>
-<p>We published the first version of the <em>CHERI C/C++ Programming Guide</em> in June
-2020.</p>
-<h3 id="2025"><a class="header" href="#2025">2025</a></h3>
-<p>This work-in-progress version of the <em>CHERI C/C++ Programming Guide</em> contains
-the following changes:</p>
-<ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Discuss the goal of non-aliasing spatial and temporal memory safety, and
-explore when exceptions may be, or must be, delivered.</li>
-<li>Document a subset of <code>malloc_revoke(3)</code> APIs controlling revocation for the
-system heap allocator.</li>
-<li>Note that some behaviors, such as bounds precision and revocation behavior,
-are implementation defined.</li>
-<li>Document expectations for in-memory capabilities, in particular the
-portability of <code>NULL</code> pointer values, and non-portability of any other
-assumptions.</li>
-<li>Document that subobject bounds, as currently implemented, are
-opportunistic, and may not be precise.</li>
-<li>Provide more detailed discussion of the limitations of the CHERI C/C++
-approach including with respect to integer-pointer type safety vs full
-pointer type safety, compile-time uncertainty on types, bounds imprecision,
-unions, stack temporal safety, and compiler optimizations.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
-</ul>
+                        <h2 id="integer-pointer-safety-vs-pointer-type-safety"><a class="header" href="#integer-pointer-safety-vs-pointer-type-safety">Integer-pointer safety vs. pointer type safety</a></h2>
+<p>CHERI C/C++ provide strong, dynamic differentiation of integer and pointer
+values by virtue of capability tags: Integer values are not architecturally
+dereferenceable.
+CHERI C/C++ also strongly differentiate executable pointers (which will be
+sealed and have execute permission) from data pointers (which will have load
+and store permissions), which prevents execution of data as well as pointer
+arithmetic on control-flow pointers.</p>
+<p>However, tagged capabilities do not dynamically enforce C/C++-language types.
+For example, casting from <code>struct foo *</code> to <code>struct bar *</code> is permitted
+dynamically as long as the compiler accepts the cast, regardless of whether
+that leads to unintended type confusion.
+This is required because idiomatic C/C++ software has a strong expectation for
+flexible casting, and enforcing these types breaks a significant proportion of
+real-world software.</p>
+<p>Common usage patterns requiring this sort of cast include object-oriented
+programming styles used in C, and it is not clear what dynamic type system
+might be both strong enough to provide useful vulnerability mitigation while
+also being flexible enough to accept most software.
+In C++, there are well defined rules for casting between classes and
+subclasses, but those rules are extremely flexible and are not easily or
+efficiently implemented architecturally.</p>
+<p>CHERI permissions to prevent certain very narrow types of dynamic type
+confusion that are essential to low-level memory safety: Specifically,
+CHERI-enabled kernels and run-time linkers will by invariant prevent the
+creation of code pointers with store privilege, or data pointers with execute
+privilege.
+Sealed capabilities also prevent undesired mutation of code pointers outside
+of run-time linkers, just-in-time compilers, or the dynamic creation of
+return addresses during function calls.</p>
+<p>As such, while CHERI C/C++ preventing integer-pointer type, as well as certain
+narrow forms of pointer-pointer type confusion, is incredibly valuable in
+implementing memory safety, its benefits should not be confused with those of
+full dynamic type safety.</p>
+<p><strong>Advice to developers</strong>: While many integer-pointer type confusions are
+strongly prevented in CHERI C/C++, pointer-pointer type confusions other
+than between code and data are not prevented.
+Given the current absence of static analysis tools addressing this problem,
+the best recourse will be defensive programming styles that avoid the
+opportunity for pointer-pointer type confusion, and careful tagging and
+checking of invariants dynamically.</p>
+<p><strong>Ongoing research</strong>: SRI/Cambridge have been exploring dynamic enforcement
+of language-level types using the architectural <em>otype</em> feature, but have
+yet to find a satisfactory middle ground between idiomatic type flexibility
+and strong vulnerability mitigation.
+Frequently, type errors of interest in C++ involve complex class hierarchies
+and inheritence, which are not directly mappable into a flat type space.
+New types of dynamic type enforcement, using <em>otype</em> or other capability
+features, seem a promising area to explore in the future.</p>
+<p>In the CHERIoT design, sealing is frequently used for type safety between
+compartments to allow compartment state to be efficiently referenced without
+connoting access to that state, which was one of the fundamental design aims
+of the capability <em>otype</em> mechanism.
+This is driven via direct use of types in the source code, rather than being
+an automatic compiler feature.
+Similarly, we have used sealing in earlier explorations of how vtables in
+language runtimes (e.g., Java runtimes) can be used to improve robustness
+through explicit use of the <em>otype</em> mechanism.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../limitations/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../limitations/compile-time-type-uncertainty.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -213,11 +232,11 @@ unions, stack temporal safety, and compiler optimizations.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../limitations/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../limitations/compile-time-type-uncertainty.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

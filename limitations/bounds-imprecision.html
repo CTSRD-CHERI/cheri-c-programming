@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>Bounds imprecision, sub-object bounds, and custom allocators - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,55 +155,93 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<h3 id="2020"><a class="header" href="#2020">2020</a></h3>
-<p>We published the first version of the <em>CHERI C/C++ Programming Guide</em> in June
-2020.</p>
-<h3 id="2025"><a class="header" href="#2025">2025</a></h3>
-<p>This work-in-progress version of the <em>CHERI C/C++ Programming Guide</em> contains
-the following changes:</p>
+                        <h2 id="bounds-imprecision-sub-object-bounds-and-custom-allocators"><a class="header" href="#bounds-imprecision-sub-object-bounds-and-custom-allocators">Bounds imprecision, sub-object bounds, and custom allocators</a></h2>
+<p>CHERI capabilities employ bounds compression to fit both the lower and upper
+bounds into a single address-sized word of metadata.
+See (Bounds precision)[../background/cheri-capabilities.html#bounds-precision]
+for further details.</p>
+<p>As a result, it is not possible to represent all possible combinations of
+lower and upper bounds with a given address, leading to stronger alignment and
+padding requirements for memory allocations.
+The compiler, linker, and run-time environment are aware of these constraints,
+and hence generally introduce necessary alignment and padding as required --
+for example, by placing additional padding around some memory allocations to
+ensure that more coarse bounds do not allow underruns or overruns to access
+memory associated with other allocations.
+See (Bounds alignment due to compression)[../apis/bounds-alignment-due-to-compression.html#bounds-alignment-due-to-compression]
+for further details.</p>
+<p>There are, however, situations in which programmers must be explicitly aware
+of this imprecise bounding behavior, including:</p>
 <ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Discuss the goal of non-aliasing spatial and temporal memory safety, and
-explore when exceptions may be, or must be, delivered.</li>
-<li>Document a subset of <code>malloc_revoke(3)</code> APIs controlling revocation for the
-system heap allocator.</li>
-<li>Note that some behaviors, such as bounds precision and revocation behavior,
-are implementation defined.</li>
-<li>Document expectations for in-memory capabilities, in particular the
-portability of <code>NULL</code> pointer values, and non-portability of any other
-assumptions.</li>
-<li>Document that subobject bounds, as currently implemented, are
-opportunistic, and may not be precise.</li>
-<li>Provide more detailed discussion of the limitations of the CHERI C/C++
-approach including with respect to integer-pointer type safety vs full
-pointer type safety, compile-time uncertainty on types, bounds imprecision,
-unions, stack temporal safety, and compiler optimizations.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
+<li>
+<p>Optional use of sub-object bounds, which is currently considered
+<em>opportunistic protection</em> as sub-object bounds do not adjust structure
+alignment and padding for fields.
+This feaure is not currently enabled by default in the compiler due to
+these limitations.</p>
+</li>
+<li>
+<p>Application-specific memory allocators, which require modest extensions to
+not just set bounds, but also ensure suitable alignment and padding such
+that non-aliasing can be enforced using CHERI bounds.</p>
+</li>
+<li>
+<p>Sub-allocation patterns, where the result of a single call to <code>malloc()</code> is used
+to allocate two or more related but disjoint objects, possibly of different types.
+This case is different from custom allocators, because the intention is not to write
+a memory allocator, but rather to optimise the allocation of multiple
+related objects. Consider, for example, the contiguous allocation of an
+array and a structure that references the array. In this case, bounds must be
+set manually and considering precision will be necessary.</p>
+</li>
+<li>
+<p>Other uses of manually set bounds in libraries and applications to limit
+the potential for underruns and overruns, such as in packet parsing, which
+must similarly take into account new alignment and padding requirements.</p>
+</li>
 </ul>
+<p>Where possible, the compiler will emit warnings in situations where sub-object
+bounds cannot be guaranteed to provide precise spatial protection.</p>
+<p><strong>Advice to developers</strong>: When using sub-object bounds, additional padding and
+alignment may be required to ensure precise protection.
+In some situations, it may be more efficient to use external allocations
+pointed to by a primary allocation rather than embed sub-objects with large
+sizes and poor alignment within a larger strucure.
+Compiler warnings about limited precision should be observed.
+When implementing protecion in memory allocators, guidance provided in this
+document should be observed to ensure precise spatial safety is achieved.</p>
+<p><strong>Advice to developers</strong>: Sub-allocation patterns should be avoided. If multiple
+objects need to be allocated, the system allocator (or application-specific
+allocators) should be used to allocate each disjoint object separately, and
+should guarantee that the allocation is properly aligned and padded for
+representability. If sub-allocation can not be avoided, care must be taken to
+ensure that each sub-allocated object is placed at a representable boundary
+within the main allocation (note that this is platform-specific).
+Splitting a large allocation into multiple representable objects is not
+straightforward, see <a href="../apis/bounds-alignment-due-to-compression.html#bounds-alignment-due-to-compression">Bounds alignment</a>.</p>
+<p><strong>Ongoing research</strong>: SRI/Cambridge/SCI have ongoing research to improve the
+safety of sub-object bounds in the hopes of transitioning them from being
+"opportunistic" to being deterministically safe.
+This involves improvements to compiler analysis, the use of trapping
+bounds-setting instructions to ensure fail-closedd behavior, and optional
+support for additional alignment and padding.
+Early experiments with the CheriBSD kernel suggest that migrating to a
+deterministically safe sub-object bounds mode can be feasible with potentially
+modest disruption to the codebase (at least for the kernel). The main sources
+of friction appear to be Variable Length Arrays (VLAs). The toolchain can be
+extended to introduce padding to ensure sub-object representability; however,
+there are open questions to quantify the disruption to structure padding,
+whether this is acceptable and whether this can be automated.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../limitations/compile-time-type-uncertainty.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../limitations/unions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -213,11 +251,11 @@ unions, stack temporal safety, and compiler optimizations.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../limitations/compile-time-type-uncertainty.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../limitations/unions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

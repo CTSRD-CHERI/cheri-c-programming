@@ -1,0 +1,325 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Compile-time uncertainty on regarding pointer types - CHERI C/C++ Programming Guide</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">CHERI C/C++ Programming Guide</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/CTSRD-CHERI/cheri-c-programming" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="compile-time-uncertainty-on-pointer-types"><a class="header" href="#compile-time-uncertainty-on-pointer-types">Compile-time uncertainty on pointer types</a></h2>
+<p>CHERI C/C++ provide strong dynamic differentiation of pointer and integer
+values by virtue of the capability tag, which prevents their confusion at run
+time.
+For example, C code intended to increment a pure integer type will clear the
+tag on a previously valid pointer, preventing its future dereference.
+However, there are some necessary situations in which there is ambiguity --
+perhaps required by the language specification, or perhaps just idiomatic use
+-- and either integer or pointer values must be loaded or stored.
+These fall into two common cases: Capability-oblivious copying, and explicit
+type ambiguity.</p>
+<h3 id="capability-oblivious-memory-copying"><a class="header" href="#capability-oblivious-memory-copying">Capability-oblivious memory copying</a></h3>
+<p>Memory-copying is both a explicit and implied in the C and C++ languages, and
+also a construct that programmers can implement.</p>
+<p>The C <code>memcpy()</code> API copies a fixed quantity of data from one memory location
+to another.
+In CHERI C/C++, <code>memcpy()</code> is capability-oblivious: It is not, in general,
+possible to know whether the originating memory should or does contain
+capabilities, or whether the destination should or can accept their storage.
+For example, a pointer to a structure that does contain a pointer field could
+be cast to <code>void *</code>, losing that information.
+Similarly, a pointer to an array of integer types, and no pointer fields, could
+be cast to <code>void *</code>, losing that information.
+While a manual copy of fields might do so using variables that do (or do not)
+preserve tagged values, <code>memcpy()</code> implementations must be <em>capability
+oblivious</em>: They copy any capabilities present, preserving rather than
+stripping tags.</p>
+<p>The situation is further complicated by compiler optimizations that may either
+inline or outline <code>memcpy()</code>.
+For example, a large structure assignment may appear to be type aware,
+generating a series of suitably typed loads and stores, preserving or
+stripping tagged values as appropriate, but the compiler is permitted to
+replace that sequence with a call to <code>memcpy()</code> that will preserve tags even
+if the source or destination types would not permit it.</p>
+<p>Finally, there are many APIs in C, common libraries, and applications that are
+in fact <code>memcpy()</code> implementations that must similarly be oblivious to dynamic
+enforcement for the same reason.
+For example, <code>qsort()</code> might be used on structures that contain pointers, and
+therefore must preserve pointer types.
+This imposes both a compatibility burden (custom memory-copying routines
+require adaptation to preserve pointers) and also in effect causes capability
+values to be propagated even if the C types themselves would not generally
+cause that to take place.</p>
+<p><strong>Advice to developers</strong>: In general, C APIs such as <code>memcpy()</code>, and in fact
+structure assignment statements, can be assumed to always preserve pointers
+when they need to, but may also preserve them when not expected to.
+If it is important to prevent propagation, use the
+<code>cheri_perms_and()</code> API to strip the <code>CHERI_PERM_LOAD_CAP</code> permission before
+passing it to a routine that may perform a memory copy.
+In the CheriBSD kernel, which frequently needs to limit the flow of
+capabilities, <code>memcpynocap()</code> exists as a wrapper to this.</p>
+<p><strong>Ongoing research</strong>: SRI/Cambridge are continuing our research into the
+effects of compiler optimisations and when to constrain optimisations to
+better enforce protection properties.
+However, the tradeoffs here are tricky given the pracical goal of minimizing
+source-code disruption.
+It may be useful to add a new <code>memcpy_nocap()</code> API usable by both userlevel
+and the kernel.</p>
+<h3 id="intentional-integer-pointer-type-ambiguity"><a class="header" href="#intentional-integer-pointer-type-ambiguity">Intentional integer-pointer type ambiguity</a></h3>
+<p>Sometimes, programmers require an integer type that can be used to hold both
+integer and pointer values, and furher, require that pointer arithmetic
+performed on that type result in a dereferenceable pointer.
+This is typically performed using the types <code>intptr_t</code> and <code>uintptr_t</code>, which
+will frequently be found in software such as language runtimes, but also in
+code implementing <em>callbacks</em> or similar programming behaviors where arbitrary
+arguments or return values must be passed around by code not aware of the true
+data types being used.
+Stripping the tag on values calculated via these types will seriously disrupt
+realworld source code.
+When these types are used in CHERI C/C++, there are two important implications
+with programmer impact:</p>
+<ol>
+<li>
+<p>Capability-sized storage will be allocated, rather than that of the
+largest integer type, which can be confusing; i.e., <code>sizeof(intptr_t)</code>
+may not be the same as <code>sizeof(intmax_t)</code>.
+Further, if these types have been used extensively, perhaps in preference
+to other integer types, this can lead to a significant memory overhead
+beyond that seen just from increasing the size of pointer types.</p>
+</li>
+<li>
+<p>Instructions are therefore used that will preserve the tag on a
+capability dynamically by virtue of using arithetic instructions normally
+used only for pointer types.
+However, this means that CHERI C/C++ are not able to provide certain
+types of dynamic integer-pointer type-confusion prevention, as the types
+are inherently ambiguous.</p>
+<p>For example, while with non-<code>intptr_t</code> integer types, the tag will always
+be cleared when its arithmetic operations are applied to a pointer, this
+is not true when <code>intptr_t</code> is used for integers.
+If <code>intptr_t</code> is used extensively for integer types (e.g., as the atom
+type in a language runtime), then the opportunity for dynamic confusion
+is restored: arithmetic operations intended only to operate on integer
+values will also operate on pointers preserving the tag.</p>
+</li>
+</ol>
+<p>It is worth further noting that the C types <code>long</code> and <code>unsigned long</code> have
+historically been used for these purposes, although that has been discouraged
+for many years.
+Code using <code>long</code> and <code>unsigned long</code> to hold pointer values in CHERI C/C++
+will not preserve tags, and hence casting a pointer via <code>long</code> or <code>unsigned long</code> will lead to the pointer no longer being dereferenceable.</p>
+<p><strong>Advice to developers</strong>: <code>intptr_t</code> and <code>uintptr_t</code> should be used only where
+essential to achieving the programming goals of either holding a pointer or
+integer in the same type (perhaps as an opaque argument), or to enable more
+rich forms of arithmetic on pointers.
+Where programers wish to compute on the address of pointers without provenance, <code>ptraddr_t</code> should be used to make this clear.
+Pointers can be unambiguously reconstructed using <code>ptraddr_t</code> computations and <code>cheri_address_set()</code>.
+<code>ptraddr_t</code> is currently under consideration for standardization as paper <a href="https://isocpp.org/files/papers/P3744R0.html">P3744R0</a>.
+<code>long</code> and <code>unsigned long</code> should never be used to hold pointers that must
+remain deferenceable.</p>
+<p><strong>Advice to developers</strong>: <code>ptraddr_t</code> should be used in place of <code>long</code>,
+<code>unsigned long</code> or <code>uint64_t</code> where an integer type is required to hold
+a virtual address.
+As <a href="../impact/recommended-use-c-types.html">previously introduced</a>, <code>ptraddr_t</code>
+is not dereferenceable on CHERI, and must be combined with a valid capability
+to generate a dereferenceable pointer.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../limitations/integer-pointer-safety.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../limitations/bounds-imprecision.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../limitations/integer-pointer-safety.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../limitations/bounds-imprecision.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

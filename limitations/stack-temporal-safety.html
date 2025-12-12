@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>Stack temporal safety - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,55 +155,45 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<h3 id="2020"><a class="header" href="#2020">2020</a></h3>
-<p>We published the first version of the <em>CHERI C/C++ Programming Guide</em> in June
-2020.</p>
-<h3 id="2025"><a class="header" href="#2025">2025</a></h3>
-<p>This work-in-progress version of the <em>CHERI C/C++ Programming Guide</em> contains
-the following changes:</p>
-<ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Discuss the goal of non-aliasing spatial and temporal memory safety, and
-explore when exceptions may be, or must be, delivered.</li>
-<li>Document a subset of <code>malloc_revoke(3)</code> APIs controlling revocation for the
-system heap allocator.</li>
-<li>Note that some behaviors, such as bounds precision and revocation behavior,
-are implementation defined.</li>
-<li>Document expectations for in-memory capabilities, in particular the
-portability of <code>NULL</code> pointer values, and non-portability of any other
-assumptions.</li>
-<li>Document that subobject bounds, as currently implemented, are
-opportunistic, and may not be precise.</li>
-<li>Provide more detailed discussion of the limitations of the CHERI C/C++
-approach including with respect to integer-pointer type safety vs full
-pointer type safety, compile-time uncertainty on types, bounds imprecision,
-unions, stack temporal safety, and compiler optimizations.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
-</ul>
+                        <h2 id="stack-temporal-safety"><a class="header" href="#stack-temporal-safety">Stack temporal safety</a></h2>
+<p>CHERI includes different temporal-safety mechanisms at different
+microarchitectural scales.
+In general, those mechanisms scale well to providing temporal safety for
+services such as memory mappings and heap allocations, but do not perform
+sufficiently well to enable generalized stack temporal safety able to address
+use-after-function-return and use-out-of-scope vulnerabilities.
+In the presence of compartmentalization support (e.g., for libraries in
+CheriBSD or between compartments in CHERIoT RTOS), there may be stronger
+protections preventing stack reuse or limiting the flow and reuse of stack
+memory, but these are not provided within compartments.</p>
+<p><strong>Advice to developers</strong>: Existing sanitizers used to detect some
+use-after-function-return and use-out-of-scope bugs should be used when
+writing code intended to be robust on CHERI.
+As exploitation of stack temporal-safety vulnerabilities often involves the
+use of uninitialized stack values, compiler features automatically
+initialize stack variables can also play an important role in mitigation
+(see below).
+Finally, integer-pointer and other CHERI protections, such as sealing of
+code pointers, provide significant robustness against exploitation of such
+vulnerabilities -- but cannot be argued to strongly mitigate stack
+temporal-safety vulnerabilities in the same way that can be argued for heap
+allocations.</p>
+<p><strong>Ongoing research</strong>: The broader CHERI research community has been exploring
+a variety of mechanisms to provide probablistic or deterministic stack
+protections at varying costs, including concepts such as capability flow
+control and capability linearity.
+None have yet been deemed appropriate for widespread adoption, but we hope
+that at least one mechanism will proceed to maturity in due course.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../limitations/unions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../limitations/compiler-optimizations.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -213,11 +203,11 @@ unions, stack temporal safety, and compiler optimizations.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../limitations/unions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../limitations/compiler-optimizations.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

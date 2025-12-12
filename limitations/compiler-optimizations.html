@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>Compiler optimizations and undefined behavior - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,55 +155,101 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<h3 id="2020"><a class="header" href="#2020">2020</a></h3>
-<p>We published the first version of the <em>CHERI C/C++ Programming Guide</em> in June
-2020.</p>
-<h3 id="2025"><a class="header" href="#2025">2025</a></h3>
-<p>This work-in-progress version of the <em>CHERI C/C++ Programming Guide</em> contains
-the following changes:</p>
-<ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Discuss the goal of non-aliasing spatial and temporal memory safety, and
-explore when exceptions may be, or must be, delivered.</li>
-<li>Document a subset of <code>malloc_revoke(3)</code> APIs controlling revocation for the
-system heap allocator.</li>
-<li>Note that some behaviors, such as bounds precision and revocation behavior,
-are implementation defined.</li>
-<li>Document expectations for in-memory capabilities, in particular the
-portability of <code>NULL</code> pointer values, and non-portability of any other
-assumptions.</li>
-<li>Document that subobject bounds, as currently implemented, are
-opportunistic, and may not be precise.</li>
-<li>Provide more detailed discussion of the limitations of the CHERI C/C++
-approach including with respect to integer-pointer type safety vs full
-pointer type safety, compile-time uncertainty on types, bounds imprecision,
-unions, stack temporal safety, and compiler optimizations.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
-</ul>
+                        <h2 id="compiler-optimizations-and-undefined-behavior"><a class="header" href="#compiler-optimizations-and-undefined-behavior">Compiler optimizations and undefined behavior</a></h2>
+<p>Many of CHERI's protections can be seen as an effort to determine new, and
+safer, dynamic outcomes to undefined behavior specified in the C/C++
+languages.
+For example, CHERI's dynamic bounds checking and exception throwing replaces
+the common (and specification-compliant) behavior of enabling arbitrary code
+execution found in many C/C++ implementations.
+There is, however, an important interaction with compiler optimizations:
+Compilers are allowed to (and not infrequently do) assume that software will
+not behave in undefined ways, and are permitted to optimize on that basis.
+In this section, we explore several such cases that are important to be aware
+of in understanding key limitations to the CHERI C/C++ approach.
+This is an active area of research at SRI/Cambridge.</p>
+<h3 id="uninitialized-local-variables"><a class="header" href="#uninitialized-local-variables">Uninitialized local variables</a></h3>
+<p>In the C language, it is undefined behavior to depend on the value of an
+uninitialized local variable, and bugs triggering this behavior are sometimes
+exploitable vulnerabilities.
+For example, an integer or pointer value may "shadow through" from a now free
+stack frames, which could lead to misbehavior such as attacker-controlled
+control flows.</p>
+<p>CHERI does not, itself, prevent the use of uninitialized values, although it
+does impose a number of protections that hamper exploitation (such as tagged
+pointers, sealed control-flow pointers, spatial safety, and temporal safety).
+Further, compartmentalization may limit the scope for stack reuse, preventing
+(for example) application compartments from reusing stack space previously
+used for privileged components such as the run-time linker and heap
+allocators.
+However, CHERI in isolation does not prevent the use of undefined values
+exposed by uninitalized local variables,and it remains important to prevent or
+mitigate these vulnerabilities in other ways.</p>
+<p><strong>Advice to developers</strong>: Compilers support both warnings regarding the use of
+unitialized local variables, as well as options to automatically zero (or
+otherwise initialize) uninitialized local variables.
+We strongly recommend that uninitialized local variables be considered a
+compile-time error or that automatic initialization be enabled, when using
+CHERI C/C++ for memory protection.</p>
+<p><strong>Ongoing research</strong>: The CHERI research community is actively exploring
+potential extensions to CHERI to detect or prevent undefined behavior.</p>
+<h3 id="uninitialized-arguments-and-return-values"><a class="header" href="#uninitialized-arguments-and-return-values">Uninitialized arguments and return values</a></h3>
+<p>As with software bugs involving uninitialized local variables, CHERI does not
+directly prevent vulnerabilities from arising as a result of uninitialized
+arguments or return values.
+And, as with uninitialized local variabls, compilers are permitted to optimize
+based on the assumption that no undefined behavior occurs in execution, and
+may generate code that causes surprising resuls in the presence of improper
+initialization.
+CHERI indirectly affects the exploitability of those vulnerabilities by
+virtue of pointer tagging, spatial safety, and temporal safety, but these
+limited exploitation rather than preventing vulnerability.</p>
+<p><strong>Advice to developers</strong>: As with uninitialized local variables, compilers
+support warnings regarding the use of uninitialized arguments and failures
+to return values as defined by a function's prototype.
+We strongly recommend that uninitialized arguments and return values be
+considered compile-time errors.</p>
+<h3 id="out-of-bounds-memory-accesses"><a class="header" href="#out-of-bounds-memory-accesses">Out-of-bounds memory accesses</a></h3>
+<p>Compilers are, however, permitted to assume that undefined behavior does not
+occur for the purposes of optimization, and may, for example, elide stores
+that can be statically determined to be out of bounds.</p>
+<p>For example, dynamic bounds checking on memory allocations frequently replaces
+the specification-compliant corruption of other in-memory structures when a
+buffer overflow occurs with a dynamic exception that, by default, terminates
+an application.</p>
+<p>Further, for a buffer with suitably scoped lifetime, not only may the store be
+elided, but a later load may carry forward the expected value for being
+loaded, despite the store not taking place.</p>
+<p>This interacts importantly with the definitions of spatial and temporal safety
+in CHERI, which are focused on <em>non-aliasing</em> rather than <em>precise
+exceptions</em>.
+If the compiler optimizes out an out-of-bounds store, then no CHERI exception
+will be thrown dynamically.
+Further, out-of-bounds loads may not only not throw an exception, but they may
+see the value that was not stored.
+CHERI's spatial safety is not violated, as no other object was corrupted.
+However, this behavior may be surprising, and is a more broad example of how
+memory-unsafe code may not fail stop, leading to further undefined execution
+that could have surprising or insecure behavior.</p>
+<p><strong>Advice to developers</strong>: If memory-safety vulnerabilities are reported in
+software, it is important to validate the protection CHERI provides through
+testing and not just source-code inspection.
+This will help differentiate cases in which a clean "fail stop" is generated
+vs. those in which other undefined behavior may be reached, which must be
+analyzed in order to determine impact.</p>
+<p><strong>Ongoing research</strong>: The SRI/Cambridge team is actively investigating the
+impact of undefined behavior and compiler optimizations alongside CHERI
+memory protection.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../limitations/stack-temporal-safety.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../compiler/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -213,11 +259,11 @@ unions, stack temporal safety, and compiler optimizations.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../limitations/stack-temporal-safety.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../compiler/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

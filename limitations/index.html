@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Version history - CHERI C/C++ Programming Guide</title>
+        <title>Limitations to CHERI C/C++ memory safety - CHERI C/C++ Programming Guide</title>
 
 
         <!-- Custom HTML head -->
@@ -155,55 +155,52 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h2 id="version-history"><a class="header" href="#version-history">Version history</a></h2>
-<p>The current web version is a living document being prepared for release as a
-second edition in late 2025, based on five years of deployed experience with
-hundreds of CHERI C/C++ developers working on various CHERI platforms
-including Arm's Morello prototype, Microsoft's CHERIoT, Codasip's X730,
-the University of Cambridge's CHERI-Toooba, and Capabilities Limited's
-CVA6-CHERI platforms.</p>
-<h3 id="2020"><a class="header" href="#2020">2020</a></h3>
-<p>We published the first version of the <em>CHERI C/C++ Programming Guide</em> in June
-2020.</p>
-<h3 id="2025"><a class="header" href="#2025">2025</a></h3>
-<p>This work-in-progress version of the <em>CHERI C/C++ Programming Guide</em> contains
-the following changes:</p>
+                        <h1 id="limitations-to-cheri-cc-memory-safety"><a class="header" href="#limitations-to-cheri-cc-memory-safety">Limitations to CHERI C/C++ memory safety</a></h1>
+<p>The idea of memory-safe C and C++ variants able to compile and run the vast
+majority of extant code, despite research exploration for several
+decades, remains surprising: Both languages have long histories of
+catatrophic memory-safety vulnerabilities, leading to disastrous reputations
+for their unsafety.
+It is our experience in developing CHERI C and C++ that there are indeed
+fundamental limits to the nature of improvements that can be made: Software
+written in C and C++ expects significant type-system flexibility, making many
+forms of static and dynamic enforcement difficult, and inherently embeds
+assumptions that lead rapidly to "type confusion," a historically exploitable
+condition that frequently allows minor memory corruption to be escalated into
+arbitrary code execution.
+However, it is also our practical experience that quite substantial headway
+can be made in achieving strong memory safety for C and C++ despite this.</p>
+<p>In this section we document and explore a number of constraints and
+limitations to CHERI C and C++ memory safety.
+Some originate from limitations in capturing language-level notions of type
+safety (e.g., preventing integer-pointer confusion while not introducting
+dynamic typing to differentiate pointer types from one another) when mapping
+into CHERI's simpler capability model, some from CHERI's performance and
+memory overhead(such as bounds compression), and others from limitations of
+the currently implementations -- especially of the compiler and its
+optimizations -- that we hope further research will rectify.
+We explore:</p>
 <ul>
-<li>Conversion to mdbook from LaTeX to enable a live web version.</li>
-<li>Update cited articles and technical reports.</li>
-<li>Better define, and discourage use of, CHERI Hybrid C/C++.</li>
-<li>Include information on using CHERI C/C++ on a more diverse range of
-platforms, including Morello and CHERIoT, as well as work on arising
-CHERI-adapted OSes such as CHERI Linux and seL4.</li>
-<li>Include information on printing capability values via <code>strfcap(3)</code> and
-<code>printf(3)</code>.</li>
-<li>Discuss the goal of non-aliasing spatial and temporal memory safety, and
-explore when exceptions may be, or must be, delivered.</li>
-<li>Document a subset of <code>malloc_revoke(3)</code> APIs controlling revocation for the
-system heap allocator.</li>
-<li>Note that some behaviors, such as bounds precision and revocation behavior,
-are implementation defined.</li>
-<li>Document expectations for in-memory capabilities, in particular the
-portability of <code>NULL</code> pointer values, and non-portability of any other
-assumptions.</li>
-<li>Document that subobject bounds, as currently implemented, are
-opportunistic, and may not be precise.</li>
-<li>Provide more detailed discussion of the limitations of the CHERI C/C++
-approach including with respect to integer-pointer type safety vs full
-pointer type safety, compile-time uncertainty on types, bounds imprecision,
-unions, stack temporal safety, and compiler optimizations.</li>
-<li>Numerous minor editorial and formatting improvements.</li>
+<li>Integer-pointer safety vs. pointer type safety</li>
+<li>Compile-time uncertainty on regarding pointer types</li>
+<li>Bounds imprecision, sub-object bounds, and custom allocators</li>
+<li>Unions</li>
+<li>Stack temporal safety</li>
+<li>Compiler optimizations and undefined behavior</li>
 </ul>
+<p>For each issue, we provide advice to developers and, where applicable,
+information on current research directions that may address these issues in
+the future.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../introduction/definitions.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../impact/restrictions-in-capability-locations.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next prefetch" href="../background/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../limitations/integer-pointer-safety.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -213,11 +210,11 @@ unions, stack temporal safety, and compiler optimizations.</li>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../introduction/definitions.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../impact/restrictions-in-capability-locations.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next prefetch" href="../background/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../limitations/integer-pointer-safety.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
