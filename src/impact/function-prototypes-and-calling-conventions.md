@@ -34,7 +34,7 @@ programming styles that fail to unambiguously differentiate these types:
   \rwnote{I wonder if we need to be more specific with an example here.}\arnote{TODO: Add example such as missing open() mode arguments?}
 -->
 
-[^10]: The forthcoming ISO C2x standard makes function declarations with an
+[^10]: The ISO C23 standard makes function declarations with an
 empty parameter list equivalent to a parameter list consisting of a single
 `void`.
 
