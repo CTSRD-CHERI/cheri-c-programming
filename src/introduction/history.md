@@ -40,4 +40,6 @@ the following changes:
    approach including with respect to integer-pointer type safety vs full
    pointer type safety, compile-time uncertainty on types, bounds imprecision,
    unions, stack temporal safety, and compiler optimizations.
+ * Document expectations for CHERI-enabled allocators, including guidance for
+   both consumers and implementers of allocation APIs.
  * Numerous minor editorial and formatting improvements.
