@@ -39,20 +39,25 @@ passed capability:
  * Has permissions that disallow any of data load, data store, capability
    load, or capability store
 
-The allocator may implement fail-stop semantics if the call fails for one or
-more of the above reasons.
+The allocator may:
+
+ * Implement fail-stop semantics if the call fails for one or more of the
+   above reasons.
 
 ### Reallocating memory
 
-The allocator must fail a call to `realloc()` if the passed capability
-violates any of the properties checked for in `free()`.
+The allocator must:
 
-The allocator may implement fail-stop semantics if the call fails for the
-above reason.
+ * Fail a call to `realloc()` if the passed capability violates any of the
+   properties checked for in `free()`.
+ * Return a capability with the same properties as those defined for
+   `malloc()`.
 
-Returned capabilites must have the same capability properties as those defined
-for `malloc()`.
+The allocator must not:
 
-The allocator must not return a capability that:
+ * Return a capability that has the same integer address as the passed
+   argument, but with different bounds.
 
- * Has the same integer address as the passed argument but different bounds
+The allocator may:
+
+ * Implement fail-stop semantics if the call fails for the above reasons.

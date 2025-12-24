@@ -25,3 +25,18 @@ revocation.
 CHERI will then ensure that memory accesses to allocations made via pointers
 are safe with respect to memory-safety properties such as spatial safety,
 temporal safety, and so on.
+
+## Memory-safety features enabled through allocators
+
+
+### Spatial safety
+
+ * Align allocations to allow pointers to be stored
+ * Align and pad allocations if required by compressed bounds
+
+### Temporal safety
+
+ * Initialize memory before reuse
+ * Ensure no outstanding pointers
+   * Quarantining and revocation
+   * Garbage collection
