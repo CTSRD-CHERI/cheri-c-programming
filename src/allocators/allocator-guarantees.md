@@ -10,8 +10,8 @@ properties:
  * Is valid (i.e., with its tag bit set)
  * Is unsealed
  * Has bounds that permit access to the full requested range of the allocation
- * Has bounds that do not permit access to any other current allocation,
-   implementing non-aliasing spatial safety
+ * Has bounds that do not permit access to any other current allocation, nor
+   allocator metadata, implementing non-aliasing spatial safety
  * Has permissions that allow data load, data store, capability load, and
    capability store
  * Be sufficiently aligned to allow capability loads and stores at relative
