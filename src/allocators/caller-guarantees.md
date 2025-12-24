@@ -46,6 +46,8 @@ The allocator may:
 
  * Fill reachable memory within the bounds of the allocation with zeroes after
    it has been freed
+ * On virtual-memory-enabled systems, unmap reachable memory within the bounds
+   of the allocation after it has been freed.
  * Revoke capabilities to the storage immediately upon free
 
 If utilizing revocation, the allocator must:
