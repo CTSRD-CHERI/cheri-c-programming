@@ -19,7 +19,8 @@ properties:
 
 The allocator should:
 
- * Zero the allocation before returning a pointer to it
+ * Fill reachable memory within bounds with zeroes before returning a pointer
+   to it
 
 The allocator may:
 
