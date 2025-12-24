@@ -58,6 +58,11 @@ The allocator must not:
  * Return a capability that has the same integer address as the passed
    argument, but with different bounds.
 
+The allocator should:
+
+ * Zero any newly accessible memory before returning a pointer to it,
+   including any allocator metadata.
+
 The allocator may:
 
  * Implement fail-stop semantics if the call fails for the above reasons.
