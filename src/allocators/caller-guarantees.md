@@ -61,11 +61,17 @@ On revocation, the allocator may:
 
 ### Reallocating memory
 
-The caller must not pass a capability to `realloc()` that violates any of the
-requirements for a call to `free()`.
+The caller must not:
 
-The allocator must conform to the guarantees associated with calls to
-`malloc()` and `calloc()` when allocating memory.
+ * Pass a capability to `realloc()` that violates any of the requirements for
+    a call to `free()`.
 
-The allocator may always reallocate, returning a new pointer, on every call to
-`realloc()`.
+The allocator must:
+
+ * Conform to the guarantees associated with calls to `malloc()` and
+   `calloc()` when allocating memory in `realloc()`.
+
+The allocator may:
+
+ * Zero any newly accessible memory before returning a pointer to it.
+ * Always reallocate, returning a new pointer, on every call to `realloc()`.
