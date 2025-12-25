@@ -71,6 +71,11 @@ The allocator must:
  * Conform to the guarantees associated with calls to `malloc()` and
    `calloc()` when allocating memory in `realloc()`.
 
+The allocator must not:
+
+ * Return a new pointer from `realloc()` that has an identical address to the
+   passed argument but differs in its bounds or other metadata.
+
 The allocator may:
 
  * Zero any newly accessible memory before returning a pointer to it.

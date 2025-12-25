@@ -56,8 +56,8 @@ The allocator must:
 
 The allocator must not:
 
- * Return a capability that has the same integer address as the passed
-   argument, but with different bounds.
+ * Return a new pointer from `realloc()` that has an identical address to the
+   passed argument but differs in its bounds or other metadata.
 
 The allocator should:
 
