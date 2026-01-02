@@ -5,7 +5,7 @@ rely on from all CHERI-enabled allocators.
 
 ### Allocating memory
 
-Calls to `malloc()` and `calloc() must return capabilities that:
+Calls to `malloc()` and `calloc()` must return capabilities that:
 
  * Are valid (i.e., with its tag bit set)
  * Are unsealed
