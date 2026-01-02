@@ -12,7 +12,7 @@ Calls to `malloc()` and `calloc() must return capabilities that:
  * Have bounds that permit access to the full requested memory range of the
    allocation
  * Have bounds that do not permit access to any other current allocation, nor
-   allocator metadata, implementing non-aliasing spatial safety
+   to allocator metadata, implementing non-aliasing spatial safety
  * Have permissions that allow data load, data store, capability load, and
    capability store
  * Are sufficiently aligned to allow capability loads and stores at relative
