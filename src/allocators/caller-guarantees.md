@@ -5,17 +5,19 @@ rely on from all CHERI-enabled allocators.
 
 ### Allocating memory
 
-Calls to `malloc()` and `calloc()` must return capabilities that:
+Calls to `malloc()`, `calloc()`, and `posix_memalign()` must either return a
+capability holding a `NULL` pointer (on failure), or a capability holding a
+non-`NULL` pointer (on success) that is:
 
- * Are valid (i.e., with its tag bit set)
- * Are unsealed
- * Have bounds that permit access to the full requested memory range of the
+ * Valid (i.e., with its tag bit set)
+ * Unsealed
+ * Has bounds that permit access to the full requested memory range of the
    allocation
- * Have bounds that do not permit access to any other current allocation, nor
+ * Has bounds that do not permit access to any other current allocation, nor
    to allocator metadata, implementing non-aliasing spatial safety
- * Have permissions that allow data load, data store, capability load, and
+ * Has permissions that allow data load, data store, capability load, and
    capability store
- * Are sufficiently aligned to allow capability loads and stores at relative
+ * Is sufficiently aligned to allow capability loads and stores at relative
    offset 0 from the returned pointer
 
 The allocator may:
@@ -28,14 +30,13 @@ The allocator may:
 
 ### Freeing memory
 
-The caller must not pass as an argument to `free()` a capability that:
+The caller must pass either a `NULL` pointer via a capability argument to
+`free()`, or a non-`NULL` capability that:
 
- * Is invalid (i.e., without its tag bit set)
- * Is sealed
- * Has bounds other than those on the original capability returned by
-   `malloc()`, `calloc()`, or `realloc()`
- * Has permissions that differ from those on the original capability returned
-   by `malloc()`, `calloc()`, or `realloc()`
+ * Is valid (i.e., with its tag bit set)
+ * Is unsealed
+ * Has address, bounds, and permissions identical to those on the original
+   capability returned by `malloc()`, `calloc()`, or `realloc()`
 
 The allocator must not:
 
@@ -47,7 +48,7 @@ The allocator may:
  * Fill reachable memory within the bounds of the allocation with zeroes after
    it has been freed
  * On virtual-memory-enabled systems, unmap reachable memory within the bounds
-   of the allocation after it has been freed.
+   of the allocation after it has been freed
  * Revoke capabilities to the storage immediately upon free
 
 If utilizing revocation, the allocator must:

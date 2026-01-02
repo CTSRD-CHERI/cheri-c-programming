@@ -4,11 +4,12 @@
 
 In addition to implementing the conventational invariants ensuring the
 mutually exclusive allocation of memory, CHERI-aware implementations of
-`malloc()` and `calloc()` must return a capability that has the following
-properties:
+`malloc()`, `calloc()`, and `posix_memalign()` must either return a capability
+holding a `NULL` pointer (on failure), or a capability holding a non-`NULL`
+poiner (on success) that is:
 
- * Is valid (i.e., with its tag bit set)
- * Is unsealed
+ * Valid (i.e., with its tag bit set)
+ * Unsealed
  * Has bounds that permit access to the full requested range of the allocation
  * Has bounds that do not permit access to any other current allocation, nor
    to allocator metadata, implementing non-aliasing spatial safety
