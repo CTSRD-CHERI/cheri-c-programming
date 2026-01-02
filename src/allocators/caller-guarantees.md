@@ -31,7 +31,7 @@ The allocator may:
 The caller must not pass as an argument to `free()` a capability that:
 
  * Is invalid (i.e., without its tag bit set)
- * Is unsealed
+ * Is sealed
  * Has bounds other than those on the original capability returned by
    `malloc()`, `calloc()`, or `realloc()`
  * Has permissions that differ from those on the original capability returned
