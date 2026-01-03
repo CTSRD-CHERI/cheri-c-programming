@@ -1,5 +1,11 @@
 ## Recommendation for allocator implementations
 
+This section provides recommendations for the implementers of heap
+allocators on CHERI-enabled systems.
+There is also specific guidance on handling alignment and padding required to
+take into account bounds imprecision in [Implications for memory-allocator
+design](../apis/implications-for-memory-allocator-design.md).
+
 ### Allocating memory
 
 In addition to implementing the conventational invariants ensuring the
