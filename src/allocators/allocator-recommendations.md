@@ -39,6 +39,8 @@ The allocator may:
  * Provide precise bounds -- i.e., in which the lower bound is the lowest
    address of the returned allocation, and the upper bound is the highest
    address of the returned allocation plus one
+ * Pad and/or align allocation such that the returned address is equal to the
+   lower bound.
 
 ### Freeing memory
 

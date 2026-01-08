@@ -32,6 +32,8 @@ The allocator may:
  * Provide precise bounds, with the lower bound being the bottom address of
    the allocation, and the upper bound being one byte above the top address of
    the allocation
+ * Pad and/or align allocation such that the returned address is equal to the
+   lower bound.
 
 ### Freeing memory
 
