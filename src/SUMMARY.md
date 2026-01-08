@@ -49,7 +49,7 @@
   - [Implications for memory-allocator design](apis/implications-for-memory-allocator-design.md)
 - [Memory allocators and CHERI C/C++](allocators/README.md)
   - [Guarantees to the allocator consumer](allocators/caller-guarantees.md)
-  - [Recommendation for allocator implementations](allocators/allocator-guarantees.md)
+  - [Recommendation for allocator implementations](allocators/allocator-recommendations.md)
 - [Printing capabilities from C](printf/README.md)
   - [Generating string representations of capabilities](printf/strfcap.md)
   - [Printing capabilities with the printf(3) API family](printf/printf.md)
