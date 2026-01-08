@@ -49,6 +49,8 @@ The allocator may:
 
  * Implement fail-stop semantics if the call fails for one or more of the
    above reasons.
+ * Implement diagnostic features such as logging, crash dumps, and so on when
+   such usage a failure occurs.
 
 ### Reallocating memory
 
