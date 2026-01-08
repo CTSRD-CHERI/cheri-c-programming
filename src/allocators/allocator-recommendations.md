@@ -24,6 +24,11 @@ pointer (on success) that :
  * Be sufficiently aligned to allow capability loads and stores at relative
    offset 0 from the returned pointer
 
+The allocator must:
+
+ * Pad below and above allocations such that, when precise bounds are not
+   utilized, no other allocation is accessible within returned bounds.
+
 The allocator should:
 
  * Fill reachable memory within bounds with zeroes before returning a pointer
