@@ -7,10 +7,10 @@ rely on from all CHERI-enabled allocators.
 
 Calls to `malloc()`, `calloc()`, and `posix_memalign()` must either return a
 capability holding a `NULL` pointer (on failure), or a capability holding a
-non-`NULL` pointer (on success) that is:
+non-`NULL` pointer (on success) that:
 
- * Valid (i.e., with its tag bit set)
- * Unsealed
+ * Is valid (i.e., with its tag bit set)
+ * Is unsealed
  * Has bounds that permit access to the full requested memory range of the
    allocation
  * Has bounds that do not permit access to any other current allocation, nor
