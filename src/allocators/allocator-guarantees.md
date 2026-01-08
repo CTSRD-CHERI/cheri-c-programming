@@ -42,10 +42,8 @@ passed capability:
 
  * Is invalid (i.e, with its tag bit unset); or
  * Is sealed; or
- * Has bounds that have been changed from those returned by the allocator
-   when the allocation was first made; or
- * Has permissions that disallow any of data load, data store, capability
-   load, or capability store
+ * Has address, bounds, or permissions that differ from those on the original
+   capability returned by `malloc()`, `calloc()`, or `realloc()`
 
 The allocator may:
 
