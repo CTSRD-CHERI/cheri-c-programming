@@ -61,6 +61,14 @@ The allocator may:
 | Disregard invalid `free()` requests, continuing execution | Ignore the improper request rather than potentially allow internal allocator state to be corrupted, enabling improved availability at the cost of potential memory leakage and entry of undefined states in the caller. |
 | Implement diagnostic features such as logging, crash dumps, and so on when such usage a failure occurs | This design choice applies given either of the above choices, and is recommended to improve diagnostic capacity in the system. |
 
+Relating specifically to detecting and preventing use-after-free and
+use-after-reallocation, the allocator may:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| On virtual-memory-enabled systems, unmap reachable memory within the bounds of the allocation after it has been freed | This may be useful both for rapidly detecting use-after-free errors and also to allow the allocator to reuse physical memory while deferring revocation of capabilities to specific virtual addresses. |
+| Revoke capabilities to the storage immediately upon free | This is not required as larger CHERI systems will not be able to implement this behaviour efficiently, but it is permitted as this will tighten implementations from non-aliasing emporal safety to precise temporal safety, which may be efficient in smaller designs. |
+
 ### Reallocating memory
 
 The allocator must ignore, or trap on, calls to `realloc()` if the passed

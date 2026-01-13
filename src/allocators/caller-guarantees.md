@@ -2,6 +2,9 @@
 
 This section describes properties that consumers of memory allocators may
 rely on from all CHERI-enabled allocators.
+The rationales for most choices described in this section are explored in
+greater detail in the section [Recommendation for allocator
+implementations](allocators/allocator-recommendations.md).
 
 ### Allocating memory
 
