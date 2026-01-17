@@ -21,7 +21,7 @@ pointer (on success) that:
 | Has bounds that permit access to the full requested range of the allocation | Full allocation must be accessible for memory access on return |
 | Has bounds that do not permit access to anything other than the allocated memory | Allow access only to the memory allocation itself, and not either allocator-internal state (enabling a long history of heap corruption attacks or the leakage of privileged capabilities) or other allocations (violating non-aliasing requirements for spatial safety) |
 | Has permissions that allow data load, data store, capability load, and capability store | C/C++ expect that memory will not only be accessible for read and write, but also that pointers can be held in arbitrary heap memory.  While it is possible (and reasonable) to imagine heap allocators that return pointers without the ability to load or store capabilities, doing so with the general-purpose C/C++ allocators will break almost all extant software. |
-| Be sufficiently aligned to allow capability loads and stores at relative offset 0 from the returned pointer | As with capability load and store positions, being unable to use pointers stored at pointer alignment within an alllocation will break almost all extant software. |
+| Be sufficiently aligned to allow capability loads and stores at relative offset 0 from the returned pointer | As with capability load and store permissions, being unable to use pointers stored at pointer alignment within an alllocation will break almost all extant software. |
 
 The allocator must:
 
