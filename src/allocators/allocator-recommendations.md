@@ -27,7 +27,7 @@ The allocator must:
 
 | Requirement | Rationale |
 |-------------|-----------|
-| Pad below and above allocations such that, when precise bounds are not utilized, no other allocation is accessible within returned bounds | This is a corallary of the above requirement to set bounds to prevent access to allocator metadata and other allocations, non-aliasing in the presence of bounds imprecision requires padding so that accessible memory outside of the requested size cannot access disallowed data. |
+| Ensure no other allocation is accessible within returned bounds by padding below and above allocations if the requested allocation size does not permit precise bounds | This is a corollary of the above requirement to set bounds to prevent access to allocator metadata and other allocations, non-aliasing in the presence of bounds imprecision requires padding so that accessible memory outside of the requested size cannot access disallowed data. |
 
 The allocator should:
 
