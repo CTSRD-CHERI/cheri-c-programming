@@ -20,8 +20,9 @@ non-`NULL` pointer (on success) that:
    to allocator metadata, implementing non-aliasing spatial safety
  * Has permissions that allow data load, data store, capability load, and
    capability store
- * Is sufficiently aligned to allow capability loads and stores at relative
-   offset 0 from the returned pointer
+ * Sufficiently aligned to allow capability loads and stores at relative
+   offset 0 from the returned pointer, if the allocation is at least the size
+   of a pointer
 
 The allocator must:
 
