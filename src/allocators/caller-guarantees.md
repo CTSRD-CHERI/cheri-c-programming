@@ -22,7 +22,7 @@ non-`NULL` pointer (on success) that:
    capability store
  * Sufficiently aligned to allow capability loads and stores at relative
    offset 0 from the returned pointer, if the allocation is at least the size
-   of a pointer
+   of a capability
 
 The allocator must:
 
