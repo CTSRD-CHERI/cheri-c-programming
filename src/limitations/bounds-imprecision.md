@@ -2,7 +2,7 @@
 
 CHERI capabilities employ bounds compression to fit both the lower and upper
 bounds into a single address-sized word of metadata.
-See (Bounds precision)[../background/cheri-capabilities.html#bounds-precision]
+See [Bounds precision](../background/cheri-capabilities.md#bounds-precision)
 for further details.
 
 As a result, it is not possible to represent all possible combinations of
@@ -13,7 +13,7 @@ and hence generally introduce necessary alignment and padding as required --
 for example, by placing additional padding around some memory allocations to
 ensure that more coarse bounds do not allow underruns or overruns to access
 memory associated with other allocations.
-See (Bounds alignment due to compression)[../apis/bounds-alignment-due-to-compression.html#bounds-alignment-due-to-compression]
+See [Bounds alignment due to compression](../apis/bounds-alignment-due-to-compression.md#bounds-alignment-due-to-compression)
 for further details.
 
 There are, however, situations in which programmers must be explicitly aware
