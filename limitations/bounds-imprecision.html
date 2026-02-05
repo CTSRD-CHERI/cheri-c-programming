@@ -158,7 +158,7 @@
                         <h2 id="bounds-imprecision-sub-object-bounds-and-custom-allocators"><a class="header" href="#bounds-imprecision-sub-object-bounds-and-custom-allocators">Bounds imprecision, sub-object bounds, and custom allocators</a></h2>
 <p>CHERI capabilities employ bounds compression to fit both the lower and upper
 bounds into a single address-sized word of metadata.
-See (Bounds precision)[../background/cheri-capabilities.html#bounds-precision]
+See <a href="../background/cheri-capabilities.html#bounds-precision">Bounds precision</a>
 for further details.</p>
 <p>As a result, it is not possible to represent all possible combinations of
 lower and upper bounds with a given address, leading to stronger alignment and
@@ -168,7 +168,7 @@ and hence generally introduce necessary alignment and padding as required --
 for example, by placing additional padding around some memory allocations to
 ensure that more coarse bounds do not allow underruns or overruns to access
 memory associated with other allocations.
-See (Bounds alignment due to compression)[../apis/bounds-alignment-due-to-compression.html#bounds-alignment-due-to-compression]
+See <a href="../apis/bounds-alignment-due-to-compression.html#bounds-alignment-due-to-compression">Bounds alignment due to compression</a>
 for further details.</p>
 <p>There are, however, situations in which programmers must be explicitly aware
 of this imprecise bounding behavior, including:</p>
