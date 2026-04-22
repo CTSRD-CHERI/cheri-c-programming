@@ -91,4 +91,6 @@ The allocator must not:
 The allocator may:
 
  * Zero any newly accessible memory before returning a pointer to it.
- * Always reallocate, returning a new pointer, on every call to `realloc()`.
+ * Always reallocate, returning a new pointer, on every call to `realloc()`[^1].
+
+[^1]: This is not an advisable strategy in the general case due to the potentiallly very high performance overhead that could be experienced with some idiomatic uses of C.
