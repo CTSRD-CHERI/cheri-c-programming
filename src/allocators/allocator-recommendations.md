@@ -39,7 +39,7 @@ The allocator must select one of the following two choices for each memory alloc
 
 | Requirement | Rationale |
 |-------------|-----------|
-| Provide precise bounds -- i.e., in which the lower bound is the lowest address of the returned allocation, and the upper bound is the highest address of the returned allocation plus one | Implement precise bounds, where achievable whtin the constraints of bounds imprecision, avoiding the use of padding while still allowing access to the full allocation. |
+| Provide precise bounds -- i.e., in which the lower bound is the lowest address of the returned allocation, and the upper bound is the highest address of the returned allocation plus one | Implement precise bounds, where achievable within the constraints of bounds imprecision, avoiding the use of padding while still allowing access to the full allocation. |
 | Pad and/or align allocation such that the returned address is equal to the lower bound | Implement non-aliasing memory by passing allocations and setting bounds to include only the allocation and its padding. |
 
 ### Freeing memory
