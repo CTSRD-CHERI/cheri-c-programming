@@ -2,12 +2,12 @@
 
 This chapter considers two closely related topics:
 
- * Guarantees that may be relied on by heap memory-allocator consumers
-   programmed in CHERI C/C++
- * Recommendations for heap memory-allocator developers targeting CHERI C/C++
-   execution environments
+ * **Guarantees** that may be relied on by developers of CHERI C/C++ software
+   that makes use of heap allocators; and
+ * **Recommendations** for heap memory-allocator developers targeting CHERI
+   C/C++ execution environments.
 
-While the focus of this section is on class C-language APIs for heap
+While the focus of this section is on classical C-language APIs for heap
 allocation, such as `malloc()`, `calloc()`, `free()`, and `realloc()`,
 aspects of these guidelines will also apply to many other allocators
 including, to varying extents, bespoke allocators in OS kernels, language
@@ -15,15 +15,20 @@ runtimes, and scalable applications.
 
 ## Changes to memory allocators to enable support for CHERI
 
-The most fundamental behaviors of current allocators are not changed with
+The essential behaviors of current allocators are not changed with
 CHERI: Allocators are responsible for returning pointers to memory storage
-that is, under its invariants, stable and unique for the lifetime of the
+that is, under allocator invariants, stable and unique for the lifetime of the
 allocation.
-However, allocator implementations must be adapted to CHERI C/C++: To achieve
-memory protection for its callers, it must set CHERI capability properties
-(such as bounds), taking into account properties such as capability alignment
-and bounds compression, as well as (if required) integrate support for
-revocation.
+However, allocator implementations must be adapted to CHERI C/C++ in order to
+implement memory-safety properties such as spatial and temporal safety.
+
+To achieve memory protection for callers, allocators must:
+
+ * Align and pad allocations to take into requirements for capability
+   alignment and bounds imprecision;
+ * Set CHERI capability properties (such as bounds) on returned pointers; and
+ * Implement support for revocation after `free()`.
+
 CHERI will then ensure that memory accesses to allocations made via pointers
 are safe with respect to memory-safety properties such as spatial safety,
 temporal safety, and so on.
