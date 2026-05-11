@@ -1,33 +1,24 @@
 ## Guarantees to the allocator consumer
 
-This section describes properties that consumers of memory allocators may
-rely on from all CHERI-enabled allocators.
+This section describes properties that consumers of heap allocators may
+rely on from CHERI-enabled allocators in the CHERI C/C++ programming environment.
 The rationales for most choices described in this section are explored in
 greater detail in the section [Recommendation for allocator
 implementations](allocator-recommendations.md).
 
 ### Allocating memory
 
-Calls to `malloc()`, `calloc()`, and `posix_memalign()` must either return a
-capability holding a `NULL` pointer (on failure), or a capability holding a
-non-`NULL` pointer (on success) that:
+Calls to `malloc()`, `calloc()`, and `posix_memalign()` will return either a capability holding a `NULL` pointer (on failure) or a capability holding a non-`NULL` pointer (on success) that:
 
  * Is valid (i.e., with its tag bit set)
  * Is unsealed
  * Has bounds that permit access to the full requested memory range of the
    allocation
  * Has bounds that do not permit access to any other current allocation, nor
-   to allocator metadata, implementing non-aliasing spatial safety
- * Has permissions that allow data load, data store, capability load, and
+   to allocator metadata (implementing non-aliasing spatial safety)
+ * Has permissions that allow at least data load, data store, capability load, and
    capability store
- * Sufficiently aligned to allow capability loads and stores at relative
-   offset 0 from the returned pointer, if the allocation is at least the size
-   of a capability
-
-The allocator must:
-
- * Pad below and above allocations such that, when precise bounds are not
-   utilized, no other allocation is accessible within returned bounds.
+ * In the case of an allocation that is at least the size of a pointer, has an address that is sufficiently aligned to allow capability loads and stores at suitable relative alignment
 
 The allocator may:
 
@@ -36,6 +27,7 @@ The allocator may:
  * Provide precise bounds, with the lower bound being the bottom address of
    the allocation, and the upper bound being one byte above the top address of
    the allocation
+ * Provide imprecise bounds, inserting padding below or above the allocation
  * Pad and/or align allocation such that the returned address is equal to the
    lower bound.
 
@@ -47,9 +39,9 @@ The caller must pass either a `NULL` pointer via a capability argument to
  * Is valid (i.e., with its tag bit set)
  * Is unsealed
  * Has address, bounds, and permissions identical to those on the original
-   capability returned by `malloc()`, `calloc()`, or `realloc()`
+   capability returned by `malloc()`, `calloc()`, `posix_memalign()`, or `realloc()`
 
-The allocator must not:
+In the presence of temporal safety support, the allocator will not:
 
  * Reuse storage associated with the allocation until there are no outstanding
    valid capabilities that authorize access to the memory
@@ -62,14 +54,15 @@ The allocator may:
    of the allocation after it has been freed
  * Revoke capabilities to the storage immediately upon free
 
-If utilizing revocation, the allocator must:
+If utilizing revocation, the allocator will:
 
  * Ensure that any outstanding capabilities to the allocation become
-   non-dereferenceable
+   non-dereferenceable before the memory can be reallocated
 
 On revocation, the allocator may:
 
  * Clear the tag of revoked capabilities
+ * Reduce the permissions on the revoked capabilities to deny further use
 
 ### Reallocating memory
 
@@ -78,12 +71,13 @@ The caller must not:
  * Pass a capability to `realloc()` that violates any of the requirements for
     a call to `free()`.
 
-The allocator must:
+The allocator will:
 
- * Conform to the guarantees associated with calls to `malloc()` and
-   `calloc()` when allocating memory in `realloc()`.
+ * Conform to the guarantees associated with calls to `malloc()`,
+   `calloc()`, and `posix_memalign(), when allocating memory in
+   `realloc()`.
 
-The allocator must not:
+The allocator will not:
 
  * Return a new pointer from `realloc()` that has an identical address to the
    passed argument but differs in its bounds or other metadata.
