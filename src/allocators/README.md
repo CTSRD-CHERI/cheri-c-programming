@@ -13,8 +13,6 @@ aspects of these guidelines will also apply to many other allocators
 including, to varying extents, bespoke allocators in OS kernels, language
 runtimes, and scalable applications.
 
-## Caller expectations and implementation guidance
-
 It is important to consider both what expectations a programmer may have when
 using a heap allocator with CHERI (e.g., what is the scope of reasonable
 expected bounds that might be set on an allocation) as well as what behaviors
