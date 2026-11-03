@@ -9,17 +9,16 @@ on:
       - created
 
 jobs:
-  build:
+  build-mdbook:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mdbook-version: ['0.4.45', '0.5.1', 'latest']
     steps:
-      - name: Install cargo
-        uses: actions-rs/toolchain@v1
+      - name: Install mdBook
+        uses: peaceiris/actions-mdbook@v2
         with:
-          toolchain: stable
-          profile: minimal
-
-      - name: Install mdbook
-        run: curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.45/mdbook-v0.4.45-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=$HOME/.cargo/bin
+          mdbook-version: ${{ matrix.mdbook-version }}
 
       - name: Checkout source
         uses: actions/checkout@v4
@@ -27,15 +26,48 @@ jobs:
       - name: Build book
         run: mdbook build
 
-      - name: Upload book artifact
+      - name: Upload html-book artifact
+        if: matrix.mdbook-version == 'latest'
         uses: actions/upload-artifact@v4
         with:
           name: book
           path: book
 
+  build-pdf:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+          gh \
+          texlive-latex-recommended \
+          texlive-latex-extra \
+          texlive-fonts-recommended \
+          texlive-fonts-extra \
+          texlive-xetex \
+          latexmk \
+          lmodern \
+          texlive-science
+
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Build PDF book
+        run: make pdf
+
+      - name: Upload pdf book artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cheri-c-programming.pdf
+          path: book
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    needs: build
+    needs: build-mdbook
     runs-on: ubuntu-latest
     steps:
       - name: Download book artifact

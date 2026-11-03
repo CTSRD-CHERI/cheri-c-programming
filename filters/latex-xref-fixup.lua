@@ -18,19 +18,28 @@ if FORMAT:match 'latex' then
       return link
     end
 
+    local normalized = link.target
+
     -- All other links are Xrefs to sections, so change them to LaTeX
     -- section references, using the cleveref package.
-    local normalized = link.target:gsub("%.%a+$","")
-    normalized = normalized:gsub("/$","")
-    normalized = normalized:gsub("^%.%./?","")
-    normalized = normalized:gsub("^[%a-]+/","")
+    if normalized:find("#") then
+      -- If there is an hash (e.g. my/xref/file.md#my-heading), we want only
+      -- the heading section name (e.g. my-heading).
+      normalized = normalized:match("#(.+)$")
+    else
+      -- 2. If no hash, use your existing logic to clean filenames
+      normalized = normalized:gsub("%.%a+$","")
+      normalized = normalized:gsub("/$","")
+      normalized = normalized:gsub("^%.%./?","")
+      normalized = normalized:gsub("^[%a-]+/","")
 
-
-    --Apply the lookup table for xrefs that don't match their target
-    local lookupkey = normalized:gsub("-","_")
-    local lookupvalue = xreflookup[lookupkey]
-    if lookupvalue ~= nil then
-      normalized = lookupvalue
+      -- Apply lookup table ONLY if we are relying on filename matching
+      -- (If we used a hash, we assume the hash is the correct ID)
+      local lookupkey = normalized:gsub("-","_")
+      local lookupvalue = xreflookup[lookupkey]
+      if lookupvalue ~= nil then
+        normalized = lookupvalue
+      end
     end
 
     --Replace the original Pandoc element with raw LaTeX for the
