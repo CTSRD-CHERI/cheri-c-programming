@@ -193,7 +193,7 @@ However, it is not guaranteed to throw an architectural exception if a use
 after free occurs before reallocation of that memory.
 For example, non-trapping access may be permitted to memory immediately
 after a call to <code>free()</code> but prior to asynchronous revocation or a further
-call to <code>malloc()</code> that reallocates the sam memory.
+call to <code>malloc()</code> that reallocates the same memory.
 It is the responsibility of the allocator to ensure that any non-trapping
 use-after-free access is <em>safe</em>.</p>
 </li>
