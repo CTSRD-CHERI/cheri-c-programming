@@ -34,7 +34,7 @@ CHERI C/C++ therefore adopt the following definitions and approximations:
    after free occurs before reallocation of that memory.
    For example, non-trapping access may be permitted to memory immediately
    after a call to `free()` but prior to asynchronous revocation or a further
-   call to `malloc()` that reallocates the sam memory.
+   call to `malloc()` that reallocates the same memory.
    It is the responsibility of the allocator to ensure that any non-trapping
    use-after-free access is *safe*.
 
