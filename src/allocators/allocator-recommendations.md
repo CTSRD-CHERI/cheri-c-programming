@@ -17,7 +17,7 @@ implement memory-safety properties such as spatial and temporal safety.
 
 To achieve memory protection for callers, allocators must:
 
- * Align and pad allocations to take into requirements for capability
+ * Align and pad allocations to take into account requirements for capability
    alignment and bounds imprecision;
  * Set CHERI capability properties (such as bounds) on returned pointers; and
  * Implement support for revocation after `free()`.
@@ -30,7 +30,7 @@ vs. trapping for memory safety](../cheri-ccpp/nonaliasing-vs-trapping.md).
 
 ### Allocating memory
 
-In addition to implementing the conventational invariants ensuring the
+In addition to implementing the conventional invariants ensuring the
 mutually exclusive allocation of memory, CHERI-aware implementations of
 `malloc()`, `calloc()`, and `posix_memalign()` must either return a capability
 holding a `NULL` pointer (on failure), or a capability holding a non-`NULL`
@@ -90,7 +90,7 @@ use-after-reallocation, the allocator may:
 |-------------|-----------|
 | Implement pointer revocation by clearing the tag of capabilities pointing to freed memory | Clearing the tag ensures non-dereferenceability when a pointer is revoked, although this can also be achieved by other means such as changing page-table permissions on the page a pointer points to, on supporting architectures. |
 | Make memory within the bounds of the allocation inaccessible when `free()` is called, for example by unmapping it or by changing page permissions, so that subsequent accesses fault. | This may be useful both for rapidly detecting use-after-free errors and also to allow the allocator to reuse physical memory while deferring revocation of capabilities to specific virtual addresses. |
-| Revoke capabilities to the storage immediately upon free | This is not required as larger CHERI systems will not be able to implement this behaviour efficiently, but it is permitted as this will tighten implementations from non-aliasing emporal safety to precise temporal safety, which may be efficient in smaller designs. |
+| Revoke capabilities to the storage immediately upon free | This is not required as larger CHERI systems will not be able to implement this behaviour efficiently, but it is permitted as this will tighten implementations from non-aliasing temporal safety to precise temporal safety, which may be efficient in smaller designs. |
 
 ### Reallocating memory
 
