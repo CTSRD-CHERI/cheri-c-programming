@@ -89,7 +89,7 @@ use-after-reallocation, the allocator may:
 | Requirement | Rationale |
 |-------------|-----------|
 | Implement pointer revocation by clearing the tag of capabilities pointing to freed memory | Clearing the tag ensures non-dereferenceability when a pointer is revoked, although this can also be achieved by other means such as changing page-table permissions on the page a pointer points to, on supporting architectures. |
-| Make memory within the bounds of the allocation inaccessible when `free()` is called, for example by unmapping it or by changing page permissions, so that subsequent accesses fault. | This may be useful both for rapidly detecting use-after-free errors and also to allow the allocator to reuse physical memory while deferring revocation of capabilities to specific virtual addresses. |
+| Make memory within the bounds of the allocation inaccessible when `free()` is called, for example by changing page permissions, so that subsequent accesses fault. | This may be useful both for rapidly detecting use-after-free errors and also to allow the allocator to reuse physical memory while deferring revocation of capabilities to specific virtual addresses. If an `mmap()`-allocated object is partially unmapped, the freed address space cannot be reused until the remainder is unmapped. Consequently, unmapping the freed memory is not advisable in most cases. |
 | Revoke capabilities to the storage immediately upon free | This is not required as larger CHERI systems will not be able to implement this behaviour efficiently, but it is permitted as this will tighten implementations from non-aliasing temporal safety to precise temporal safety, which may be efficient in smaller designs. |
 
 ### Reallocating memory
