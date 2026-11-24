@@ -55,7 +55,7 @@ The allocator should:
 
 | Requirement | Rationale |
 |-------------|-----------|
-| Fill reachable memory within bounds with values whose validity tag is not set before returning a pointer to it | Prevent both uninitialized values and data remanence by deterministically overwriting data that may otherwise be residual from previous allocations or memory-allocator metadata. |
+| Fill reachable memory within bounds with values whose validity tag is not set before returning a pointer to it | Prevent both uninitialized values and data remnants by deterministically overwriting data that may otherwise be residual from previous allocations or memory-allocator metadata. |
 
 The allocator must select one of the following two choices for each memory allocation; different memory allocations may use different strategies (e.g., enabling precise bounds for smaller allocations, or imprecise ones for larger allocations, as well as other strategies):
 
