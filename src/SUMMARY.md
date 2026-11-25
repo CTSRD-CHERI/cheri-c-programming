@@ -47,7 +47,7 @@
   - [Capability permissions](apis/capability-permissions.md)
   - [Bounds alignment due to compression](apis/bounds-alignment-due-to-compression.md)
   - [Implications for memory-allocator design](apis/implications-for-memory-allocator-design.md)
-- [Memory allocators and CHERI C/C++](allocators/README.md)
+- [Heap memory allocators and CHERI C/C++](allocators/README.md)
   - [Guarantees to the allocator consumer](allocators/caller-guarantees.md)
   - [Recommendation for allocator implementations](allocators/allocator-recommendations.md)
 - [Printing capabilities from C](printf/README.md)
