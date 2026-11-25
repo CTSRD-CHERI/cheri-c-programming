@@ -95,7 +95,7 @@ use-after-reallocation, the allocator may:
 
 ### Reallocating memory
 
-The allocator must ignore, or trap on, calls to `realloc()` if the passed
+The allocator must ignore, or trap on, calls to `realloc()` and `reallocarray()` if the passed
 capability:
 
 | Requirement | Rationale |
