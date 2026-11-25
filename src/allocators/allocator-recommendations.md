@@ -83,6 +83,7 @@ The allocator may:
 | Disregard invalid `free()` requests, continuing execution | Ignore the improper request rather than potentially allow internal allocator state to be corrupted, enabling improved availability at the cost of potential memory leakage and entry of undefined states in the caller. |
 | Implement diagnostic features such as logging, crash dumps, and so on when such usage a failure occurs | This design choice applies given either of the above choices, and is recommended to improve diagnostic capacity in the system. |
 | Implement semantics that differ from object deallocation | This allows implementers to add new memory-management functionality. For example, the CHERIoT run-time system extends `free()` with the concept of 'claims', adding further memory-safety features (see the [CHERIoT documentation](https://cheriot.org/book/memory.html#heap_claim)). |
+| Trap if a double free is detected | A capability used in a double free may satisfy all requirements above: it may be valid, unsealed and previously returned by `malloc()` or one of its related functions. Mainstream allocators implement double-free detection, and metadata maintained for capability revocation may in future also be used to detect double frees. |
 
 Relating specifically to detecting and preventing use-after-free and
 use-after-reallocation, the allocator may:
