@@ -32,7 +32,7 @@ vs. trapping for memory safety](../cheri-ccpp/nonaliasing-vs-trapping.md).
 
 In addition to implementing the conventional invariants ensuring the
 mutually exclusive allocation of memory, CHERI-aware implementations of
-`malloc()`, `calloc()`, and `posix_memalign()` must either return a capability
+`malloc()`, `calloc()`, `aligned_alloc()` and `posix_memalign()` must either return a capability
 holding a `NULL` pointer (on failure), or a capability holding a non-`NULL`
 pointer (on success) that:
 

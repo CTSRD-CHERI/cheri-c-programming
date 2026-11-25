@@ -8,7 +8,7 @@ implementations](allocator-recommendations.md).
 
 ### Allocating memory
 
-Calls to `malloc()`, `calloc()`, and `posix_memalign()` will return either a capability holding a `NULL` pointer (on failure) or a capability holding a non-`NULL` pointer (on success) that:
+Calls to `malloc()`, `calloc()`, `aligned_alloc()` and `posix_memalign()` will return either a capability holding a `NULL` pointer (on failure) or a capability holding a non-`NULL` pointer (on success) that:
 
  * Is valid (i.e., with its tag bit set)
  * Is unsealed
