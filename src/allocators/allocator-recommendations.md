@@ -125,4 +125,4 @@ The allocator may:
 |-------------|-----------|
 | Implement fail-stop semantics if the call fails for one or more of the above reasons | As for `free()`. |
 | Disregard invalid `free()` requests, continuing execution | As for `free()`. |
-| Implement diagnostic features such as logging, crash dumps, and so on when such usage a failure occurs | As for `free()`. |
+| Implement diagnostic features such as logging, crash dumps, and so on when such usage results in a failure. | As for `free()`. |
