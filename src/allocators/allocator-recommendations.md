@@ -82,6 +82,7 @@ The allocator may:
 | Implement fail-stop semantics if the call fails for one or more of the above reasons | Fail stop rather than potentially allow internal allocator state to be corrupted; this will also prevent entering potentially harmful undefined behaviour in the caller. |
 | Disregard invalid `free()` requests, continuing execution | Ignore the improper request rather than potentially allow internal allocator state to be corrupted, enabling improved availability at the cost of potential memory leakage and entry of undefined states in the caller. |
 | Implement diagnostic features such as logging, crash dumps, and so on when such usage a failure occurs | This design choice applies given either of the above choices, and is recommended to improve diagnostic capacity in the system. |
+| Implement semantics that differ from object deallocation | This allows implementers to add new memory-management functionality. For example, the CHERIoT run-time system extends `free()` with the concept of 'claims', adding further memory-safety features (see the [CHERIoT documentation](https://cheriot.org/book/memory.html#heap_claim)). |
 
 Relating specifically to detecting and preventing use-after-free and
 use-after-reallocation, the allocator may:
