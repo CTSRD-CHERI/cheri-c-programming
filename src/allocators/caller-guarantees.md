@@ -38,7 +38,8 @@ The caller must pass either a `NULL` pointer via a capability argument to
  * Is valid (i.e., with its tag bit set)
  * Is unsealed
  * Has address, bounds, and permissions identical to those on the original
-   capability returned by `malloc()`, `calloc()`, `posix_memalign()`, or `realloc()`
+   capability returned by `malloc()`, `realloc()` and other functions that
+   allocate heap memory such as `strdup()`
 
 In the presence of temporal safety support, the allocator will not:
 
