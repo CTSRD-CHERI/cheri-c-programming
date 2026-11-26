@@ -20,7 +20,7 @@ memory, but these are not provided within compartments.
   (see below).
   Finally, integer-pointer and other CHERI protections, such as sealing of
   code pointers, provide significant robustness against exploitation of such
-  vulnerabilities -- but cannot be argued to strongly mitigate stack
+  vulnerabilities – but cannot be argued to strongly mitigate stack
   temporal-safety vulnerabilities in the same way that can be argued for heap
   allocations.
 

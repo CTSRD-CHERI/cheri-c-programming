@@ -37,13 +37,13 @@ to indicate that the compiler should not tighten bounds when taking the address 
 ```{.clisting}
 struct str {
     /*
-     * Nul-terminated string array -- pointers taken to this subobject will
+     * Nul-terminated string array – pointers taken to this subobject will
      * use the array's bounds, not those of the container structure.
      */
     char               str_array[128];
 
     /*
-     * Linked-list entry element -- because of the additional attribute,
+     * Linked-list entry element – because of the additional attribute,
      * pointers taken to this subobject will use the container structure's
      * bounds, not those of the specific field.
      */
@@ -108,7 +108,7 @@ struct message {
     int     m_type;
 
     /*
-     * Variable-length character array -- because of the additional
+     * Variable-length character array – because of the additional
      * attribute, pointers taken to this subobject will have a lower bound
      * at the first address of the array, but retain an upper bound of the
      * allocation containing the array, rather than 252 bytes higher.
@@ -151,7 +151,7 @@ precision for subobjects.
 
 In the future, new compiler modes may be supported that allow fail stops to
 occur if non-aliasing is not achieved, or to implement required alignment and
-padding additions -- which may have significant memory overheads.
+padding additions – which may have significant memory overheads.
 We are exploring potential improvements to compiler warnings and errors to
 assist developers in debugging structure layouts that may lead to imprecise
 bounds, a fail stop, or potentially unacceptable memory overhead.
