@@ -73,7 +73,7 @@ The caller must not:
 The allocator will:
 
  * Conform to the guarantees associated with calls to `malloc()`,
-   `calloc()`, and `posix_memalign(), when allocating memory in
+   `calloc()`, `algined_alloc()` and `posix_memalign()`, when allocating memory in
    `realloc()`.
 
 The allocator will not:
