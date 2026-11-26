@@ -73,7 +73,7 @@ passed capability:
 |-------------|-----------|
 | Is invalid (i.e, with its tag bit unset), except for the `NULL` capability | Only valid pointers -- i.e., those that have not been corrupted or already freed can be accepted by `free()`. The only exception is `NULL` as per the C standard.|
 | Is sealed | Sealed pointers reflect the imposition of other policies on the allocation; while allocators able to free selected sealed pointers are imaginable, the requirements laid out in this section are not sufficient to do so, and a conservative policy is selected for the C/C++ heap allocator. |
-| Has address, bounds, or permissions that differ from those on the original capability returned by `malloc()`, `calloc()`, or `realloc()` | The requirement to free the original address arises from the C standard; requiring no changes to capability metadata is a conservative policy allows the allocator to make minimum assumptions about its own use of the pointer being freed.  This has potential implications if sub-object bounds are used, as a pointer that, for example, has its bounds reduced to cover only the first field of a structure may no longer be used to free the full structure. |
+| Has address, bounds, or permissions that differ from those on the original capability returned by `malloc()`, `calloc()`, or `realloc()` | The requirement to free the original address arises from the C standard; requiring no changes to capability metadata is a conservative policy and allows the allocator to make minimum assumptions about its own use of the pointer being freed.  This has potential implications if sub-object bounds are used, as a pointer that, for example, has its bounds reduced to cover only the first field of a structure may no longer be used to free the full structure. |
 
 The allocator may:
 
@@ -81,9 +81,9 @@ The allocator may:
 |-------------|-----------|
 | Implement fail-stop semantics if the call fails for one or more of the above reasons | Fail stop rather than potentially allow internal allocator state to be corrupted; this will also prevent entering potentially harmful undefined behaviour in the caller. |
 | Disregard invalid `free()` requests, continuing execution | Ignore the improper request rather than potentially allow internal allocator state to be corrupted, enabling improved availability at the cost of potential memory leakage and entry of undefined states in the caller. |
-| Implement diagnostic features such as logging, crash dumps, and so on when such usage a failure occurs | This design choice applies given either of the above choices, and is recommended to improve diagnostic capacity in the system. |
+| Implement diagnostic features such as logging, crash dumps, and so on when such usage causes a failure | This design choice applies given either of the above choices, and is recommended to improve diagnostic capacity in the system. |
 | Implement semantics that differ from object deallocation | This allows implementers to add new memory-management functionality. For example, the CHERIoT run-time system extends `free()` with the concept of 'claims', adding further memory-safety features (see the [CHERIoT documentation](https://cheriot.org/book/memory.html#heap_claim)). |
-| Trap if a double free is detected | A capability used in a double free may satisfy all requirements above: it may be valid, unsealed and previously returned by `malloc()` or one of its related functions. Mainstream allocators implement double-free detection, and metadata maintained for capability revocation may in future also be used to detect double frees. |
+| Trap if a double free is detected | A capability used in a double free may satisfy all requirements above: it may be valid, unsealed and previously returned by `malloc()` or one of its related functions. Mainstream allocators implement double-free detection, and metadata maintained for capability revocation may in future also be used for this purpose. |
 
 Relating specifically to detecting and preventing use-after-free and
 use-after-reallocation, the allocator may:
