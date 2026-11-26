@@ -22,8 +22,8 @@ safety (e.g., preventing integer-pointer confusion while not introducting
 dynamic typing to differentiate pointer types from one another) when mapping
 into CHERI's simpler capability model, some from CHERI's performance and
 memory overhead(such as bounds compression), and others from limitations of
-the currently implementations -- especially of the compiler and its
-optimizations -- that we hope further research will rectify.
+the currently implementations – especially of the compiler and its
+optimizations – that we hope further research will rectify.
 We explore:
 
  * Integer-pointer safety vs. pointer type safety
