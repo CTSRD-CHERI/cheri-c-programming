@@ -1,4 +1,4 @@
-## Recommendation for allocator implementations
+## Guidance for allocator implementers
 
 This section provides recommendations for the implementers of heap
 allocators on CHERI-enabled systems.

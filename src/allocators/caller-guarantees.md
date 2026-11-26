@@ -3,8 +3,7 @@
 This section describes properties that consumers of heap allocators may
 rely on from CHERI-enabled allocators in the CHERI C/C++ programming environment.
 The rationales for most choices described in this section are explored in
-greater detail in the section [Recommendation for allocator
-implementations](allocator-recommendations.md).
+greater detail in the section [Guidance for allocator implementers](allocator-recommendations.md).
 
 ### Allocating memory
 
