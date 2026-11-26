@@ -61,7 +61,7 @@ The allocator must select one of the following two choices for each memory alloc
 
 | Requirement | Rationale |
 |-------------|-----------|
-| Provide precise bounds -- i.e., in which the lower bound is the lowest address of the returned allocation, and the upper bound is the highest address of the returned allocation plus one | Implement precise bounds, where achievable within the constraints of bounds imprecision, avoiding the use of padding while still allowing access to the full allocation. |
+| Provide precise bounds – i.e., in which the lower bound is the lowest address of the returned allocation, and the upper bound is the highest address of the returned allocation plus one | Implement precise bounds, where achievable within the constraints of bounds imprecision, avoiding the use of padding while still allowing access to the full allocation. |
 | Pad and/or align allocation such that the returned address is equal to the lower bound | Implement non-aliasing memory by passing allocations and setting bounds to include only the allocation and its padding. |
 
 ### Freeing memory
@@ -71,7 +71,7 @@ passed capability:
 
 | Requirement | Rationale |
 |-------------|-----------|
-| Is invalid (i.e, with its tag bit unset), except for the `NULL` capability | Only valid pointers -- i.e., those that have not been corrupted or already freed can be accepted by `free()`. The only exception is `NULL` as per the C standard.|
+| Is invalid (i.e, with its tag bit unset), except for the `NULL` capability | Only valid pointers – i.e., those that have not been corrupted or already freed can be accepted by `free()`. The only exception is `NULL` as per the C standard.|
 | Is sealed | Sealed pointers reflect the imposition of other policies on the allocation; while allocators able to free selected sealed pointers are imaginable, the requirements laid out in this section are not sufficient to do so, and a conservative policy is selected for the C/C++ heap allocator. |
 | Has address, bounds, or permissions that differ from those on the original capability returned by `malloc()`, `calloc()`, or `realloc()` | The requirement to free the original address arises from the C standard; requiring no changes to capability metadata is a conservative policy and allows the allocator to make minimum assumptions about its own use of the pointer being freed.  This has potential implications if sub-object bounds are used, as a pointer that, for example, has its bounds reduced to cover only the first field of a structure may no longer be used to free the full structure. |
 
