@@ -22,8 +22,8 @@ Calls to `malloc()`, `calloc()`, `aligned_alloc()` and `posix_memalign()` will r
 
 The allocator may:
 
- * Fill reachable memory within bounds with zeroes before returning a pointer
-   to it
+ * Fill reachable memory within bounds with untagged values before returning a
+   pointer to it
  * Provide precise bounds, with the lower bound being the bottom address of
    the allocation, and the upper bound being one byte above the top address of
    the allocation
@@ -48,7 +48,7 @@ In the presence of temporal safety support, the allocator will not:
 
 The allocator may:
 
- * Fill reachable memory within the bounds of the allocation with zeroes after
+ * Fill reachable memory within the bounds of the allocation with untagged values after
    it has been freed
  * On virtual-memory-enabled systems, make memory within the bounds of the
    allocation inaccessible
@@ -84,7 +84,7 @@ The allocator will not:
 
 The allocator may:
 
- * Zero any newly accessible memory before returning a pointer to it.
+ * Fill any newly accessible memory with untagged values before returning a pointer to it.
  * Always reallocate, returning a new pointer, on every call to `realloc()`[^1].
 
 [^1]: This is not an advisable strategy in the general case due to the potentiallly very high performance overhead that could be experienced with some idiomatic uses of C.
