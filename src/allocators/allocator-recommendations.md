@@ -1,0 +1,131 @@
+## Guidance for allocator implementers
+
+This section provides recommendations for the implementers of heap
+allocators on CHERI-enabled systems.
+There is also specific guidance on handling alignment and padding required to
+take into account bounds imprecision in [Implications for memory-allocator
+design](../apis/implications-for-memory-allocator-design.md).
+
+### Overview of typical allocator changes
+
+The essential behaviors of current allocators are not changed with
+CHERI: Allocators are responsible for returning pointers to memory storage
+that is, under allocator invariants, stable and unique for the lifetime of the
+allocation.
+However, allocator implementations must be adapted to CHERI C/C++ in order to
+implement memory-safety properties such as spatial and temporal safety.
+
+To achieve memory protection for callers, allocators must:
+
+ * Align and pad allocations to take into account requirements for capability
+   alignment and bounds imprecision;
+ * Set CHERI capability properties (such as bounds) on returned pointers; and
+ * Implement support for revocation after `free()`.
+
+CHERI will then ensure that memory accesses to allocations made via pointers
+are safe with respect to memory-safety properties such as spatial safety,
+temporal safety, and so on.
+How CHERI achieves these goals is discussed in greater detail in [Non-aliasing
+vs. trapping for memory safety](../cheri-ccpp/nonaliasing-vs-trapping.md).
+
+### Allocating memory
+
+In addition to implementing the conventional invariants ensuring the
+mutually exclusive allocation of memory, CHERI-aware implementations of
+`malloc()`, `calloc()`, `aligned_alloc()` and `posix_memalign()` must either return a capability
+holding a `NULL` pointer (on failure), or a capability holding a non-`NULL`
+pointer (on success) that:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Is valid (i.e., with its tag bit set) | Pointer must be dereferenceable for memory accesses on return |
+| Is unsealed | Pointer must be dereferenceable for memory access on return |
+| Has bounds that permit access to the full requested range of the allocation | Full allocation must be accessible for memory access on return |
+| Has bounds that do not permit access to anything other than the allocated memory | Allow access only to the memory allocation itself, and not either allocator-internal state (enabling a long history of heap corruption attacks or the leakage of privileged capabilities) or other allocations (violating non-aliasing requirements for spatial safety). Allocations may exceed the requested size, for example bounds imprecision can require allocation sizes to be rounded up. |
+| Has permissions that allow data load, data store, capability load, and capability store and does not have permission to execute code | C/C++ expect that memory will not only be accessible for read and write, but also that pointers can be held in arbitrary heap memory.  While it is possible (and reasonable) to imagine heap allocators that return pointers without the ability to load or store capabilities, doing so with the general-purpose C/C++ allocators will break almost all extant software. |
+| Be sufficiently aligned to allow capability loads and stores at relative offset 0 from the returned pointer, if the allocation is at least the size of a capability | As with capability load and store permissions, being unable to use pointers stored at pointer alignment within an allocation will break almost all extant software. This alignment requirement also follows from the C specification's rules for memory allocators. |
+
+The allocator must:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Ensure no other allocation is accessible within returned bounds by padding below and above allocations if the requested allocation size does not permit precise bounds | This is a corollary of the above requirement to set bounds to prevent access to allocator metadata and other allocations, non-aliasing in the presence of bounds imprecision requires padding so that accessible memory outside of the requested size cannot access disallowed data. |
+
+The allocator should:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Fill reachable memory within bounds with untagged values before returning a pointer to it | Prevent both uninitialized values and leakage of data remnants by deterministically overwriting data that may otherwise be residual from previous allocations or memory-allocator metadata. |
+
+The allocator must select one of the following two choices for each memory allocation; different memory allocations may use different strategies (e.g., enabling precise bounds for smaller allocations, or imprecise ones for larger allocations, as well as other strategies):
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Provide precise bounds – i.e., in which the lower bound is the lowest address of the returned allocation, and the upper bound is the highest address of the returned allocation plus one | Implement precise bounds, where achievable within the constraints of bounds imprecision, avoiding the use of padding while still allowing access to the full allocation. |
+| Pad and/or align allocation such that the returned address is equal to the lower bound | Implement non-aliasing memory by passing allocations and setting bounds to include only the allocation and its padding. |
+
+### Freeing memory
+
+CHERI-aware allocators must ignore, or trap on, calls to `free()` if the
+passed capability:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Is invalid (i.e, with its tag bit unset), except for the `NULL` capability | Only valid pointers – i.e., those that have not been corrupted or already freed can be accepted by `free()`. The only exception is `NULL` as per the C standard.|
+| Is sealed | Sealed pointers reflect the imposition of other policies on the allocation; while allocators able to free selected sealed pointers are imaginable, the requirements laid out in this section are not sufficient to do so, and a conservative policy is selected for the C/C++ heap allocator. |
+| Has address, bounds, or permissions that differ from those on the original capability returned by `malloc()`, `realloc()` and other functions that allocate heap memory such as `strdup()` | The requirement to free the original address arises from the C standard; requiring no changes to capability metadata is a conservative policy and allows the allocator to make minimum assumptions about its own use of the pointer being freed.  This has potential implications if sub-object bounds are used, as a pointer that, for example, has its bounds reduced to cover only the first field of a structure may no longer be used to free the full structure. |
+
+The allocator may:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Implement fail-stop semantics if the call fails for one or more of the above reasons | Fail stop rather than potentially allow internal allocator state to be corrupted; this will also prevent entering potentially harmful undefined behaviour in the caller. |
+| Disregard invalid `free()` requests, continuing execution | Ignore the improper request rather than potentially allow internal allocator state to be corrupted, enabling improved availability at the cost of potential memory leakage and entry of undefined states in the caller. |
+| Implement diagnostic features such as logging, crash dumps, and so on when such usage causes a failure | This design choice applies given either of the above choices, and is recommended to improve diagnostic capacity in the system. |
+| Implement semantics that differ from object deallocation | This allows implementers to add new memory-management functionality. For example, the CHERIoT run-time system extends `free()` with the concept of 'claims', adding further memory-safety features (see the [CHERIoT documentation](https://cheriot.org/book/memory.html#heap_claim)). |
+| Trap if a double free is detected | A capability used in a double free may satisfy all requirements above: it may be valid, unsealed and previously returned by `malloc()` or one of its related functions. Mainstream allocators implement double-free detection, and metadata maintained for capability revocation may in future also be used for this purpose. |
+
+Relating specifically to detecting and preventing use-after-free and
+use-after-reallocation, the allocator may:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Implement pointer revocation by clearing the tag of capabilities pointing to freed memory | Clearing the tag ensures non-dereferenceability when a pointer is revoked, although this can also be achieved by other means such as changing page-table permissions on the page a pointer points to, on supporting architectures. |
+| Make memory within the bounds of the allocation inaccessible when `free()` is called, for example by changing page permissions, so that subsequent accesses fault. | This may be useful both for rapidly detecting use-after-free errors and also to allow the allocator to reuse physical memory while deferring revocation of capabilities to specific virtual addresses. If an `mmap()`-allocated object is partially unmapped, the freed address space cannot be reused until the remainder is unmapped. Consequently, unmapping the freed memory is not advisable in most cases. |
+| Revoke capabilities to the storage immediately upon free | This is not required as larger CHERI systems will not be able to implement this behaviour efficiently, but it is permitted as this will tighten implementations from non-aliasing temporal safety to precise temporal safety, which may be efficient in smaller designs. |
+
+### Reallocating memory
+
+The allocator must ignore, or trap on, calls to `realloc()` and `reallocarray()` if the passed
+capability:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Violates any of the properties checked for in `free()` | In effect, reallocation is a request to free memory, and will typically be implemented by the same paths within the allocator. |
+
+The allocator must:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Return a capability with the same properties as those defined for `malloc()` | In effect, reallocation is a request to allocate new heap memory, and will typically be implemented by the same paths within the allocator. |
+
+The allocator must not:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Return a new pointer from `realloc()` that has an identical address to the passed argument but differs in its bounds or other metadata | This requirement arises from the observation that callers to `realloc()` will compare the passed pointer (or to avoid the associated undefined behavior[^realloc_ub], an integer derived from it) to the returned pointer to establish whether the memory was reallocated.  If it was, it is frequently the case that they will use the passed pointer rather than the returned one, since they are assumed to be interchangeable which may result in the use of the wrong provenance and the wrong bounds. Rather than allowing this situation to occur, we require reallocation. This design choice eliminates extend-in-place optimizations, but those are rare even in allocators that implement them. |
+[^realloc_ub]:  The C standard states that, after a successful call to `realloc()`, the original pointer passed to it is invalidated, even if the allocation is not moved. This means that any use of the pointer (even comparison) is undefined.
+
+The allocator should:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Overwrite any newly accessible memory with untagged values before returning a pointer to it, including any allocator metadata | As for `malloc()`. |
+
+The allocator may:
+
+| Requirement | Rationale |
+|-------------|-----------|
+| Implement fail-stop semantics if the call fails for one or more of the above reasons | As for `free()`. |
+| Disregard invalid `free()` requests, continuing execution | As for `free()`. |
+| Implement diagnostic features such as logging, crash dumps, and so on when such usage results in a failure. | As for `free()`. |
